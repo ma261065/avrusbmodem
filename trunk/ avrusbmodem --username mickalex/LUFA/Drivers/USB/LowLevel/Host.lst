@@ -1,0 +1,759 @@
+   1               		.file	"Host.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               		.section	.text.USB_Host_WaitMS,"ax",@progbits
+  17               	.global	USB_Host_WaitMS
+  19               	USB_Host_WaitMS:
+  20               	.LFB33:
+  21               	.LSM0:
+  22               	.LVL0:
+  23               	/* prologue: function */
+  24               	/* frame size = 0 */
+  25 0000 982F      		mov r25,r24
+  26               	.LSM1:
+  27 0002 2091 9E00 		lds r18,158
+  28               	.LSM2:
+  29 0006 8091 9E00 		lds r24,158
+  30               	.LVL1:
+  31 000a 8160      		ori r24,lo8(1)
+  32 000c 8093 9E00 		sts 158,r24
+  33 0010 00C0      		rjmp .L2
+  34               	.L7:
+  35               	.LSM3:
+  36 0012 8091 9F00 		lds r24,159
+  37 0016 85FF      		sbrs r24,5
+  38 0018 00C0      		rjmp .L3
+  39               	.LSM4:
+  40 001a 8091 9F00 		lds r24,159
+  41 001e 8F7D      		andi r24,lo8(-33)
+  42 0020 8093 9F00 		sts 159,r24
+  43               	.LSM5:
+  44 0024 9150      		subi r25,lo8(-(-1))
+  45               	.L3:
+  46               	.LSM6:
+  47 0026 8091 0000 		lds r24,USB_HostState
+  48 002a 8230      		cpi r24,lo8(2)
+  49 002c 01F4      		brne .L4
+  50 002e 91E0      		ldi r25,lo8(1)
+  51               	.LVL2:
+  52 0030 00C0      		rjmp .L5
+  53               	.LVL3:
+  54               	.L4:
+  55               	.LSM7:
+  56 0032 8091 A600 		lds r24,166
+  57 0036 84FF      		sbrs r24,4
+  58 0038 00C0      		rjmp .L6
+  59               	.LSM8:
+  60 003a 8091 A600 		lds r24,166
+  61 003e 8F7E      		andi r24,lo8(-17)
+  62 0040 8093 A600 		sts 166,r24
+  63 0044 92E0      		ldi r25,lo8(2)
+  64               	.LVL4:
+  65 0046 00C0      		rjmp .L5
+  66               	.LVL5:
+  67               	.L6:
+  68               	.LSM9:
+  69 0048 8091 A600 		lds r24,166
+  70 004c 81FF      		sbrs r24,1
+  71 004e 00C0      		rjmp .L2
+  72               	.LSM10:
+  73 0050 8091 A600 		lds r24,166
+  74 0054 8D7F      		andi r24,lo8(-3)
+  75 0056 8093 A600 		sts 166,r24
+  76 005a 93E0      		ldi r25,lo8(3)
+  77               	.LVL6:
+  78 005c 00C0      		rjmp .L5
+  79               	.LVL7:
+  80               	.L2:
+  81               	.LSM11:
+  82 005e 9923      		tst r25
+  83 0060 01F4      		brne .L7
+  84               	.LVL8:
+  85               	.L5:
+  86               	.LSM12:
+  87 0062 20FD      		sbrc r18,0
+  88 0064 00C0      		rjmp .L8
+  89               	.LSM13:
+  90 0066 8091 9E00 		lds r24,158
+  91 006a 8E7F      		andi r24,lo8(-2)
+  92 006c 8093 9E00 		sts 158,r24
+  93               	.L8:
+  94               	.LSM14:
+  95 0070 892F      		mov r24,r25
+  96               	/* epilogue start */
+  97 0072 0895      		ret
+  98               	.LFE33:
+ 100               		.section	.text.USB_Host_ResetDevice,"ax",@progbits
+ 102               	USB_Host_ResetDevice:
+ 103               	.LFB34:
+ 104               	.LSM15:
+ 105               	/* prologue: function */
+ 106               	/* frame size = 0 */
+ 107               	.LSM16:
+ 108 0000 3091 9E00 		lds r19,158
+ 109               	.LSM17:
+ 110 0004 8091 A000 		lds r24,160
+ 111 0008 8D7F      		andi r24,lo8(-3)
+ 112 000a 8093 A000 		sts 160,r24
+ 113               	.LSM18:
+ 114 000e 8091 9E00 		lds r24,158
+ 115 0012 8260      		ori r24,lo8(2)
+ 116 0014 8093 9E00 		sts 158,r24
+ 117               	.L12:
+ 118               	.LSM19:
+ 119 0018 8091 9E00 		lds r24,158
+ 120 001c 81FD      		sbrc r24,1
+ 121 001e 00C0      		rjmp .L12
+ 122               	.LSM20:
+ 123 0020 8091 9E00 		lds r24,158
+ 124 0024 8160      		ori r24,lo8(1)
+ 125 0026 8093 9E00 		sts 158,r24
+ 126               	.LSM21:
+ 127 002a 8091 9F00 		lds r24,159
+ 128 002e 8F7D      		andi r24,lo8(-33)
+ 129 0030 8093 9F00 		sts 159,r24
+ 130 0034 2AE0      		ldi r18,lo8(10)
+ 131               	.LVL9:
+ 132               	.LBB20:
+ 133               	.LBB21:
+ 134               	.LBB22:
+ 135               	.LBB23:
+ 136               	.LBB24:
+ 137               	.LSM22:
+ 138 0036 40ED      		ldi r20,lo8(2000)
+ 139 0038 57E0      		ldi r21,hi8(2000)
+ 140               	.LVL10:
+ 141               	.L15:
+ 142               	.LBE24:
+ 143               	.LBE23:
+ 144               	.LBE22:
+ 145               	.LBE21:
+ 146               	.LSM23:
+ 147 003a 8091 9F00 		lds r24,159
+ 148               	.LVL11:
+ 149 003e 85FF      		sbrs r24,5
+ 150 0040 00C0      		rjmp .L13
+ 151               	.LSM24:
+ 152 0042 8091 9F00 		lds r24,159
+ 153 0046 8F7D      		andi r24,lo8(-33)
+ 154 0048 8093 9F00 		sts 159,r24
+ 155               	.LSM25:
+ 156 004c 8091 9F00 		lds r24,159
+ 157 0050 8D7F      		andi r24,lo8(-3)
+ 158 0052 8093 9F00 		sts 159,r24
+ 159 0056 00C0      		rjmp .L14
+ 160               	.L13:
+ 161               	.LBB28:
+ 162               	.LBB27:
+ 163               	.LBB26:
+ 164               	.LBB25:
+ 165               	.LSM26:
+ 166 0058 CA01      		movw r24,r20
+ 167               	.LVL12:
+ 168               	/* #APP */
+ 169               	 ;  105 "c:/program files/winavr-20090313/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 170 005a 0197      		1: sbiw r24,1
+ 171 005c 01F4      		brne 1b
+ 172               	 ;  0 "" 2
+ 173               	/* #NOAPP */
+ 174               	.LBE25:
+ 175               	.LBE26:
+ 176               	.LBE27:
+ 177               	.LBE28:
+ 178               	.LSM27:
+ 179 005e 2150      		subi r18,lo8(-(-1))
+ 180 0060 01F4      		brne .L15
+ 181               	.L14:
+ 182               	.LBE20:
+ 183               	.LSM28:
+ 184 0062 30FD      		sbrc r19,0
+ 185 0064 00C0      		rjmp .L16
+ 186               	.LSM29:
+ 187 0066 8091 9E00 		lds r24,158
+ 188               	.LVL13:
+ 189 006a 8E7F      		andi r24,lo8(-2)
+ 190 006c 8093 9E00 		sts 158,r24
+ 191               	.LVL14:
+ 192               	.L16:
+ 193               	.LSM30:
+ 194 0070 8091 A000 		lds r24,160
+ 195               	.LVL15:
+ 196 0074 8260      		ori r24,lo8(2)
+ 197 0076 8093 A000 		sts 160,r24
+ 198               	/* epilogue start */
+ 199               	.LSM31:
+ 200 007a 0895      		ret
+ 201               	.LFE34:
+ 203               		.section	.text.USB_Host_ClearPipeStall,"ax",@progbits
+ 204               	.global	USB_Host_ClearPipeStall
+ 206               	USB_Host_ClearPipeStall:
+ 207               	.LFB38:
+ 208               	.LSM32:
+ 209               	.LVL16:
+ 210               	/* prologue: function */
+ 211               	/* frame size = 0 */
+ 212 0000 982F      		mov r25,r24
+ 213               	.LSM33:
+ 214 0002 8091 AA00 		lds r24,170
+ 215               	.LVL17:
+ 216 0006 8073      		andi r24,lo8(48)
+ 217 0008 8031      		cpi r24,lo8(16)
+ 218 000a 01F4      		brne .L21
+ 219               	.LSM34:
+ 220 000c 9068      		ori r25,lo8(-128)
+ 221               	.L21:
+ 222               	.LSM35:
+ 223 000e 82E0      		ldi r24,lo8(2)
+ 224 0010 8093 0000 		sts USB_ControlRequest,r24
+ 225 0014 81E0      		ldi r24,lo8(1)
+ 226 0016 8093 0000 		sts USB_ControlRequest+1,r24
+ 227 001a 1092 0000 		sts (USB_ControlRequest+2)+1,__zero_reg__
+ 228 001e 1092 0000 		sts USB_ControlRequest+2,__zero_reg__
+ 229 0022 9093 0000 		sts USB_ControlRequest+4,r25
+ 230 0026 1092 0000 		sts USB_ControlRequest+5,__zero_reg__
+ 231 002a 1092 0000 		sts (USB_ControlRequest+6)+1,__zero_reg__
+ 232 002e 1092 0000 		sts USB_ControlRequest+6,__zero_reg__
+ 233               	.LSM36:
+ 234 0032 1092 A700 		sts 167,__zero_reg__
+ 235               	.LSM37:
+ 236 0036 80E0      		ldi r24,lo8(0)
+ 237 0038 90E0      		ldi r25,hi8(0)
+ 238 003a 0E94 0000 		call USB_Host_SendControlRequest
+ 239               	.LVL18:
+ 240               	/* epilogue start */
+ 241               	.LSM38:
+ 242 003e 0895      		ret
+ 243               	.LFE38:
+ 245               		.section	.text.USB_Host_GetDeviceStringDescriptor,"ax",@progbits
+ 246               	.global	USB_Host_GetDeviceStringDescriptor
+ 248               	USB_Host_GetDeviceStringDescriptor:
+ 249               	.LFB37:
+ 250               	.LSM39:
+ 251               	.LVL19:
+ 252               	/* prologue: function */
+ 253               	/* frame size = 0 */
+ 254               	.LSM40:
+ 255 0000 90E8      		ldi r25,lo8(-128)
+ 256 0002 9093 0000 		sts USB_ControlRequest,r25
+ 257 0006 96E0      		ldi r25,lo8(6)
+ 258 0008 9093 0000 		sts USB_ControlRequest+1,r25
+ 259 000c 90E0      		ldi r25,lo8(0)
+ 260               	.LVL20:
+ 261 000e 9360      		ori r25,hi8(768)
+ 262               	.LVL21:
+ 263 0010 9093 0000 		sts (USB_ControlRequest+2)+1,r25
+ 264 0014 8093 0000 		sts USB_ControlRequest+2,r24
+ 265 0018 1092 0000 		sts (USB_ControlRequest+4)+1,__zero_reg__
+ 266 001c 1092 0000 		sts USB_ControlRequest+4,__zero_reg__
+ 267 0020 4093 0000 		sts USB_ControlRequest+6,r20
+ 268 0024 1092 0000 		sts USB_ControlRequest+7,__zero_reg__
+ 269               	.LSM41:
+ 270 0028 1092 A700 		sts 167,__zero_reg__
+ 271               	.LSM42:
+ 272 002c CB01      		movw r24,r22
+ 273               	.LVL22:
+ 274 002e 0E94 0000 		call USB_Host_SendControlRequest
+ 275               	.LVL23:
+ 276               	/* epilogue start */
+ 277               	.LSM43:
+ 278 0032 0895      		ret
+ 279               	.LFE37:
+ 281               		.section	.text.USB_Host_GetDeviceDescriptor,"ax",@progbits
+ 282               	.global	USB_Host_GetDeviceDescriptor
+ 284               	USB_Host_GetDeviceDescriptor:
+ 285               	.LFB36:
+ 286               	.LSM44:
+ 287               	.LVL24:
+ 288               	/* prologue: function */
+ 289               	/* frame size = 0 */
+ 290               	.LSM45:
+ 291 0000 A0E0      		ldi r26,lo8(USB_ControlRequest)
+ 292 0002 B0E0      		ldi r27,hi8(USB_ControlRequest)
+ 293 0004 E0E0      		ldi r30,lo8(C.17.2119)
+ 294 0006 F0E0      		ldi r31,hi8(C.17.2119)
+ 295 0008 28E0      		ldi r18,lo8(8)
+ 296               	.L26:
+ 297 000a 0190      		ld r0,Z+
+ 298 000c 0D92      		st X+,r0
+ 299 000e 2150      		subi r18,lo8(-(-1))
+ 300 0010 01F4      		brne .L26
+ 301               	.LSM46:
+ 302 0012 1092 A700 		sts 167,__zero_reg__
+ 303               	.LSM47:
+ 304 0016 0E94 0000 		call USB_Host_SendControlRequest
+ 305               	.LVL25:
+ 306               	/* epilogue start */
+ 307               	.LSM48:
+ 308 001a 0895      		ret
+ 309               	.LFE36:
+ 311               		.section	.text.USB_Host_SetDeviceConfiguration,"ax",@progbits
+ 312               	.global	USB_Host_SetDeviceConfiguration
+ 314               	USB_Host_SetDeviceConfiguration:
+ 315               	.LFB35:
+ 316               	.LSM49:
+ 317               	.LVL26:
+ 318               	/* prologue: function */
+ 319               	/* frame size = 0 */
+ 320               	.LSM50:
+ 321 0000 1092 0000 		sts USB_ControlRequest,__zero_reg__
+ 322 0004 99E0      		ldi r25,lo8(9)
+ 323 0006 9093 0000 		sts USB_ControlRequest+1,r25
+ 324 000a 8093 0000 		sts USB_ControlRequest+2,r24
+ 325 000e 1092 0000 		sts USB_ControlRequest+3,__zero_reg__
+ 326 0012 1092 0000 		sts (USB_ControlRequest+4)+1,__zero_reg__
+ 327 0016 1092 0000 		sts USB_ControlRequest+4,__zero_reg__
+ 328 001a 1092 0000 		sts (USB_ControlRequest+6)+1,__zero_reg__
+ 329 001e 1092 0000 		sts USB_ControlRequest+6,__zero_reg__
+ 330               	.LSM51:
+ 331 0022 1092 A700 		sts 167,__zero_reg__
+ 332               	.LSM52:
+ 333 0026 80E0      		ldi r24,lo8(0)
+ 334 0028 90E0      		ldi r25,hi8(0)
+ 335               	.LVL27:
+ 336 002a 0E94 0000 		call USB_Host_SendControlRequest
+ 337               	/* epilogue start */
+ 338               	.LSM53:
+ 339 002e 0895      		ret
+ 340               	.LFE35:
+ 342               		.section	.text.USB_Host_ProcessNextHostState,"ax",@progbits
+ 343               	.global	USB_Host_ProcessNextHostState
+ 345               	USB_Host_ProcessNextHostState:
+ 346               	.LFB32:
+ 347               	.LSM54:
+ 348 0000 EF92      		push r14
+ 349 0002 0F93      		push r16
+ 350 0004 1F93      		push r17
+ 351 0006 DF93      		push r29
+ 352 0008 CF93      		push r28
+ 353 000a CDB7      		in r28,__SP_L__
+ 354 000c DEB7      		in r29,__SP_H__
+ 355 000e 2897      		sbiw r28,8
+ 356 0010 0FB6      		in __tmp_reg__,__SREG__
+ 357 0012 F894      		cli
+ 358 0014 DEBF      		out __SP_H__,r29
+ 359 0016 0FBE      		out __SREG__,__tmp_reg__
+ 360 0018 CDBF      		out __SP_L__,r28
+ 361               	/* prologue: function */
+ 362               	/* frame size = 8 */
+ 363               	.LSM55:
+ 364 001a 8091 0000 		lds r24,USB_HostState
+ 365 001e 8630      		cpi r24,lo8(6)
+ 366 0020 01F4      		brne .+2
+ 367 0022 00C0      		rjmp .L37
+ 368 0024 8730      		cpi r24,lo8(7)
+ 369 0026 00F4      		brsh .L42
+ 370 0028 8330      		cpi r24,lo8(3)
+ 371 002a 01F0      		breq .L34
+ 372 002c 8430      		cpi r24,lo8(4)
+ 373 002e 00F4      		brsh .L43
+ 374 0030 8130      		cpi r24,lo8(1)
+ 375 0032 01F0      		breq .+2
+ 376 0034 00C0      		rjmp .L52
+ 377 0036 00C0      		rjmp .L57
+ 378               	.L43:
+ 379 0038 8430      		cpi r24,lo8(4)
+ 380 003a 01F0      		breq .L35
+ 381 003c 8530      		cpi r24,lo8(5)
+ 382 003e 01F0      		breq .+2
+ 383 0040 00C0      		rjmp .L52
+ 384 0042 00C0      		rjmp .L58
+ 385               	.L42:
+ 386 0044 8830      		cpi r24,lo8(8)
+ 387 0046 01F4      		brne .+2
+ 388 0048 00C0      		rjmp .L39
+ 389 004a 8830      		cpi r24,lo8(8)
+ 390 004c 00F4      		brsh .+2
+ 391 004e 00C0      		rjmp .L38
+ 392 0050 8930      		cpi r24,lo8(9)
+ 393 0052 01F4      		brne .+2
+ 394 0054 00C0      		rjmp .L40
+ 395 0056 8A30      		cpi r24,lo8(10)
+ 396 0058 01F0      		breq .+2
+ 397 005a 00C0      		rjmp .L52
+ 398 005c 00C0      		rjmp .L59
+ 399               	.L57:
+ 400               	.LBB29:
+ 401               	.LSM56:
+ 402 005e 0091 0000 		lds r16,WaitMSRemaining.1949
+ 403 0062 1091 0000 		lds r17,(WaitMSRemaining.1949)+1
+ 404 0066 0115      		cp r16,__zero_reg__
+ 405 0068 1105      		cpc r17,__zero_reg__
+ 406 006a 01F4      		brne .+2
+ 407 006c 00C0      		rjmp .L52
+ 408               	.LSM57:
+ 409 006e 81E0      		ldi r24,lo8(1)
+ 410 0070 0E94 0000 		call USB_Host_WaitMS
+ 411 0074 682F      		mov r22,r24
+ 412               	.LVL28:
+ 413 0076 8823      		tst r24
+ 414 0078 01F0      		breq .L44
+ 415               	.LVL29:
+ 416               	.LSM58:
+ 417 007a 8091 0000 		lds r24,PostWaitState.1950
+ 418               	.LVL30:
+ 419 007e 8093 0000 		sts USB_HostState,r24
+ 420 0082 91E0      		ldi r25,lo8(1)
+ 421               	.LVL31:
+ 422 0084 00C0      		rjmp .L45
+ 423               	.LVL32:
+ 424               	.L44:
+ 425               	.LSM59:
+ 426 0086 C801      		movw r24,r16
+ 427               	.LVL33:
+ 428 0088 0197      		sbiw r24,1
+ 429 008a 9093 0000 		sts (WaitMSRemaining.1949)+1,r25
+ 430 008e 8093 0000 		sts WaitMSRemaining.1949,r24
+ 431 0092 892B      		or r24,r25
+ 432 0094 01F0      		breq .+2
+ 433 0096 00C0      		rjmp .L52
+ 434               	.LSM60:
+ 435 0098 8091 0000 		lds r24,PostWaitState.1950
+ 436               	.LVL34:
+ 437 009c 00C0      		rjmp .L55
+ 438               	.LVL35:
+ 439               	.L34:
+ 440               	.LSM61:
+ 441 009e 8CED      		ldi r24,lo8(1500)
+ 442 00a0 95E0      		ldi r25,hi8(1500)
+ 443 00a2 9093 0000 		sts (WaitMSRemaining.1949)+1,r25
+ 444 00a6 8093 0000 		sts WaitMSRemaining.1949,r24
+ 445               	.LSM62:
+ 446 00aa 84E0      		ldi r24,lo8(4)
+ 447 00ac 00C0      		rjmp .L55
+ 448               	.L35:
+ 449               	.LSM63:
+ 450 00ae 8091 0000 		lds r24,WaitMSRemaining.1949
+ 451 00b2 9091 0000 		lds r25,(WaitMSRemaining.1949)+1
+ 452 00b6 0197      		sbiw r24,1
+ 453 00b8 9093 0000 		sts (WaitMSRemaining.1949)+1,r25
+ 454 00bc 8093 0000 		sts WaitMSRemaining.1949,r24
+ 455 00c0 0196      		adiw r24,1
+ 456 00c2 01F0      		breq .L46
+ 457               	.LBB30:
+ 458               	.LBB31:
+ 459               	.LBB32:
+ 460               	.LBB33:
+ 461               	.LSM64:
+ 462 00c4 80ED      		ldi r24,lo8(2000)
+ 463 00c6 97E0      		ldi r25,hi8(2000)
+ 464               	.LVL36:
+ 465               	/* #APP */
+ 466               	 ;  105 "c:/program files/winavr-20090313/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 467 00c8 0197      		1: sbiw r24,1
+ 468 00ca 01F4      		brne 1b
+ 469               	 ;  0 "" 2
+ 470               	/* #NOAPP */
+ 471 00cc 00C0      		rjmp .L52
+ 472               	.LVL37:
+ 473               	.L46:
+ 474               	.LBE33:
+ 475               	.LBE32:
+ 476               	.LBE31:
+ 477               	.LBE30:
+ 478               	.LSM65:
+ 479 00ce 7798      		cbi 46-32,7
+ 480               	.LSM66:
+ 481 00d0 8091 D800 		lds r24,216
+ 482 00d4 8061      		ori r24,lo8(16)
+ 483 00d6 8093 D800 		sts 216,r24
+ 484               	.LSM67:
+ 485 00da 8091 DD00 		lds r24,221
+ 486 00de 8B7F      		andi r24,lo8(-5)
+ 487 00e0 8093 DD00 		sts 221,r24
+ 488 00e4 8091 D700 		lds r24,215
+ 489 00e8 8061      		ori r24,lo8(16)
+ 490 00ea 8093 D700 		sts 215,r24
+ 491               	.LSM68:
+ 492 00ee 8091 DD00 		lds r24,221
+ 493 00f2 8260      		ori r24,lo8(2)
+ 494 00f4 8093 DD00 		sts 221,r24
+ 495               	.LSM69:
+ 496 00f8 85E0      		ldi r24,lo8(5)
+ 497 00fa 00C0      		rjmp .L55
+ 498               	.L58:
+ 499               	.LSM70:
+ 500 00fc 8091 9F00 		lds r24,159
+ 501 0100 80FF      		sbrs r24,0
+ 502 0102 00C0      		rjmp .L52
+ 503               	.LSM71:
+ 504 0104 8091 9F00 		lds r24,159
+ 505 0108 8E7F      		andi r24,lo8(-2)
+ 506 010a 8093 9F00 		sts 159,r24
+ 507               	.LSM72:
+ 508 010e 8091 9F00 		lds r24,159
+ 509 0112 8D7F      		andi r24,lo8(-3)
+ 510 0114 8093 9F00 		sts 159,r24
+ 511               	.LSM73:
+ 512 0118 8091 DF00 		lds r24,223
+ 513 011c 8D7F      		andi r24,lo8(-3)
+ 514 011e 8093 DF00 		sts 223,r24
+ 515               	.LSM74:
+ 516 0122 8091 DE00 		lds r24,222
+ 517 0126 8260      		ori r24,lo8(2)
+ 518 0128 8093 DE00 		sts 222,r24
+ 519               	.LSM75:
+ 520 012c 8091 9E00 		lds r24,158
+ 521 0130 8160      		ori r24,lo8(1)
+ 522 0132 8093 9E00 		sts 158,r24
+ 523               	.LSM76:
+ 524 0136 0E94 0000 		call Pipe_ClearPipes
+ 525               	.LSM77:
+ 526 013a 81E0      		ldi r24,lo8(1)
+ 527 013c 8093 0000 		sts USB_HostState,r24
+ 528 0140 84E6      		ldi r24,lo8(100)
+ 529 0142 90E0      		ldi r25,hi8(100)
+ 530 0144 9093 0000 		sts (WaitMSRemaining.1949)+1,r25
+ 531 0148 8093 0000 		sts WaitMSRemaining.1949,r24
+ 532 014c 86E0      		ldi r24,lo8(6)
+ 533 014e 00C0      		rjmp .L56
+ 534               	.L37:
+ 535               	.LSM78:
+ 536 0150 0E94 0000 		call USB_Host_ResetDevice
+ 537               	.LSM79:
+ 538 0154 81E0      		ldi r24,lo8(1)
+ 539 0156 8093 0000 		sts USB_HostState,r24
+ 540 015a 88EC      		ldi r24,lo8(200)
+ 541 015c 90E0      		ldi r25,hi8(200)
+ 542 015e 9093 0000 		sts (WaitMSRemaining.1949)+1,r25
+ 543 0162 8093 0000 		sts WaitMSRemaining.1949,r24
+ 544 0166 87E0      		ldi r24,lo8(7)
+ 545 0168 00C0      		rjmp .L56
+ 546               	.L38:
+ 547               	.LSM80:
+ 548 016a 80E0      		ldi r24,lo8(0)
+ 549 016c 60E0      		ldi r22,lo8(0)
+ 550 016e 40E0      		ldi r20,lo8(0)
+ 551 0170 20E0      		ldi r18,lo8(0)
+ 552 0172 00E4      		ldi r16,lo8(64)
+ 553 0174 10E0      		ldi r17,hi8(64)
+ 554 0176 EE24      		clr r14
+ 555 0178 0E94 0000 		call Pipe_ConfigurePipe
+ 556               	.LSM81:
+ 557 017c 8091 AC00 		lds r24,172
+ 558 0180 87FF      		sbrs r24,7
+ 559 0182 00C0      		rjmp .L47
+ 560               	.LSM82:
+ 561 0184 88E0      		ldi r24,lo8(8)
+ 562 0186 00C0      		rjmp .L55
+ 563               	.L39:
+ 564               	.LSM83:
+ 565 0188 A0E0      		ldi r26,lo8(USB_ControlRequest)
+ 566 018a B0E0      		ldi r27,hi8(USB_ControlRequest)
+ 567 018c E0E0      		ldi r30,lo8(C.7.2006)
+ 568 018e F0E0      		ldi r31,hi8(C.7.2006)
+ 569 0190 88E0      		ldi r24,lo8(8)
+ 570               	.L48:
+ 571 0192 0190      		ld r0,Z+
+ 572 0194 0D92      		st X+,r0
+ 573 0196 8150      		subi r24,lo8(-(-1))
+ 574 0198 01F4      		brne .L48
+ 575               	.LSM84:
+ 576 019a CE01      		movw r24,r28
+ 577 019c 0196      		adiw r24,1
+ 578 019e 0E94 0000 		call USB_Host_SendControlRequest
+ 579 01a2 682F      		mov r22,r24
+ 580               	.LVL38:
+ 581 01a4 8823      		tst r24
+ 582 01a6 01F0      		breq .+2
+ 583 01a8 00C0      		rjmp .L49
+ 584               	.LVL39:
+ 585               	.LSM85:
+ 586 01aa 8885      		ldd r24,Y+8
+ 587               	.LVL40:
+ 588 01ac 8093 0000 		sts USB_ControlPipeSize,r24
+ 589               	.LSM86:
+ 590 01b0 0E94 0000 		call USB_Host_ResetDevice
+ 591               	.LVL41:
+ 592               	.LSM87:
+ 593 01b4 81E0      		ldi r24,lo8(1)
+ 594 01b6 8093 0000 		sts USB_HostState,r24
+ 595 01ba 88EC      		ldi r24,lo8(200)
+ 596 01bc 90E0      		ldi r25,hi8(200)
+ 597 01be 9093 0000 		sts (WaitMSRemaining.1949)+1,r25
+ 598 01c2 8093 0000 		sts WaitMSRemaining.1949,r24
+ 599 01c6 89E0      		ldi r24,lo8(9)
+ 600 01c8 00C0      		rjmp .L56
+ 601               	.L40:
+ 602               	.LSM88:
+ 603 01ca 8091 A900 		lds r24,169
+ 604 01ce 8E7F      		andi r24,lo8(-2)
+ 605 01d0 8093 A900 		sts 169,r24
+ 606               	.LSM89:
+ 607 01d4 8091 AB00 		lds r24,171
+ 608 01d8 8D7F      		andi r24,lo8(-3)
+ 609 01da 8093 AB00 		sts 171,r24
+ 610               	.LSM90:
+ 611 01de 81E0      		ldi r24,lo8(1)
+ 612 01e0 8093 A800 		sts 168,r24
+ 613 01e4 1092 A800 		sts 168,__zero_reg__
+ 614               	.LSM91:
+ 615 01e8 0091 0000 		lds r16,USB_ControlPipeSize
+ 616 01ec 80E0      		ldi r24,lo8(0)
+ 617 01ee 60E0      		ldi r22,lo8(0)
+ 618 01f0 40E0      		ldi r20,lo8(0)
+ 619 01f2 20E0      		ldi r18,lo8(0)
+ 620 01f4 10E0      		ldi r17,lo8(0)
+ 621 01f6 EE24      		clr r14
+ 622 01f8 0E94 0000 		call Pipe_ConfigurePipe
+ 623               	.LSM92:
+ 624 01fc 8091 AC00 		lds r24,172
+ 625 0200 87FF      		sbrs r24,7
+ 626 0202 00C0      		rjmp .L47
+ 627               	.LSM93:
+ 628 0204 A0E0      		ldi r26,lo8(USB_ControlRequest)
+ 629 0206 B0E0      		ldi r27,hi8(USB_ControlRequest)
+ 630 0208 E0E0      		ldi r30,lo8(C.11.2020)
+ 631 020a F0E0      		ldi r31,hi8(C.11.2020)
+ 632 020c 88E0      		ldi r24,lo8(8)
+ 633               	.L50:
+ 634 020e 0190      		ld r0,Z+
+ 635 0210 0D92      		st X+,r0
+ 636 0212 8150      		subi r24,lo8(-(-1))
+ 637 0214 01F4      		brne .L50
+ 638               	.LSM94:
+ 639 0216 80E0      		ldi r24,lo8(0)
+ 640 0218 90E0      		ldi r25,hi8(0)
+ 641 021a 0E94 0000 		call USB_Host_SendControlRequest
+ 642 021e 682F      		mov r22,r24
+ 643               	.LVL42:
+ 644 0220 8823      		tst r24
+ 645 0222 01F4      		brne .L49
+ 646               	.LVL43:
+ 647               	.LSM95:
+ 648 0224 81E0      		ldi r24,lo8(1)
+ 649               	.LVL44:
+ 650 0226 8093 0000 		sts USB_HostState,r24
+ 651 022a 84E6      		ldi r24,lo8(100)
+ 652 022c 90E0      		ldi r25,hi8(100)
+ 653 022e 9093 0000 		sts (WaitMSRemaining.1949)+1,r25
+ 654 0232 8093 0000 		sts WaitMSRemaining.1949,r24
+ 655 0236 8AE0      		ldi r24,lo8(10)
+ 656               	.L56:
+ 657 0238 8093 0000 		sts PostWaitState.1950,r24
+ 658 023c 00C0      		rjmp .L52
+ 659               	.LVL45:
+ 660               	.L59:
+ 661               	.LSM96:
+ 662 023e 81E0      		ldi r24,lo8(1)
+ 663 0240 8093 A100 		sts 161,r24
+ 664               	.LSM97:
+ 665 0244 0E94 0000 		call EVENT_USB_Host_DeviceEnumerationComplete
+ 666               	.LSM98:
+ 667 0248 8BE0      		ldi r24,lo8(11)
+ 668               	.LVL46:
+ 669               	.L55:
+ 670 024a 8093 0000 		sts USB_HostState,r24
+ 671               	.LVL47:
+ 672 024e 00C0      		rjmp .L52
+ 673               	.LVL48:
+ 674               	.L51:
+ 675               	.LBE29:
+ 676               	.LSM99:
+ 677 0250 892F      		mov r24,r25
+ 678 0252 0E94 0000 		call EVENT_USB_Host_DeviceEnumerationFailed
+ 679               	.LVL49:
+ 680               	.LSM100:
+ 681 0256 8091 DD00 		lds r24,221
+ 682 025a 8160      		ori r24,lo8(1)
+ 683 025c 8093 DD00 		sts 221,r24
+ 684               	.LSM101:
+ 685 0260 0E94 0000 		call EVENT_USB_Host_DeviceUnattached
+ 686               	.LSM102:
+ 687 0264 0E94 0000 		call USB_ResetInterface
+ 688 0268 00C0      		rjmp .L52
+ 689               	.LVL50:
+ 690               	.L49:
+ 691               	.LSM103:
+ 692 026a 93E0      		ldi r25,lo8(3)
+ 693               	.LVL51:
+ 694 026c 00C0      		rjmp .L45
+ 695               	.LVL52:
+ 696               	.L47:
+ 697 026e 94E0      		ldi r25,lo8(4)
+ 698               	.LVL53:
+ 699 0270 60E0      		ldi r22,lo8(0)
+ 700               	.LVL54:
+ 701               	.L45:
+ 702               	.LSM104:
+ 703 0272 8091 0000 		lds r24,USB_HostState
+ 704               	.LVL55:
+ 705 0276 8230      		cpi r24,lo8(2)
+ 706 0278 01F4      		brne .L51
+ 707               	.LVL56:
+ 708               	.L52:
+ 709               	/* epilogue start */
+ 710               	.LSM105:
+ 711 027a 2896      		adiw r28,8
+ 712 027c 0FB6      		in __tmp_reg__,__SREG__
+ 713 027e F894      		cli
+ 714 0280 DEBF      		out __SP_H__,r29
+ 715 0282 0FBE      		out __SREG__,__tmp_reg__
+ 716 0284 CDBF      		out __SP_L__,r28
+ 717 0286 CF91      		pop r28
+ 718 0288 DF91      		pop r29
+ 719 028a 1F91      		pop r17
+ 720 028c 0F91      		pop r16
+ 721 028e EF90      		pop r14
+ 722 0290 0895      		ret
+ 723               	.LFE32:
+ 725               		.data
+ 728               	C.17.2119:
+ 729 0000 80        		.byte	-128
+ 730 0001 06        		.byte	6
+ 731 0002 0001      		.word	256
+ 732 0004 0000      		.word	0
+ 733 0006 1200      		.word	18
+ 734               		.lcomm PostWaitState.1950,1
+ 735               		.lcomm WaitMSRemaining.1949,2
+ 738               	C.11.2020:
+ 739 0008 00        		.byte	0
+ 740 0009 05        		.byte	5
+ 741 000a 0100      		.word	1
+ 742 000c 0000      		.word	0
+ 743 000e 0000      		.word	0
+ 746               	C.7.2006:
+ 747 0010 80        		.byte	-128
+ 748 0011 06        		.byte	6
+ 749 0012 0001      		.word	256
+ 750 0014 0000      		.word	0
+ 751 0016 0800      		.word	8
+ 824               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 Host.c
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:19     .text.USB_Host_WaitMS:00000000 USB_Host_WaitMS
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:102    .text.USB_Host_ResetDevice:00000000 USB_Host_ResetDevice
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:206    .text.USB_Host_ClearPipeStall:00000000 USB_Host_ClearPipeStall
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:248    .text.USB_Host_GetDeviceStringDescriptor:00000000 USB_Host_GetDeviceStringDescriptor
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:284    .text.USB_Host_GetDeviceDescriptor:00000000 USB_Host_GetDeviceDescriptor
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:728    .data:00000000 C.17.2119
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:314    .text.USB_Host_SetDeviceConfiguration:00000000 USB_Host_SetDeviceConfiguration
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:345    .text.USB_Host_ProcessNextHostState:00000000 USB_Host_ProcessNextHostState
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:734    .bss:00000001 WaitMSRemaining.1949
+                             .bss:00000000 PostWaitState.1950
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:746    .data:00000010 C.7.2006
+C:\Users\Mike\AppData\Local\Temp/ccaj81ox.s:738    .data:00000008 C.11.2020
+
+UNDEFINED SYMBOLS
+USB_HostState
+USB_ControlRequest
+USB_Host_SendControlRequest
+Pipe_ClearPipes
+Pipe_ConfigurePipe
+USB_ControlPipeSize
+EVENT_USB_Host_DeviceEnumerationComplete
+EVENT_USB_Host_DeviceEnumerationFailed
+EVENT_USB_Host_DeviceUnattached
+USB_ResetInterface
+__do_copy_data
+__do_clear_bss

@@ -1,0 +1,209 @@
+   1               		.file	"USBInterrupt.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               		.section	.text.USB_INT_DisableAllInterrupts,"ax",@progbits
+  17               	.global	USB_INT_DisableAllInterrupts
+  19               	USB_INT_DisableAllInterrupts:
+  20               	.LFB32:
+  21               	.LSM0:
+  22               	/* prologue: function */
+  23               	/* frame size = 0 */
+  24               	.LSM1:
+  25 0000 E8ED      		ldi r30,lo8(216)
+  26 0002 F0E0      		ldi r31,hi8(216)
+  27 0004 8081      		ld r24,Z
+  28 0006 8C7F      		andi r24,lo8(-4)
+  29 0008 8083      		st Z,r24
+  30               	.LSM2:
+  31 000a 1092 A000 		sts 160,__zero_reg__
+  32               	.LSM3:
+  33 000e 1092 DE00 		sts 222,__zero_reg__
+  34               	/* epilogue start */
+  35               	.LSM4:
+  36 0012 0895      		ret
+  37               	.LFE32:
+  39               		.section	.text.USB_INT_ClearAllInterrupts,"ax",@progbits
+  40               	.global	USB_INT_ClearAllInterrupts
+  42               	USB_INT_ClearAllInterrupts:
+  43               	.LFB33:
+  44               	.LSM5:
+  45               	/* prologue: function */
+  46               	/* frame size = 0 */
+  47               	.LSM6:
+  48 0000 1092 DA00 		sts 218,__zero_reg__
+  49               	.LSM7:
+  50 0004 1092 9F00 		sts 159,__zero_reg__
+  51               	.LSM8:
+  52 0008 1092 DF00 		sts 223,__zero_reg__
+  53               	/* epilogue start */
+  54               	.LSM9:
+  55 000c 0895      		ret
+  56               	.LFE33:
+  58               		.section	.text.__vector_10,"ax",@progbits
+  59               	.global	__vector_10
+  61               	__vector_10:
+  62               	.LFB34:
+  63               	.LSM10:
+  64 0000 1F92      		push __zero_reg__
+  65 0002 0F92      		push r0
+  66 0004 0FB6      		in r0,__SREG__
+  67 0006 0F92      		push r0
+  68 0008 0BB6      		in r0,91-32
+  69 000a 0F92      		push r0
+  70 000c 1124      		clr __zero_reg__
+  71 000e 2F93      		push r18
+  72 0010 3F93      		push r19
+  73 0012 4F93      		push r20
+  74 0014 5F93      		push r21
+  75 0016 6F93      		push r22
+  76 0018 7F93      		push r23
+  77 001a 8F93      		push r24
+  78 001c 9F93      		push r25
+  79 001e AF93      		push r26
+  80 0020 BF93      		push r27
+  81 0022 EF93      		push r30
+  82 0024 FF93      		push r31
+  83               	/* prologue: Signal */
+  84               	/* frame size = 0 */
+  85               	.LSM11:
+  86 0026 8091 9F00 		lds r24,159
+  87 002a 81FF      		sbrs r24,1
+  88 002c 00C0      		rjmp .L6
+  89 002e 8091 A000 		lds r24,160
+  90 0032 81FF      		sbrs r24,1
+  91 0034 00C0      		rjmp .L6
+  92               	.LSM12:
+  93 0036 8091 9F00 		lds r24,159
+  94 003a 8D7F      		andi r24,lo8(-3)
+  95 003c 8093 9F00 		sts 159,r24
+  96               	.LSM13:
+  97 0040 8091 9F00 		lds r24,159
+  98 0044 8E7F      		andi r24,lo8(-2)
+  99 0046 8093 9F00 		sts 159,r24
+ 100               	.LSM14:
+ 101 004a 8091 A000 		lds r24,160
+ 102 004e 8D7F      		andi r24,lo8(-3)
+ 103 0050 8093 A000 		sts 160,r24
+ 104               	.LSM15:
+ 105 0054 0E94 0000 		call EVENT_USB_Host_DeviceUnattached
+ 106               	.LSM16:
+ 107 0058 0E94 0000 		call USB_ResetInterface
+ 108               	.L6:
+ 109               	.LSM17:
+ 110 005c 8091 DF00 		lds r24,223
+ 111 0060 81FF      		sbrs r24,1
+ 112 0062 00C0      		rjmp .L7
+ 113 0064 8091 DE00 		lds r24,222
+ 114 0068 81FF      		sbrs r24,1
+ 115 006a 00C0      		rjmp .L7
+ 116               	.LSM18:
+ 117 006c 8091 DF00 		lds r24,223
+ 118 0070 8D7F      		andi r24,lo8(-3)
+ 119 0072 8093 DF00 		sts 223,r24
+ 120               	.LSM19:
+ 121 0076 7798      		cbi 46-32,7
+ 122               	.LSM20:
+ 123 0078 8091 DD00 		lds r24,221
+ 124 007c 8160      		ori r24,lo8(1)
+ 125 007e 8093 DD00 		sts 221,r24
+ 126               	.LSM21:
+ 127 0082 80E0      		ldi r24,lo8(0)
+ 128 0084 0E94 0000 		call EVENT_USB_Host_HostError
+ 129               	.LSM22:
+ 130 0088 0E94 0000 		call EVENT_USB_Host_DeviceUnattached
+ 131               	.LSM23:
+ 132 008c 82E0      		ldi r24,lo8(2)
+ 133 008e 8093 0000 		sts USB_HostState,r24
+ 134               	.L7:
+ 135               	.LSM24:
+ 136 0092 8091 DF00 		lds r24,223
+ 137 0096 80FF      		sbrs r24,0
+ 138 0098 00C0      		rjmp .L8
+ 139 009a 8091 DE00 		lds r24,222
+ 140 009e 80FF      		sbrs r24,0
+ 141 00a0 00C0      		rjmp .L8
+ 142               	.LSM25:
+ 143 00a2 8091 DF00 		lds r24,223
+ 144 00a6 8E7F      		andi r24,lo8(-2)
+ 145 00a8 8093 DF00 		sts 223,r24
+ 146               	.LSM26:
+ 147 00ac 8091 DE00 		lds r24,222
+ 148 00b0 8E7F      		andi r24,lo8(-2)
+ 149 00b2 8093 DE00 		sts 222,r24
+ 150               	.LSM27:
+ 151 00b6 0E94 0000 		call EVENT_USB_Host_DeviceAttached
+ 152               	.LSM28:
+ 153 00ba 8091 A000 		lds r24,160
+ 154 00be 8260      		ori r24,lo8(2)
+ 155 00c0 8093 A000 		sts 160,r24
+ 156               	.LSM29:
+ 157 00c4 83E0      		ldi r24,lo8(3)
+ 158 00c6 8093 0000 		sts USB_HostState,r24
+ 159               	.L8:
+ 160               	.LSM30:
+ 161 00ca 8091 DF00 		lds r24,223
+ 162 00ce 82FF      		sbrs r24,2
+ 163 00d0 00C0      		rjmp .L10
+ 164 00d2 8091 DE00 		lds r24,222
+ 165 00d6 82FF      		sbrs r24,2
+ 166 00d8 00C0      		rjmp .L10
+ 167               	.LSM31:
+ 168 00da 8091 DF00 		lds r24,223
+ 169 00de 8B7F      		andi r24,lo8(-5)
+ 170 00e0 8093 DF00 		sts 223,r24
+ 171               	.LSM32:
+ 172 00e4 82E0      		ldi r24,lo8(2)
+ 173 00e6 60E0      		ldi r22,lo8(0)
+ 174 00e8 0E94 0000 		call EVENT_USB_Host_DeviceEnumerationFailed
+ 175               	.LSM33:
+ 176 00ec 0E94 0000 		call EVENT_USB_Host_DeviceUnattached
+ 177               	.LSM34:
+ 178 00f0 0E94 0000 		call USB_ResetInterface
+ 179               	.L10:
+ 180               	/* epilogue start */
+ 181               	.LSM35:
+ 182 00f4 FF91      		pop r31
+ 183 00f6 EF91      		pop r30
+ 184 00f8 BF91      		pop r27
+ 185 00fa AF91      		pop r26
+ 186 00fc 9F91      		pop r25
+ 187 00fe 8F91      		pop r24
+ 188 0100 7F91      		pop r23
+ 189 0102 6F91      		pop r22
+ 190 0104 5F91      		pop r21
+ 191 0106 4F91      		pop r20
+ 192 0108 3F91      		pop r19
+ 193 010a 2F91      		pop r18
+ 194 010c 0F90      		pop r0
+ 195 010e 0BBE      		out 91-32,r0
+ 196 0110 0F90      		pop r0
+ 197 0112 0FBE      		out __SREG__,r0
+ 198 0114 0F90      		pop r0
+ 199 0116 1F90      		pop __zero_reg__
+ 200 0118 1895      		reti
+ 201               	.LFE34:
+ 243               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 USBInterrupt.c
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:19     .text.USB_INT_DisableAllInterrupts:00000000 USB_INT_DisableAllInterrupts
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:42     .text.USB_INT_ClearAllInterrupts:00000000 USB_INT_ClearAllInterrupts
+C:\Users\Mike\AppData\Local\Temp/cc3iePEC.s:61     .text.__vector_10:00000000 __vector_10
+
+UNDEFINED SYMBOLS
+EVENT_USB_Host_DeviceUnattached
+USB_ResetInterface
+EVENT_USB_Host_HostError
+USB_HostState
+EVENT_USB_Host_DeviceAttached
+EVENT_USB_Host_DeviceEnumerationFailed

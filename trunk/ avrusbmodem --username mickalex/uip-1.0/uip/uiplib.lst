@@ -1,0 +1,97 @@
+   1               		.file	"uiplib.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               		.section	.text.uiplib_ipaddrconv,"ax",@progbits
+  17               	.global	uiplib_ipaddrconv
+  19               	uiplib_ipaddrconv:
+  20               	.LFB45:
+  21               	.LSM0:
+  22               	.LVL0:
+  23               	/* prologue: function */
+  24               	/* frame size = 0 */
+  25 0000 FC01      		movw r30,r24
+  26 0002 DB01      		movw r26,r22
+  27               	.LSM1:
+  28 0004 20E0      		ldi r18,lo8(0)
+  29               	.LVL1:
+  30 0006 40E0      		ldi r20,lo8(0)
+  31               	.LVL2:
+  32               	.LSM2:
+  33 0008 5AE0      		ldi r21,lo8(10)
+  34               	.LVL3:
+  35               	.L8:
+  36               	.LSM3:
+  37 000a 30E0      		ldi r19,lo8(0)
+  38               	.L7:
+  39               	.LSM4:
+  40 000c 8081      		ld r24,Z
+  41               	.LSM5:
+  42 000e 3F5F      		subi r19,lo8(-(1))
+  43               	.LSM6:
+  44 0010 3530      		cpi r19,lo8(5)
+  45 0012 01F0      		breq .L2
+  46               	.LSM7:
+  47 0014 8E32      		cpi r24,lo8(46)
+  48 0016 01F0      		breq .L3
+  49 0018 8823      		tst r24
+  50 001a 01F4      		brne .L4
+  51               	.L3:
+  52               	.LSM8:
+  53 001c 2D93      		st X+,r18
+  54               	.LSM9:
+  55 001e 20E0      		ldi r18,lo8(0)
+  56 0020 00C0      		rjmp .L5
+  57               	.L4:
+  58               	.LSM10:
+  59 0022 982F      		mov r25,r24
+  60 0024 9053      		subi r25,lo8(-(-48))
+  61 0026 9A30      		cpi r25,lo8(10)
+  62 0028 00F4      		brsh .L2
+  63               	.LSM11:
+  64 002a 259F      		mul r18,r21
+  65 002c 202D      		mov r18,r0
+  66 002e 1124      		clr r1
+  67 0030 290F      		add r18,r25
+  68               	.L5:
+  69               	.LSM12:
+  70 0032 3196      		adiw r30,1
+  71               	.LSM13:
+  72 0034 8E32      		cpi r24,lo8(46)
+  73 0036 01F0      		breq .L6
+  74 0038 8823      		tst r24
+  75 003a 01F4      		brne .L7
+  76               	.L6:
+  77               	.LSM14:
+  78 003c 4F5F      		subi r20,lo8(-(1))
+  79 003e 4430      		cpi r20,lo8(4)
+  80 0040 01F4      		brne .L8
+  81 0042 81E0      		ldi r24,lo8(1)
+  82               	.LVL4:
+  83 0044 0895      		ret
+  84               	.LVL5:
+  85               	.L2:
+  86 0046 80E0      		ldi r24,lo8(0)
+  87               	.LVL6:
+  88               	.LSM15:
+  89 0048 0895      		ret
+  90               	.LFE45:
+  92               		.comm TIME,2,1
+ 117               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 uiplib.c
+C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:19     .text.uiplib_ipaddrconv:00000000 uiplib_ipaddrconv
+                            *COM*:00000002 TIME
+
+UNDEFINED SYMBOLS
+__do_clear_bss

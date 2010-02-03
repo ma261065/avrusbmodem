@@ -1,0 +1,1415 @@
+Archive member included because of file (symbol)
+
+c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+                              c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o (exit)
+c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+                              USBModem.o (__do_clear_bss)
+c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(memcpy.o)
+                              uip-1.0/uip/uip.o (memcpy)
+c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcmp.o)
+                              USBModem.o (strcmp)
+c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcpy.o)
+                              USBModem.o (strcpy)
+
+Allocating common symbols
+Common symbol       size              file
+
+addr2               0x1               ppp.o
+TIME                0x2               USBModem.o
+USB_IsInitialized   0x1               LUFA/Drivers/USB/HighLevel/USBTask.o
+IPAddr3             0x1               USBModem.o
+uip_len             0x2               uip-1.0/uip/uip.o
+IPAddr2             0x1               USBModem.o
+tx_ptr              0x2               ppp.o
+uip_sappdata        0x2               uip-1.0/uip/uip.o
+uip_acc32           0x4               uip-1.0/uip/uip.o
+RemoteIPAddress     0x4               USBModem.o
+IPAddr4             0x1               USBModem.o
+uip_flags           0x1               uip-1.0/uip/uip.o
+periodic_timer      0x4               USBModem.o
+checksum1secondlast
+                    0x2               ppp.o
+number              0x1               ppp.o
+uip_udp_conn        0x2               uip-1.0/uip/uip.o
+LocalReady          0x1               ppp.o
+ThisConn            0x2               USBModem.o
+addr3               0x1               ppp.o
+IPAddr1             0x1               USBModem.o
+PPPState            0x1               ppp.o
+rx_ptr              0x2               ppp.o
+uip_appdata         0x2               uip-1.0/uip/uip.o
+uip_conn            0x2               uip-1.0/uip/uip.o
+tx_str              0x201             ppp.o
+uip_conns           0x1e              uip-1.0/uip/uip.o
+checksum2           0x2               ppp.o
+LocalIPAddress      0x4               USBModem.o
+USB_ControlRequest  0x8               LUFA/Drivers/USB/HighLevel/USBTask.o
+checksum1last       0x2               ppp.o
+rx_str              0x201             ppp.o
+USB_HostState       0x1               LUFA/Drivers/USB/HighLevel/USBTask.o
+uip_listenports     0x2               uip-1.0/uip/uip.o
+uip_draddr          0x4               uip-1.0/uip/uip.o
+checksum1           0x2               ppp.o
+addr4               0x1               ppp.o
+addr1               0x1               ppp.o
+tx_end              0x2               ppp.o
+uip_netmask         0x4               uip-1.0/uip/uip.o
+uip_hostaddr        0x4               uip-1.0/uip/uip.o
+uip_buf             0x25a             uip-1.0/uip/uip.o
+uip_slen            0x2               uip-1.0/uip/uip.o
+uip_udp_conns       0xb               uip-1.0/uip/uip.o
+
+Discarded input sections
+
+ .data          0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+ .bss           0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+ .text          0x00000000        0x0 USBModem.o
+ .text.device_queue_full
+                0x00000000        0x0 USBModem.o
+ .text          0x00000000        0x0 ConfigDescriptor.o
+ .data          0x00000000        0x0 ConfigDescriptor.o
+ .bss           0x00000000        0x0 ConfigDescriptor.o
+ .text          0x00000000        0x0 uart.o
+ .data          0x00000000        0x0 uart.o
+ .text.uart1_puts_p
+                0x00000000        0x0 uart.o
+ .text          0x00000000        0x0 modem.o
+ .text.modem_RxBufferEmpty
+                0x00000000        0x0 modem.o
+ .text          0x00000000        0x0 ppp.o
+ .text.AddToPacket
+                0x00000000        0x0 ppp.o
+ .text          0x00000000        0x0 uip-1.0/uip/timer.o
+ .data          0x00000000        0x0 uip-1.0/uip/timer.o
+ .bss           0x00000000        0x0 uip-1.0/uip/timer.o
+ .text.timer_restart
+                0x00000000        0x0 uip-1.0/uip/timer.o
+ .text          0x00000000        0x0 uip-1.0/uip/uip.o
+ .text.uip_setipid
+                0x00000000        0x0 uip-1.0/uip/uip.o
+ .text.uip_chksum
+                0x00000000        0x0 uip-1.0/uip/uip.o
+ .text.uip_unlisten
+                0x00000000        0x0 uip-1.0/uip/uip.o
+ .text.uip_listen
+                0x00000000        0x0 uip-1.0/uip/uip.o
+ .text.htons    0x00000000        0x0 uip-1.0/uip/uip.o
+ .text.uip_udp_new
+                0x00000000        0x0 uip-1.0/uip/uip.o
+ .text          0x00000000        0x0 uip-1.0/uip/uiplib.o
+ .data          0x00000000        0x0 uip-1.0/uip/uiplib.o
+ .bss           0x00000000        0x0 uip-1.0/uip/uiplib.o
+ .text.uiplib_ipaddrconv
+                0x00000000        0x0 uip-1.0/uip/uiplib.o
+ .text          0x00000000        0x0 uip-1.0/atmega/clock-arch.o
+ .data          0x00000000        0x0 uip-1.0/atmega/clock-arch.o
+ .text          0x00000000        0x0 uip-1.0/drivers/interfaces/network.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/DevChapter9.o
+ .data          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/DevChapter9.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/LowLevel/DevChapter9.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Endpoint.o
+ .data          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Endpoint.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Endpoint.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Host.o
+ .text.USB_Host_ClearPipeStall
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Host.o
+ .text.USB_Host_GetDeviceStringDescriptor
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Host.o
+ .text.USB_Host_GetDeviceDescriptor
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Host.o
+ .text.USB_Host_SetDeviceConfiguration
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Host.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .data          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .data          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Discard_Stream
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Write_PStream_LE
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Write_EStream_LE
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Write_Stream_BE
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Write_PStream_BE
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Write_EStream_BE
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Read_EStream_LE
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Read_Stream_BE
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text.Pipe_Read_EStream_BE
+                0x00000000        0x0 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/HighLevel/Events.o
+ .data          0x00000000        0x0 LUFA/Drivers/USB/HighLevel/Events.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/HighLevel/Events.o
+ .text.USB_Event_Stub
+                0x00000000        0x0 LUFA/Drivers/USB/HighLevel/Events.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .data          0x00000000        0x0 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .data          0x00000000        0x0 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .text          0x00000000        0x0 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+ .data          0x00000000        0x0 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+ .bss           0x00000000        0x0 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+ .text.USB_GetNextDescriptorOfType
+                0x00000000        0x0 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+ .text.USB_GetNextDescriptorOfTypeBefore
+                0x00000000        0x0 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+ .text.USB_GetNextDescriptorOfTypeAfter
+                0x00000000        0x0 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+ .text          0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+ .data          0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+ .bss           0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+ .text.libgcc   0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+ .text          0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+ .data          0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+ .bss           0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+ .text.libgcc   0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+ .data          0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(memcpy.o)
+ .bss           0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(memcpy.o)
+ .data          0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcmp.o)
+ .bss           0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcmp.o)
+ .data          0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcpy.o)
+ .bss           0x00000000        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcpy.o)
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x00000000         0x00020000         xr
+data             0x00800060         0x0000ffa0         rw !x
+eeprom           0x00810000         0x00010000         rw !x
+fuse             0x00820000         0x00000400         rw !x
+lock             0x00830000         0x00000400         rw !x
+signature        0x00840000         0x00000400         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+Address of section .data set to 0x800100
+LOAD c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+LOAD USBModem.o
+LOAD ConfigDescriptor.o
+LOAD uart.o
+LOAD modem.o
+LOAD ppp.o
+LOAD uip-1.0/uip/timer.o
+LOAD uip-1.0/uip/uip.o
+LOAD uip-1.0/uip/uiplib.o
+LOAD uip-1.0/atmega/clock-arch.o
+LOAD uip-1.0/drivers/interfaces/network.o
+LOAD LUFA/Drivers/USB/LowLevel/DevChapter9.o
+LOAD LUFA/Drivers/USB/LowLevel/Endpoint.o
+LOAD LUFA/Drivers/USB/LowLevel/Host.o
+LOAD LUFA/Drivers/USB/LowLevel/HostChapter9.o
+LOAD LUFA/Drivers/USB/LowLevel/LowLevel.o
+LOAD LUFA/Drivers/USB/LowLevel/Pipe.o
+LOAD LUFA/Drivers/USB/HighLevel/Events.o
+LOAD LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+LOAD LUFA/Drivers/USB/HighLevel/USBTask.o
+LOAD LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+LOAD c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libm.a
+LOAD c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a
+LOAD c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a
+LOAD c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x00000000     0x38ae
+ *(.vectors)
+ .vectors       0x00000000       0x98 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+                0x00000000                __vectors
+                0x00000000                __vector_default
+ *(.vectors)
+ *(.progmem.gcc*)
+ *(.progmem*)
+                0x00000098                . = ALIGN (0x2)
+                0x00000098                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x00000098        0x0 linker stubs
+ *(.trampolines*)
+                0x00000098                __trampolines_end = .
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x00000098                __ctors_start = .
+ *(.ctors)
+                0x00000098                __ctors_end = .
+                0x00000098                __dtors_start = .
+ *(.dtors)
+                0x00000098                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ .init0         0x00000098        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+                0x00000098                __init
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ .init2         0x00000098        0xc c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+ *(.init2)
+ *(.init3)
+ .init3         0x000000a4       0x12 USBModem.o
+                0x000000a4                wdt_init
+ *(.init3)
+ *(.init4)
+ .init4         0x000000b6       0x1a c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+                0x000000b6                __do_copy_data
+ .init4         0x000000d0       0x10 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+                0x000000d0                __do_clear_bss
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x000000e0        0x6 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+ *(.init9)
+ *(.text)
+ .text          0x000000e6        0x2 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+                0x000000e6                __vector_22
+                0x000000e6                __vector_28
+                0x000000e6                __vector_1
+                0x000000e6                __vector_32
+                0x000000e6                __vector_34
+                0x000000e6                __vector_24
+                0x000000e6                __bad_interrupt
+                0x000000e6                __vector_6
+                0x000000e6                __vector_31
+                0x000000e6                __vector_35
+                0x000000e6                __vector_3
+                0x000000e6                __vector_30
+                0x000000e6                __vector_11
+                0x000000e6                __vector_13
+                0x000000e6                __vector_19
+                0x000000e6                __vector_7
+                0x000000e6                __vector_27
+                0x000000e6                __vector_5
+                0x000000e6                __vector_33
+                0x000000e6                __vector_37
+                0x000000e6                __vector_4
+                0x000000e6                __vector_9
+                0x000000e6                __vector_2
+                0x000000e6                __vector_21
+                0x000000e6                __vector_15
+                0x000000e6                __vector_36
+                0x000000e6                __vector_29
+                0x000000e6                __vector_8
+                0x000000e6                __vector_14
+                0x000000e6                __vector_16
+                0x000000e6                __vector_18
+                0x000000e6                __vector_20
+ .text          0x000000e8       0x12 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(memcpy.o)
+                0x000000e8                memcpy
+ .text          0x000000fa       0x12 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcmp.o)
+                0x000000fa                strcmp
+ .text          0x0000010c        0xe c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcpy.o)
+                0x0000010c                strcpy
+                0x0000011a                . = ALIGN (0x2)
+ *(.text.*)
+ .text.__vector_17
+                0x0000011a       0x2e USBModem.o
+                0x0000011a                __vector_17
+ .text.Debug    0x00000148       0x10 USBModem.o
+                0x00000148                Debug
+ .text.EVENT_USB_Host_DeviceEnumerationFailed
+                0x00000158       0x10 USBModem.o
+                0x00000158                EVENT_USB_Host_DeviceEnumerationFailed
+ .text.EVENT_USB_Host_DeviceEnumerationComplete
+                0x00000168       0x10 USBModem.o
+                0x00000168                EVENT_USB_Host_DeviceEnumerationComplete
+ .text.EVENT_USB_Host_DeviceUnattached
+                0x00000178       0x14 USBModem.o
+                0x00000178                EVENT_USB_Host_DeviceUnattached
+ .text.EVENT_USB_Host_DeviceAttached
+                0x0000018c       0x10 USBModem.o
+                0x0000018c                EVENT_USB_Host_DeviceAttached
+ .text.__vector_12
+                0x0000019c       0x66 USBModem.o
+                0x0000019c                __vector_12
+ .text.DebugChar
+                0x00000202       0x10 USBModem.o
+                0x00000202                DebugChar
+ .text.PrintHex
+                0x00000212       0x38 USBModem.o
+                0x00000212                PrintHex
+ .text.device_enqueue
+                0x0000024a       0x46 USBModem.o
+                0x0000024a                device_enqueue
+ .text.SendDataToAndFromModem
+                0x00000290      0x1ca USBModem.o
+                0x00000290                SendDataToAndFromModem
+ .text.CDC_Host_Task
+                0x0000045a       0x86 USBModem.o
+                0x0000045a                CDC_Host_Task
+ .text.EVENT_USB_Host_HostError
+                0x000004e0       0x14 USBModem.o
+                0x000004e0                EVENT_USB_Host_HostError
+ .text.Dial     0x000004f4       0xac USBModem.o
+                0x000004f4                Dial
+ .text.TCPIPTask
+                0x000005a0      0x168 USBModem.o
+                0x000005a0                TCPIPTask
+ .text.SendGET  0x00000708        0xc USBModem.o
+                0x00000708                SendGET
+ .text.TCPCallback
+                0x00000714      0x122 USBModem.o
+                0x00000714                TCPCallback
+ .text.main     0x00000836      0x26a USBModem.o
+                0x00000836                main
+ .text.DComp_NextCDCControlInterface
+                0x00000aa0       0x22 ConfigDescriptor.o
+                0x00000aa0                DComp_NextCDCControlInterface
+ .text.DComp_NextCDCDataInterface
+                0x00000ac2       0x22 ConfigDescriptor.o
+                0x00000ac2                DComp_NextCDCDataInterface
+ .text.DComp_NextCDCDataInterfaceEndpoint
+                0x00000ae4       0x22 ConfigDescriptor.o
+                0x00000ae4                DComp_NextCDCDataInterfaceEndpoint
+ .text.ProcessConfigurationDescriptor
+                0x00000b06      0x1ba ConfigDescriptor.o
+                0x00000b06                ProcessConfigurationDescriptor
+ .text.__vector_25
+                0x00000cc0       0x5e uart.o
+                0x00000cc0                __vector_25
+ .text.__vector_26
+                0x00000d1e       0x5a uart.o
+                0x00000d1e                __vector_26
+ .text.uart1_init
+                0x00000d78       0x34 uart.o
+                0x00000d78                uart1_init
+ .text.uart1_getc
+                0x00000dac       0x38 uart.o
+                0x00000dac                uart1_getc
+ .text.uart1_putc
+                0x00000de4       0x2a uart.o
+                0x00000de4                uart1_putc
+ .text.uart1_puts
+                0x00000e0e       0x34 uart.o
+                0x00000e0e                uart1_puts
+ .text.modem_init
+                0x00000e42       0x12 modem.o
+                0x00000e42                modem_init
+ .text.modem_getc
+                0x00000e54       0x38 modem.o
+                0x00000e54                modem_getc
+ .text.modem_TxBufferEmpty
+                0x00000e8c       0x14 modem.o
+                0x00000e8c                modem_TxBufferEmpty
+ .text.modem_getTxBuffer
+                0x00000ea0       0x3e modem.o
+                0x00000ea0                modem_getTxBuffer
+ .text.modem_putRxBuffer
+                0x00000ede       0x42 modem.o
+                0x00000ede                modem_putRxBuffer
+ .text.modem_putc
+                0x00000f20       0x2c modem.o
+                0x00000f20                modem_putc
+ .text.modem_puts
+                0x00000f4c       0x18 modem.o
+                0x00000f4c                modem_puts
+ .text.CreatePacket
+                0x00000f64      0x216 ppp.o
+                0x00000f64                CreatePacket
+ .text.TestOptions
+                0x0000117a       0xf2 ppp.o
+                0x0000117a                TestOptions
+ .text.CRC      0x0000126c       0x28 ppp.o
+                0x0000126c                CRC
+ .text.MakeInitialPacket
+                0x00001294       0xbe ppp.o
+                0x00001294                MakeInitialPacket
+ .text.ProcessReceivedPacket
+                0x00001352      0x266 ppp.o
+                0x00001352                ProcessReceivedPacket
+ .text.DoPPP    0x000015b8      0x30c ppp.o
+                0x000015b8                DoPPP
+ .text.timer_reset
+                0x000018c4       0x14 uip-1.0/uip/timer.o
+                0x000018c4                timer_reset
+ .text.timer_expired
+                0x000018d8       0x2e uip-1.0/uip/timer.o
+                0x000018d8                timer_expired
+ .text.timer_set
+                0x00001906       0x1c uip-1.0/uip/timer.o
+                0x00001906                timer_set
+ .text.uip_add32
+                0x00001922       0x70 uip-1.0/uip/uip.o
+                0x00001922                uip_add32
+ .text.chksum   0x00001992       0x4c uip-1.0/uip/uip.o
+ .text.uip_ipchksum
+                0x000019de       0x20 uip-1.0/uip/uip.o
+                0x000019de                uip_ipchksum
+ .text.uip_tcpchksum
+                0x000019fe       0x44 uip-1.0/uip/uip.o
+                0x000019fe                uip_tcpchksum
+ .text.uip_init
+                0x00001a42       0x28 uip-1.0/uip/uip.o
+                0x00001a42                uip_init
+ .text.uip_connect
+                0x00001a6a       0xc4 uip-1.0/uip/uip.o
+                0x00001a6a                uip_connect
+ .text.uip_add_rcv_nxt
+                0x00001b2e       0x30 uip-1.0/uip/uip.o
+ .text.uip_send
+                0x00001b5e       0x2c uip-1.0/uip/uip.o
+                0x00001b5e                uip_send
+ .text.uip_process
+                0x00001b8a      0xe22 uip-1.0/uip/uip.o
+                0x00001b8a                uip_process
+ .text.__vector_23
+                0x000029ac       0x2e uip-1.0/atmega/clock-arch.o
+                0x000029ac                __vector_23
+ .text.clock_init
+                0x000029da       0x14 uip-1.0/atmega/clock-arch.o
+                0x000029da                clock_init
+ .text.clock_time
+                0x000029ee       0x10 uip-1.0/atmega/clock-arch.o
+                0x000029ee                clock_time
+ .text.network_init
+                0x000029fe       0x16 uip-1.0/drivers/interfaces/network.o
+                0x000029fe                network_init
+ .text.network_send
+                0x00002a14      0x1e2 uip-1.0/drivers/interfaces/network.o
+                0x00002a14                network_send
+ .text.network_read
+                0x00002bf6      0x10e uip-1.0/drivers/interfaces/network.o
+                0x00002bf6                network_read
+ .text.USB_Host_WaitMS
+                0x00002d04       0x74 LUFA/Drivers/USB/LowLevel/Host.o
+                0x00002d04                USB_Host_WaitMS
+ .text.USB_Host_ResetDevice
+                0x00002d78       0x7c LUFA/Drivers/USB/LowLevel/Host.o
+ .text.USB_Host_ProcessNextHostState
+                0x00002df4      0x280 LUFA/Drivers/USB/LowLevel/Host.o
+                0x00002df4                USB_Host_ProcessNextHostState
+ .text.USB_Host_WaitForIOS
+                0x00003074       0x52 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .text.USB_Host_SendControlRequest
+                0x000030c6      0x22e LUFA/Drivers/USB/LowLevel/HostChapter9.o
+                0x000030c6                USB_Host_SendControlRequest
+ .text.USB_ResetInterface
+                0x000032f4       0x96 LUFA/Drivers/USB/LowLevel/LowLevel.o
+                0x000032f4                USB_ResetInterface
+ .text.USB_ShutDown
+                0x0000338a       0x24 LUFA/Drivers/USB/LowLevel/LowLevel.o
+                0x0000338a                USB_ShutDown
+ .text.USB_Init
+                0x000033ae       0x26 LUFA/Drivers/USB/LowLevel/LowLevel.o
+                0x000033ae                USB_Init
+ .text.Pipe_ConfigurePipe
+                0x000033d4       0x84 LUFA/Drivers/USB/LowLevel/Pipe.o
+                0x000033d4                Pipe_ConfigurePipe
+ .text.Pipe_ClearPipes
+                0x00003458       0x5c LUFA/Drivers/USB/LowLevel/Pipe.o
+                0x00003458                Pipe_ClearPipes
+ .text.Pipe_IsEndpointBound
+                0x000034b4       0x3c LUFA/Drivers/USB/LowLevel/Pipe.o
+                0x000034b4                Pipe_IsEndpointBound
+ .text.Pipe_WaitUntilReady
+                0x000034f0       0x54 LUFA/Drivers/USB/LowLevel/Pipe.o
+                0x000034f0                Pipe_WaitUntilReady
+ .text.Pipe_Write_Stream_LE
+                0x00003544       0x6e LUFA/Drivers/USB/LowLevel/Pipe.o
+                0x00003544                Pipe_Write_Stream_LE
+ .text.Pipe_Read_Stream_LE
+                0x000035b2       0x6e LUFA/Drivers/USB/LowLevel/Pipe.o
+                0x000035b2                Pipe_Read_Stream_LE
+ .text.USB_INT_DisableAllInterrupts
+                0x00003620       0x14 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                0x00003620                USB_INT_DisableAllInterrupts
+ .text.USB_INT_ClearAllInterrupts
+                0x00003634        0xe LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                0x00003634                USB_INT_ClearAllInterrupts
+ .text.__vector_10
+                0x00003642      0x116 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                0x00003642                __vector_10
+ .text.USB_USBTask
+                0x00003758       0x24 LUFA/Drivers/USB/HighLevel/USBTask.o
+                0x00003758                USB_USBTask
+ .text.USB_GetNextDescriptorComp
+                0x0000377c       0x7a LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+                0x0000377c                USB_GetNextDescriptorComp
+ .text.USB_Host_GetDeviceConfigDescriptor
+                0x000037f6       0xb4 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+                0x000037f6                USB_Host_GetDeviceConfigDescriptor
+                0x000038aa                . = ALIGN (0x2)
+ *(.fini9)
+ .fini9         0x000038aa        0x0 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+                0x000038aa                exit
+                0x000038aa                _exit
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ .fini0         0x000038aa        0x4 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+ *(.fini0)
+                0x000038ae                _etext = .
+
+.data           0x00800100      0x572 load address 0x000038ae
+                0x00800100                PROVIDE (__data_start, .)
+ *(.data)
+ .data          0x00800100      0x3d0 USBModem.o
+                0x008004ba                DialCommands
+ .data          0x008004d0       0x18 modem.o
+ .data          0x008004e8      0x157 ppp.o
+ .data          0x0080063f        0x8 uip-1.0/uip/uip.o
+ .data          0x00800647       0x11 uip-1.0/drivers/interfaces/network.o
+ .data          0x00800658       0x18 LUFA/Drivers/USB/LowLevel/Host.o
+ .data          0x00800670        0x1 LUFA/Drivers/USB/LowLevel/Pipe.o
+                0x00800670                USB_ControlPipeSize
+ *(.data*)
+ *(.rodata)
+ *(.rodata*)
+ *(.gnu.linkonce.d*)
+                0x00800672                . = ALIGN (0x2)
+ *fill*         0x00800671        0x1 00
+                0x00800672                _edata = .
+                0x00800672                PROVIDE (__data_end, .)
+
+.bss            0x00800672      0xb05
+                0x00800672                PROVIDE (__bss_start, .)
+ *(.bss)
+ .bss           0x00800672        0x4 USBModem.o
+                0x00800674                WatchdogTicks
+                0x00800672                ConnectedState
+                0x00800675                DialSteps
+                0x00800673                DebugMode
+ .bss           0x00800676      0x205 uart.o
+ .bss           0x0080087b      0x205 modem.o
+ .bss           0x00800a80        0x4 ppp.o
+                0x00800a82                EscapeFlag
+                0x00800a80                PacketType
+                0x00800a83                RemoteReady
+ .bss           0x00800a84       0x12 uip-1.0/uip/uip.o
+                0x00800a84                uip_ethaddr
+ .bss           0x00800a96        0x2 uip-1.0/atmega/clock-arch.o
+                0x00800a96                clock_datetime
+ .bss           0x00800a98        0x5 uip-1.0/drivers/interfaces/network.o
+                0x00800a99                InPacket
+                0x00800a98                InHeader
+                0x00800a9a                Escape
+                0x00800a9b                len
+ .bss           0x00800a9d        0x3 LUFA/Drivers/USB/LowLevel/Host.o
+ *(.bss*)
+ *(COMMON)
+ COMMON         0x00800aa0       0x14 USBModem.o
+                0x00800aa0                TIME
+                0x00800aa2                IPAddr3
+                0x00800aa3                IPAddr2
+                0x00800aa4                RemoteIPAddress
+                0x00800aa8                IPAddr4
+                0x00800aa9                periodic_timer
+                0x00800aad                ThisConn
+                0x00800aaf                IPAddr1
+                0x00800ab0                LocalIPAddress
+ COMMON         0x00800ab4      0x417 ppp.o
+                0x00800ab4                addr2
+                0x00800ab5                tx_ptr
+                0x00800ab7                checksum1secondlast
+                0x00800ab9                number
+                0x00800aba                LocalReady
+                0x00800abb                addr3
+                0x00800abc                PPPState
+                0x00800abd                rx_ptr
+                0x00800abf                tx_str
+                0x00800cc0                checksum2
+                0x00800cc2                checksum1last
+                0x00800cc4                rx_str
+                0x00800ec5                checksum1
+                0x00800ec7                addr4
+                0x00800ec8                addr1
+                0x00800ec9                tx_end
+ COMMON         0x00800ecb      0x2a2 uip-1.0/uip/uip.o
+                0x00800ecb                uip_len
+                0x00800ecd                uip_sappdata
+                0x00800ecf                uip_acc32
+                0x00800ed3                uip_flags
+                0x00800ed4                uip_udp_conn
+                0x00800ed6                uip_appdata
+                0x00800ed8                uip_conn
+                0x00800eda                uip_conns
+                0x00800ef8                uip_listenports
+                0x00800efa                uip_draddr
+                0x00800efe                uip_netmask
+                0x00800f02                uip_hostaddr
+                0x00800f06                uip_buf
+                0x00801160                uip_slen
+                0x00801162                uip_udp_conns
+ COMMON         0x0080116d        0xa LUFA/Drivers/USB/HighLevel/USBTask.o
+                0x0080116d                USB_IsInitialized
+                0x0080116e                USB_ControlRequest
+                0x00801176                USB_HostState
+                0x00801177                PROVIDE (__bss_end, .)
+                0x000038ae                __data_load_start = LOADADDR (.data)
+                0x00003e20                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x00801177        0x0
+                0x00801177                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x00801177                PROVIDE (__noinit_end, .)
+                0x00801177                _end = .
+                0x00801177                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000        0x0
+ *(.eeprom*)
+                0x00810000                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment
+ *(.comment)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000      0x518
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0xb8 USBModem.o
+ .debug_aranges
+                0x000000b8       0x38 ConfigDescriptor.o
+ .debug_aranges
+                0x000000f0       0x50 uart.o
+ .debug_aranges
+                0x00000140       0x58 modem.o
+ .debug_aranges
+                0x00000198       0x50 ppp.o
+ .debug_aranges
+                0x000001e8       0x38 uip-1.0/uip/timer.o
+ .debug_aranges
+                0x00000220       0x90 uip-1.0/uip/uip.o
+ .debug_aranges
+                0x000002b0       0x20 uip-1.0/uip/uiplib.o
+ .debug_aranges
+                0x000002d0       0x30 uip-1.0/atmega/clock-arch.o
+ .debug_aranges
+                0x00000300       0x30 uip-1.0/drivers/interfaces/network.o
+ .debug_aranges
+                0x00000330       0x50 LUFA/Drivers/USB/LowLevel/Host.o
+ .debug_aranges
+                0x00000380       0x28 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .debug_aranges
+                0x000003a8       0x30 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .debug_aranges
+                0x000003d8       0x90 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .debug_aranges
+                0x00000468       0x20 LUFA/Drivers/USB/HighLevel/Events.o
+ .debug_aranges
+                0x00000488       0x30 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .debug_aranges
+                0x000004b8       0x20 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .debug_aranges
+                0x000004d8       0x40 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+
+.debug_pubnames
+                0x00000000      0xda8
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x00000000      0x283 USBModem.o
+ .debug_pubnames
+                0x00000283       0xa6 ConfigDescriptor.o
+ .debug_pubnames
+                0x00000329       0x7f uart.o
+ .debug_pubnames
+                0x000003a8       0xb3 modem.o
+ .debug_pubnames
+                0x0000045b      0x188 ppp.o
+ .debug_pubnames
+                0x000005e3       0x5d uip-1.0/uip/timer.o
+ .debug_pubnames
+                0x00000640      0x1d3 uip-1.0/uip/uip.o
+ .debug_pubnames
+                0x00000813       0x31 uip-1.0/uip/uiplib.o
+ .debug_pubnames
+                0x00000844       0x5c uip-1.0/atmega/clock-arch.o
+ .debug_pubnames
+                0x000008a0       0x7b uip-1.0/drivers/interfaces/network.o
+ .debug_pubnames
+                0x0000091b       0xd0 LUFA/Drivers/USB/LowLevel/Host.o
+ .debug_pubnames
+                0x000009eb       0x32 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .debug_pubnames
+                0x00000a1d       0x47 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .debug_pubnames
+                0x00000a64      0x19a LUFA/Drivers/USB/LowLevel/Pipe.o
+ .debug_pubnames
+                0x00000bfe       0x25 LUFA/Drivers/USB/HighLevel/Events.o
+ .debug_pubnames
+                0x00000c23       0x62 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .debug_pubnames
+                0x00000c85       0x61 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .debug_pubnames
+                0x00000ce6       0xc2 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+
+.debug_info     0x00000000     0x4e90
+ *(.debug_info)
+ .debug_info    0x00000000      0xce9 USBModem.o
+ .debug_info    0x00000ce9      0x3b4 ConfigDescriptor.o
+ .debug_info    0x0000109d      0x32b uart.o
+ .debug_info    0x000013c8      0x2d4 modem.o
+ .debug_info    0x0000169c      0x852 ppp.o
+ .debug_info    0x00001eee      0x178 uip-1.0/uip/timer.o
+ .debug_info    0x00002066      0xced uip-1.0/uip/uip.o
+ .debug_info    0x00002d53       0xff uip-1.0/uip/uiplib.o
+ .debug_info    0x00002e52      0x109 uip-1.0/atmega/clock-arch.o
+ .debug_info    0x00002f5b      0x1c0 uip-1.0/drivers/interfaces/network.o
+ .debug_info    0x0000311b        0x0 LUFA/Drivers/USB/LowLevel/DevChapter9.o
+ .debug_info    0x0000311b        0x0 LUFA/Drivers/USB/LowLevel/Endpoint.o
+ .debug_info    0x0000311b      0x511 LUFA/Drivers/USB/LowLevel/Host.o
+ .debug_info    0x0000362c      0x354 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .debug_info    0x00003980      0x16c LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .debug_info    0x00003aec      0x9f6 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .debug_info    0x000044e2       0x76 LUFA/Drivers/USB/HighLevel/Events.o
+ .debug_info    0x00004558      0x162 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .debug_info    0x000046ba      0x174 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .debug_info    0x0000482e      0x662 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev   0x00000000     0x18ca
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x314 USBModem.o
+ .debug_abbrev  0x00000314      0x12e ConfigDescriptor.o
+ .debug_abbrev  0x00000442      0x185 uart.o
+ .debug_abbrev  0x000005c7      0x12e modem.o
+ .debug_abbrev  0x000006f5      0x23f ppp.o
+ .debug_abbrev  0x00000934       0xc8 uip-1.0/uip/timer.o
+ .debug_abbrev  0x000009fc      0x299 uip-1.0/uip/uip.o
+ .debug_abbrev  0x00000c95       0x95 uip-1.0/uip/uiplib.o
+ .debug_abbrev  0x00000d2a       0x97 uip-1.0/atmega/clock-arch.o
+ .debug_abbrev  0x00000dc1       0xf3 uip-1.0/drivers/interfaces/network.o
+ .debug_abbrev  0x00000eb4        0x1 LUFA/Drivers/USB/LowLevel/DevChapter9.o
+ .debug_abbrev  0x00000eb5        0x1 LUFA/Drivers/USB/LowLevel/Endpoint.o
+ .debug_abbrev  0x00000eb6      0x1f4 LUFA/Drivers/USB/LowLevel/Host.o
+ .debug_abbrev  0x000010aa      0x19f LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .debug_abbrev  0x00001249       0xce LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .debug_abbrev  0x00001317      0x208 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .debug_abbrev  0x0000151f       0x41 LUFA/Drivers/USB/HighLevel/Events.o
+ .debug_abbrev  0x00001560       0x96 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .debug_abbrev  0x000015f6       0xcc LUFA/Drivers/USB/HighLevel/USBTask.o
+ .debug_abbrev  0x000016c2      0x208 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+
+.debug_line     0x00000000     0x5073
+ *(.debug_line)
+ .debug_line    0x00000000      0xc8f USBModem.o
+ .debug_line    0x00000c8f      0x2f7 ConfigDescriptor.o
+ .debug_line    0x00000f86      0x2db uart.o
+ .debug_line    0x00001261      0x20f modem.o
+ .debug_line    0x00001470      0x84d ppp.o
+ .debug_line    0x00001cbd      0x162 uip-1.0/uip/timer.o
+ .debug_line    0x00001e1f      0xfac uip-1.0/uip/uip.o
+ .debug_line    0x00002dcb       0xf0 uip-1.0/uip/uiplib.o
+ .debug_line    0x00002ebb      0x146 uip-1.0/atmega/clock-arch.o
+ .debug_line    0x00003001      0x39b uip-1.0/drivers/interfaces/network.o
+ .debug_line    0x0000339c       0x24 LUFA/Drivers/USB/LowLevel/DevChapter9.o
+ .debug_line    0x000033c0       0x24 LUFA/Drivers/USB/LowLevel/Endpoint.o
+ .debug_line    0x000033e4      0x627 LUFA/Drivers/USB/LowLevel/Host.o
+ .debug_line    0x00003a0b      0x364 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .debug_line    0x00003d6f      0x233 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .debug_line    0x00003fa2      0x946 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .debug_line    0x000048e8       0x82 LUFA/Drivers/USB/HighLevel/Events.o
+ .debug_line    0x0000496a      0x28a LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .debug_line    0x00004bf4      0x100 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .debug_line    0x00004cf4      0x37f LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+
+.debug_frame    0x00000000      0x7f0
+ *(.debug_frame)
+ .debug_frame   0x00000000      0x150 USBModem.o
+ .debug_frame   0x00000150       0x50 ConfigDescriptor.o
+ .debug_frame   0x000001a0       0x80 uart.o
+ .debug_frame   0x00000220       0x90 modem.o
+ .debug_frame   0x000002b0       0x80 ppp.o
+ .debug_frame   0x00000330       0x50 uip-1.0/uip/timer.o
+ .debug_frame   0x00000380      0x100 uip-1.0/uip/uip.o
+ .debug_frame   0x00000480       0x20 uip-1.0/uip/uiplib.o
+ .debug_frame   0x000004a0       0x40 uip-1.0/atmega/clock-arch.o
+ .debug_frame   0x000004e0       0x40 uip-1.0/drivers/interfaces/network.o
+ .debug_frame   0x00000520       0x80 LUFA/Drivers/USB/LowLevel/Host.o
+ .debug_frame   0x000005a0       0x30 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .debug_frame   0x000005d0       0x40 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .debug_frame   0x00000610      0x100 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .debug_frame   0x00000710       0x20 LUFA/Drivers/USB/HighLevel/Events.o
+ .debug_frame   0x00000730       0x40 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .debug_frame   0x00000770       0x20 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .debug_frame   0x00000790       0x60 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+
+.debug_str      0x00000000     0x1ee9
+ *(.debug_str)
+ .debug_str     0x00000000      0x997 USBModem.o
+                                0xa02 (size before relaxing)
+ .debug_str     0x00000997      0x431 ConfigDescriptor.o
+                                0x5be (size before relaxing)
+ .debug_str     0x00000dc8       0xf7 uart.o
+                                0x1b5 (size before relaxing)
+ .debug_str     0x00000ebf       0xf6 modem.o
+                                0x1ca (size before relaxing)
+ .debug_str     0x00000fb5      0x1ad ppp.o
+                                0x29f (size before relaxing)
+ .debug_str     0x00001162       0x46 uip-1.0/uip/timer.o
+                                0x131 (size before relaxing)
+ .debug_str     0x000011a8      0x33d uip-1.0/uip/uip.o
+                                0x528 (size before relaxing)
+ .debug_str     0x000014e5       0x2f uip-1.0/uip/uiplib.o
+                                 0xf6 (size before relaxing)
+ .debug_str     0x00001514       0x4d uip-1.0/atmega/clock-arch.o
+                                0x128 (size before relaxing)
+ .debug_str     0x00001561       0x6e uip-1.0/drivers/interfaces/network.o
+                                0x15a (size before relaxing)
+ .debug_str     0x000015cf      0x28a LUFA/Drivers/USB/LowLevel/Host.o
+                                0x7e2 (size before relaxing)
+ .debug_str     0x00001859      0x14a LUFA/Drivers/USB/LowLevel/HostChapter9.o
+                                0x3d4 (size before relaxing)
+ .debug_str     0x000019a3       0x60 LUFA/Drivers/USB/LowLevel/LowLevel.o
+                                0x2c0 (size before relaxing)
+ .debug_str     0x00001a03      0x1f1 LUFA/Drivers/USB/LowLevel/Pipe.o
+                                0x601 (size before relaxing)
+ .debug_str     0x00001bf4       0x33 LUFA/Drivers/USB/HighLevel/Events.o
+                                 0xd6 (size before relaxing)
+ .debug_str     0x00001c27       0x9e LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                                0x38b (size before relaxing)
+ .debug_str     0x00001cc5       0x47 LUFA/Drivers/USB/HighLevel/USBTask.o
+                                0x176 (size before relaxing)
+ .debug_str     0x00001d0c      0x1dd LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+                                0x751 (size before relaxing)
+
+.debug_loc      0x00000000     0x269e
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x520 USBModem.o
+ .debug_loc     0x00000520       0xa3 ConfigDescriptor.o
+ .debug_loc     0x000005c3      0x146 uart.o
+ .debug_loc     0x00000709      0x16b modem.o
+ .debug_loc     0x00000874      0x3b8 ppp.o
+ .debug_loc     0x00000c2c       0xb8 uip-1.0/uip/timer.o
+ .debug_loc     0x00000ce4      0x3c2 uip-1.0/uip/uip.o
+ .debug_loc     0x000010a6       0x6e uip-1.0/uip/uiplib.o
+ .debug_loc     0x00001114       0x18 uip-1.0/atmega/clock-arch.o
+ .debug_loc     0x0000112c       0xd8 uip-1.0/drivers/interfaces/network.o
+ .debug_loc     0x00001204      0x240 LUFA/Drivers/USB/LowLevel/Host.o
+ .debug_loc     0x00001444      0x2b5 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .debug_loc     0x000016f9       0x13 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .debug_loc     0x0000170c      0xc43 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .debug_loc     0x0000234f       0x13 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .debug_loc     0x00002362      0x33c LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+OUTPUT(USBModem.elf elf32-avr)
+LOAD linker stubs
+
+.debug_ranges   0x00000000      0x5f0
+ .debug_ranges  0x00000000       0xf8 USBModem.o
+ .debug_ranges  0x000000f8       0x30 ConfigDescriptor.o
+ .debug_ranges  0x00000128       0x78 uart.o
+ .debug_ranges  0x000001a0       0x50 modem.o
+ .debug_ranges  0x000001f0       0x48 ppp.o
+ .debug_ranges  0x00000238       0x30 uip-1.0/uip/timer.o
+ .debug_ranges  0x00000268       0xa0 uip-1.0/uip/uip.o
+ .debug_ranges  0x00000308       0x18 uip-1.0/uip/uiplib.o
+ .debug_ranges  0x00000320       0x28 uip-1.0/atmega/clock-arch.o
+ .debug_ranges  0x00000348       0x28 uip-1.0/drivers/interfaces/network.o
+ .debug_ranges  0x00000370       0x90 LUFA/Drivers/USB/LowLevel/Host.o
+ .debug_ranges  0x00000400       0x20 LUFA/Drivers/USB/LowLevel/HostChapter9.o
+ .debug_ranges  0x00000420       0x28 LUFA/Drivers/USB/LowLevel/LowLevel.o
+ .debug_ranges  0x00000448      0x118 LUFA/Drivers/USB/LowLevel/Pipe.o
+ .debug_ranges  0x00000560       0x18 LUFA/Drivers/USB/HighLevel/Events.o
+ .debug_ranges  0x00000578       0x28 LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+ .debug_ranges  0x000005a0       0x18 LUFA/Drivers/USB/HighLevel/USBTask.o
+ .debug_ranges  0x000005b8       0x38 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+
+Cross Reference Table
+
+Symbol                                            File
+AddToPacket                                       ppp.o
+CDC_Host_Task                                     USBModem.o
+CRC                                               ppp.o
+                                                  uip-1.0/drivers/interfaces/network.o
+ConnectedState                                    USBModem.o
+                                                  ppp.o
+CreatePacket                                      ppp.o
+DComp_NextCDCControlInterface                     ConfigDescriptor.o
+DComp_NextCDCDataInterface                        ConfigDescriptor.o
+DComp_NextCDCDataInterfaceEndpoint                ConfigDescriptor.o
+Debug                                             USBModem.o
+                                                  uip-1.0/drivers/interfaces/network.o
+                                                  ppp.o
+                                                  modem.o
+DebugChar                                         USBModem.o
+                                                  uip-1.0/drivers/interfaces/network.o
+DebugMode                                         USBModem.o
+Dial                                              USBModem.o
+DialCommands                                      USBModem.o
+DialSteps                                         USBModem.o
+DoPPP                                             ppp.o
+                                                  USBModem.o
+EVENT_USB_Host_DeviceAttached                     USBModem.o
+                                                  LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+EVENT_USB_Host_DeviceEnumerationComplete          USBModem.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+EVENT_USB_Host_DeviceEnumerationFailed            USBModem.o
+                                                  LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+EVENT_USB_Host_DeviceUnattached                   USBModem.o
+                                                  LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+EVENT_USB_Host_HostError                          USBModem.o
+                                                  LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+Escape                                            uip-1.0/drivers/interfaces/network.o
+EscapeFlag                                        ppp.o
+IPAddr1                                           ppp.o
+                                                  USBModem.o
+IPAddr2                                           ppp.o
+                                                  USBModem.o
+IPAddr3                                           ppp.o
+                                                  USBModem.o
+IPAddr4                                           ppp.o
+                                                  USBModem.o
+InHeader                                          uip-1.0/drivers/interfaces/network.o
+InPacket                                          uip-1.0/drivers/interfaces/network.o
+LocalIPAddress                                    USBModem.o
+LocalReady                                        ppp.o
+MakeInitialPacket                                 ppp.o
+PPPState                                          ppp.o
+PacketType                                        ppp.o
+Pipe_ClearPipes                                   LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+Pipe_ConfigurePipe                                LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+                                                  ConfigDescriptor.o
+Pipe_Discard_Stream                               LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_IsEndpointBound                              LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  ConfigDescriptor.o
+Pipe_Read_EStream_BE                              LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_Read_EStream_LE                              LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_Read_Stream_BE                               LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_Read_Stream_LE                               LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  USBModem.o
+Pipe_WaitUntilReady                               LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  USBModem.o
+Pipe_Write_EStream_BE                             LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_Write_EStream_LE                             LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_Write_PStream_BE                             LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_Write_PStream_LE                             LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_Write_Stream_BE                              LUFA/Drivers/USB/LowLevel/Pipe.o
+Pipe_Write_Stream_LE                              LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  USBModem.o
+PrintHex                                          USBModem.o
+                                                  uip-1.0/drivers/interfaces/network.o
+                                                  ppp.o
+ProcessConfigurationDescriptor                    ConfigDescriptor.o
+                                                  USBModem.o
+ProcessReceivedPacket                             ppp.o
+RemoteIPAddress                                   USBModem.o
+RemoteReady                                       ppp.o
+SendDataToAndFromModem                            USBModem.o
+                                                  uip-1.0/drivers/interfaces/network.o
+SendGET                                           USBModem.o
+TCPCallback                                       USBModem.o
+                                                  uip-1.0/uip/uip.o
+TCPIPTask                                         USBModem.o
+TIME                                              uip-1.0/drivers/interfaces/network.o
+                                                  uip-1.0/atmega/clock-arch.o
+                                                  uip-1.0/uip/uiplib.o
+                                                  uip-1.0/uip/uip.o
+                                                  uip-1.0/uip/timer.o
+                                                  ppp.o
+                                                  modem.o
+                                                  ConfigDescriptor.o
+                                                  USBModem.o
+TestOptions                                       ppp.o
+ThisConn                                          USBModem.o
+USB_ControlPipeSize                               LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  LUFA/Drivers/USB/LowLevel/LowLevel.o
+                                                  LUFA/Drivers/USB/LowLevel/HostChapter9.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+USB_ControlRequest                                LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+                                                  LUFA/Drivers/USB/HighLevel/USBTask.o
+                                                  LUFA/Drivers/USB/LowLevel/HostChapter9.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+                                                  USBModem.o
+USB_Event_Stub                                    LUFA/Drivers/USB/HighLevel/Events.o
+USB_GetNextDescriptorComp                         LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+                                                  ConfigDescriptor.o
+USB_GetNextDescriptorOfType                       LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+USB_GetNextDescriptorOfTypeAfter                  LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+USB_GetNextDescriptorOfTypeBefore                 LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+USB_HostState                                     LUFA/Drivers/USB/HighLevel/USBTask.o
+                                                  LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                                                  LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  LUFA/Drivers/USB/LowLevel/LowLevel.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+                                                  USBModem.o
+USB_Host_ClearPipeStall                           LUFA/Drivers/USB/LowLevel/Host.o
+USB_Host_GetDeviceConfigDescriptor                LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+                                                  ConfigDescriptor.o
+USB_Host_GetDeviceDescriptor                      LUFA/Drivers/USB/LowLevel/Host.o
+USB_Host_GetDeviceStringDescriptor                LUFA/Drivers/USB/LowLevel/Host.o
+USB_Host_ProcessNextHostState                     LUFA/Drivers/USB/LowLevel/Host.o
+                                                  LUFA/Drivers/USB/HighLevel/USBTask.o
+USB_Host_SendControlRequest                       LUFA/Drivers/USB/LowLevel/HostChapter9.o
+                                                  LUFA/Drivers/USB/HighLevel/ConfigDescriptor.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+                                                  USBModem.o
+USB_Host_SetDeviceConfiguration                   LUFA/Drivers/USB/LowLevel/Host.o
+USB_Host_WaitMS                                   LUFA/Drivers/USB/LowLevel/Host.o
+                                                  LUFA/Drivers/USB/LowLevel/HostChapter9.o
+USB_INT_ClearAllInterrupts                        LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                                                  LUFA/Drivers/USB/LowLevel/LowLevel.o
+USB_INT_DisableAllInterrupts                      LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                                                  LUFA/Drivers/USB/LowLevel/LowLevel.o
+USB_Init                                          LUFA/Drivers/USB/LowLevel/LowLevel.o
+                                                  USBModem.o
+USB_IsInitialized                                 LUFA/Drivers/USB/HighLevel/USBTask.o
+                                                  LUFA/Drivers/USB/LowLevel/LowLevel.o
+USB_ResetInterface                                LUFA/Drivers/USB/LowLevel/LowLevel.o
+                                                  LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+USB_ShutDown                                      LUFA/Drivers/USB/LowLevel/LowLevel.o
+                                                  USBModem.o
+USB_USBTask                                       LUFA/Drivers/USB/HighLevel/USBTask.o
+                                                  USBModem.o
+WatchdogTicks                                     USBModem.o
+__bad_interrupt                                   c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__bss_end                                         c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+__bss_start                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+__data_end                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__data_load_start                                 c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__data_start                                      c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__do_clear_bss                                    c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_clear_bss.o)
+                                                  LUFA/Drivers/USB/HighLevel/USBTask.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+                                                  uip-1.0/drivers/interfaces/network.o
+                                                  uip-1.0/atmega/clock-arch.o
+                                                  uip-1.0/uip/uiplib.o
+                                                  uip-1.0/uip/uip.o
+                                                  uip-1.0/uip/timer.o
+                                                  ppp.o
+                                                  modem.o
+                                                  uart.o
+                                                  ConfigDescriptor.o
+                                                  USBModem.o
+__do_copy_data                                    c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+                                                  LUFA/Drivers/USB/LowLevel/Pipe.o
+                                                  LUFA/Drivers/USB/LowLevel/Host.o
+                                                  uip-1.0/drivers/interfaces/network.o
+                                                  uip-1.0/uip/uip.o
+                                                  ppp.o
+                                                  modem.o
+                                                  USBModem.o
+__heap_end                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__init                                            c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__stack                                           c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_1                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_10                                       LUFA/Drivers/USB/HighLevel/USBInterrupt.o
+                                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_11                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_12                                       USBModem.o
+                                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_13                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_14                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_15                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_16                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_17                                       USBModem.o
+                                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_18                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_19                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_2                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_20                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_21                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_22                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_23                                       uip-1.0/atmega/clock-arch.o
+                                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_24                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_25                                       uart.o
+                                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_26                                       uart.o
+                                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_27                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_28                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_29                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_3                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_30                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_31                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_32                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_33                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_34                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_35                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_36                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_37                                       c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_4                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_5                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_6                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_7                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_8                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_9                                        c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vector_default                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+__vectors                                         c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+_exit                                             c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+addr1                                             ppp.o
+addr2                                             ppp.o
+addr3                                             ppp.o
+addr4                                             ppp.o
+checksum1                                         ppp.o
+checksum1last                                     ppp.o
+checksum1secondlast                               ppp.o
+checksum2                                         ppp.o
+clock_datetime                                    uip-1.0/atmega/clock-arch.o
+clock_init                                        uip-1.0/atmega/clock-arch.o
+                                                  USBModem.o
+clock_time                                        uip-1.0/atmega/clock-arch.o
+                                                  uip-1.0/uip/timer.o
+device_enqueue                                    USBModem.o
+device_queue_full                                 USBModem.o
+exit                                              c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/avr51\libgcc.a(_exit.o)
+                                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+htons                                             uip-1.0/uip/uip.o
+len                                               uip-1.0/drivers/interfaces/network.o
+main                                              USBModem.o
+                                                  c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51/crtusb1287.o
+memcpy                                            c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(memcpy.o)
+                                                  uip-1.0/uip/uip.o
+modem_RxBufferEmpty                               modem.o
+modem_TxBufferEmpty                               modem.o
+                                                  USBModem.o
+modem_getTxBuffer                                 modem.o
+                                                  USBModem.o
+modem_getc                                        modem.o
+                                                  uip-1.0/drivers/interfaces/network.o
+                                                  ppp.o
+                                                  USBModem.o
+modem_init                                        modem.o
+                                                  USBModem.o
+modem_putRxBuffer                                 modem.o
+                                                  USBModem.o
+modem_putc                                        modem.o
+                                                  uip-1.0/drivers/interfaces/network.o
+                                                  ppp.o
+modem_puts                                        modem.o
+                                                  USBModem.o
+network_init                                      uip-1.0/drivers/interfaces/network.o
+                                                  USBModem.o
+network_read                                      uip-1.0/drivers/interfaces/network.o
+                                                  USBModem.o
+network_send                                      uip-1.0/drivers/interfaces/network.o
+                                                  USBModem.o
+number                                            ppp.o
+periodic_timer                                    USBModem.o
+rx_ptr                                            ppp.o
+rx_str                                            ppp.o
+strcmp                                            c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcmp.o)
+                                                  USBModem.o
+strcpy                                            c:/program files/winavr-20090313/bin/../lib/gcc/avr/4.3.2/../../../../avr/lib/avr51\libc.a(strcpy.o)
+                                                  USBModem.o
+timer_expired                                     uip-1.0/uip/timer.o
+                                                  USBModem.o
+timer_reset                                       uip-1.0/uip/timer.o
+                                                  USBModem.o
+timer_restart                                     uip-1.0/uip/timer.o
+timer_set                                         uip-1.0/uip/timer.o
+                                                  USBModem.o
+tx_end                                            ppp.o
+tx_ptr                                            ppp.o
+tx_str                                            ppp.o
+uart1_getc                                        uart.o
+                                                  USBModem.o
+uart1_init                                        uart.o
+                                                  USBModem.o
+uart1_putc                                        uart.o
+                                                  USBModem.o
+uart1_puts                                        uart.o
+                                                  USBModem.o
+uart1_puts_p                                      uart.o
+uip_acc32                                         uip-1.0/uip/uip.o
+uip_add32                                         uip-1.0/uip/uip.o
+uip_appdata                                       uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_buf                                           uip-1.0/drivers/interfaces/network.o
+                                                  uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_chksum                                        uip-1.0/uip/uip.o
+uip_conn                                          uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_connect                                       uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_conns                                         uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_draddr                                        uip-1.0/uip/uip.o
+uip_ethaddr                                       uip-1.0/uip/uip.o
+uip_flags                                         uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_hostaddr                                      uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_init                                          uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_ipchksum                                      uip-1.0/uip/uip.o
+uip_len                                           uip-1.0/drivers/interfaces/network.o
+                                                  uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_listen                                        uip-1.0/uip/uip.o
+uip_listenports                                   uip-1.0/uip/uip.o
+uip_netmask                                       uip-1.0/uip/uip.o
+uip_process                                       uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_sappdata                                      uip-1.0/uip/uip.o
+uip_send                                          uip-1.0/uip/uip.o
+                                                  USBModem.o
+uip_setipid                                       uip-1.0/uip/uip.o
+uip_slen                                          uip-1.0/uip/uip.o
+uip_tcpchksum                                     uip-1.0/uip/uip.o
+uip_udp_conn                                      uip-1.0/uip/uip.o
+uip_udp_conns                                     uip-1.0/uip/uip.o
+uip_udp_new                                       uip-1.0/uip/uip.o
+uip_unlisten                                      uip-1.0/uip/uip.o
+uiplib_ipaddrconv                                 uip-1.0/uip/uiplib.o
+wdt_init                                          USBModem.o

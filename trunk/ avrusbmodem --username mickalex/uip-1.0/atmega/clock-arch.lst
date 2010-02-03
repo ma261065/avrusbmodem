@@ -1,0 +1,117 @@
+   1               		.file	"clock-arch.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               		.section	.text.__vector_23,"ax",@progbits
+  17               	.global	__vector_23
+  19               	__vector_23:
+  20               	.LFB45:
+  21               	.LSM0:
+  22 0000 1F92      		push __zero_reg__
+  23 0002 0F92      		push r0
+  24 0004 0FB6      		in r0,__SREG__
+  25 0006 0F92      		push r0
+  26 0008 1124      		clr __zero_reg__
+  27 000a 8F93      		push r24
+  28 000c 9F93      		push r25
+  29               	/* prologue: Signal */
+  30               	/* frame size = 0 */
+  31               	.LSM1:
+  32 000e 8091 0000 		lds r24,clock_datetime
+  33 0012 9091 0000 		lds r25,(clock_datetime)+1
+  34 0016 0196      		adiw r24,1
+  35 0018 9093 0000 		sts (clock_datetime)+1,r25
+  36 001c 8093 0000 		sts clock_datetime,r24
+  37               	/* epilogue start */
+  38               	.LSM2:
+  39 0020 9F91      		pop r25
+  40 0022 8F91      		pop r24
+  41 0024 0F90      		pop r0
+  42 0026 0FBE      		out __SREG__,r0
+  43 0028 0F90      		pop r0
+  44 002a 1F90      		pop __zero_reg__
+  45 002c 1895      		reti
+  46               	.LFE45:
+  48               		.section	.text.clock_init,"ax",@progbits
+  49               	.global	clock_init
+  51               	clock_init:
+  52               	.LFB46:
+  53               	.LSM3:
+  54               	/* prologue: function */
+  55               	/* frame size = 0 */
+  56               	.LSM4:
+  57 0000 EEE6      		ldi r30,lo8(110)
+  58 0002 F0E0      		ldi r31,hi8(110)
+  59 0004 8081      		ld r24,Z
+  60 0006 8160      		ori r24,lo8(1)
+  61 0008 8083      		st Z,r24
+  62               	.LSM5:
+  63 000a 85B5      		in r24,69-32
+  64 000c 8560      		ori r24,lo8(5)
+  65 000e 85BD      		out 69-32,r24
+  66               	.LSM6:
+  67               	/* #APP */
+  68               	 ;  30 "uip-1.0/atmega/clock-arch.c" 1
+  69 0010 7894      		sei
+  70               	 ;  0 "" 2
+  71               	/* epilogue start */
+  72               	.LSM7:
+  73               	/* #NOAPP */
+  74 0012 0895      		ret
+  75               	.LFE46:
+  77               		.section	.text.clock_time,"ax",@progbits
+  78               	.global	clock_time
+  80               	clock_time:
+  81               	.LFB47:
+  82               	.LSM8:
+  83               	/* prologue: function */
+  84               	/* frame size = 0 */
+  85               	.LSM9:
+  86               	/* #APP */
+  87               	 ;  38 "uip-1.0/atmega/clock-arch.c" 1
+  88 0000 F894      		cli
+  89               	 ;  0 "" 2
+  90               	.LSM10:
+  91               	/* #NOAPP */
+  92 0002 2091 0000 		lds r18,clock_datetime
+  93 0006 3091 0000 		lds r19,(clock_datetime)+1
+  94               	.LVL0:
+  95               	.LSM11:
+  96               	/* #APP */
+  97               	 ;  40 "uip-1.0/atmega/clock-arch.c" 1
+  98 000a 7894      		sei
+  99               	 ;  0 "" 2
+ 100               	.LSM12:
+ 101               	/* #NOAPP */
+ 102 000c C901      		movw r24,r18
+ 103               	.LVL1:
+ 104               	/* epilogue start */
+ 105 000e 0895      		ret
+ 106               	.LFE47:
+ 108               	.global	clock_datetime
+ 109               	.global	clock_datetime
+ 110               		.section .bss
+ 113               	clock_datetime:
+ 114 0000 0000      		.skip 2,0
+ 115               		.comm TIME,2,1
+ 156               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 clock-arch.c
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:19     .text.__vector_23:00000000 __vector_23
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:113    .bss:00000000 clock_datetime
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:51     .text.clock_init:00000000 clock_init
+C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:80     .text.clock_time:00000000 clock_time
+                            *COM*:00000002 TIME
+
+UNDEFINED SYMBOLS
+__do_clear_bss
