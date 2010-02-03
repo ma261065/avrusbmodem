@@ -1,0 +1,374 @@
+   1               		.file	"uip-neighbor.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               		.section	.text.uip_neighbor_init,"ax",@progbits
+  17               	.global	uip_neighbor_init
+  19               	uip_neighbor_init:
+  20               	.LFB45:
+  21               	.LSM0:
+  22               	/* prologue: function */
+  23               	/* frame size = 0 */
+  24               	.LSM1:
+  25 0000 E0E0      		ldi r30,lo8(entries+10)
+  26 0002 F0E0      		ldi r31,hi8(entries+10)
+  27               	.LSM2:
+  28 0004 80E8      		ldi r24,lo8(-128)
+  29               	.L2:
+  30 0006 8083      		st Z,r24
+  31 0008 3B96      		adiw r30,11
+  32               	.LSM3:
+  33 000a 90E0      		ldi r25,hi8(entries+98)
+  34 000c E030      		cpi r30,lo8(entries+98)
+  35 000e F907      		cpc r31,r25
+  36 0010 01F4      		brne .L2
+  37               	/* epilogue start */
+  38               	.LSM4:
+  39 0012 0895      		ret
+  40               	.LFE45:
+  42               		.section	.text.uip_neighbor_periodic,"ax",@progbits
+  43               	.global	uip_neighbor_periodic
+  45               	uip_neighbor_periodic:
+  46               	.LFB46:
+  47               	.LSM5:
+  48               	/* prologue: function */
+  49               	/* frame size = 0 */
+  50               	.LSM6:
+  51 0000 E0E0      		ldi r30,lo8(entries+10)
+  52 0002 F0E0      		ldi r31,hi8(entries+10)
+  53               	.L7:
+  54               	.LSM7:
+  55 0004 8081      		ld r24,Z
+  56 0006 87FD      		sbrc r24,7
+  57 0008 00C0      		rjmp .L6
+  58               	.LSM8:
+  59 000a 8F5F      		subi r24,lo8(-(1))
+  60 000c 8083      		st Z,r24
+  61               	.L6:
+  62 000e 3B96      		adiw r30,11
+  63               	.LSM9:
+  64 0010 80E0      		ldi r24,hi8(entries+98)
+  65 0012 E030      		cpi r30,lo8(entries+98)
+  66 0014 F807      		cpc r31,r24
+  67 0016 01F4      		brne .L7
+  68               	/* epilogue start */
+  69               	.LSM10:
+  70 0018 0895      		ret
+  71               	.LFE46:
+  73               		.section	.text.find_entry,"ax",@progbits
+  75               	find_entry:
+  76               	.LFB48:
+  77               	.LSM11:
+  78               	.LVL0:
+  79               	/* prologue: function */
+  80               	/* frame size = 0 */
+  81 0000 DC01      		movw r26,r24
+  82               	.LSM12:
+  83 0002 6D91      		ld r22,X+
+  84 0004 7C91      		ld r23,X
+  85 0006 1197      		sbiw r26,1
+  86 0008 E0E0      		ldi r30,lo8(entries)
+  87 000a F0E0      		ldi r31,hi8(entries)
+  88 000c 40E0      		ldi r20,lo8(0)
+  89 000e 50E0      		ldi r21,hi8(0)
+  90               	.LVL1:
+  91               	.L13:
+  92 0010 8081      		ld r24,Z
+  93 0012 9181      		ldd r25,Z+1
+  94 0014 8617      		cp r24,r22
+  95 0016 9707      		cpc r25,r23
+  96 0018 01F4      		brne .L11
+  97 001a 2281      		ldd r18,Z+2
+  98 001c 3381      		ldd r19,Z+3
+  99 001e 1296      		adiw r26,2
+ 100 0020 8D91      		ld r24,X+
+ 101 0022 9C91      		ld r25,X
+ 102 0024 1397      		sbiw r26,2+1
+ 103 0026 2817      		cp r18,r24
+ 104 0028 3907      		cpc r19,r25
+ 105 002a 01F4      		brne .L11
+ 106               	.LSM13:
+ 107 002c 8BE0      		ldi r24,lo8(11)
+ 108 002e 90E0      		ldi r25,hi8(11)
+ 109 0030 489F      		mul r20,r24
+ 110 0032 9001      		movw r18,r0
+ 111 0034 499F      		mul r20,r25
+ 112 0036 300D      		add r19,r0
+ 113 0038 589F      		mul r21,r24
+ 114 003a 300D      		add r19,r0
+ 115 003c 1124      		clr r1
+ 116 003e 2050      		subi r18,lo8(-(entries))
+ 117 0040 3040      		sbci r19,hi8(-(entries))
+ 118 0042 00C0      		rjmp .L12
+ 119               	.L11:
+ 120               	.LSM14:
+ 121 0044 4F5F      		subi r20,lo8(-(1))
+ 122 0046 5F4F      		sbci r21,hi8(-(1))
+ 123 0048 3B96      		adiw r30,11
+ 124 004a 4830      		cpi r20,8
+ 125 004c 5105      		cpc r21,__zero_reg__
+ 126 004e 01F4      		brne .L13
+ 127 0050 20E0      		ldi r18,lo8(0)
+ 128 0052 30E0      		ldi r19,hi8(0)
+ 129               	.L12:
+ 130               	.LSM15:
+ 131 0054 C901      		movw r24,r18
+ 132               	/* epilogue start */
+ 133 0056 0895      		ret
+ 134               	.LFE48:
+ 136               		.section	.text.uip_neighbor_update,"ax",@progbits
+ 137               	.global	uip_neighbor_update
+ 139               	uip_neighbor_update:
+ 140               	.LFB49:
+ 141               	.LSM16:
+ 142               	.LVL2:
+ 143               	/* prologue: function */
+ 144               	/* frame size = 0 */
+ 145               	.LSM17:
+ 146 0000 0E94 0000 		call find_entry
+ 147               	.LVL3:
+ 148 0004 FC01      		movw r30,r24
+ 149               	.LVL4:
+ 150               	.LSM18:
+ 151 0006 0097      		sbiw r24,0
+ 152 0008 01F0      		breq .L18
+ 153               	.LVL5:
+ 154               	.LSM19:
+ 155 000a 1286      		std Z+10,__zero_reg__
+ 156               	.LVL6:
+ 157               	.L18:
+ 158 000c 0895      		ret
+ 159               	.LFE49:
+ 161               		.section	.text.uip_neighbor_lookup,"ax",@progbits
+ 162               	.global	uip_neighbor_lookup
+ 164               	uip_neighbor_lookup:
+ 165               	.LFB50:
+ 166               	.LSM20:
+ 167               	.LVL7:
+ 168               	/* prologue: function */
+ 169               	/* frame size = 0 */
+ 170               	.LSM21:
+ 171 0000 0E94 0000 		call find_entry
+ 172               	.LVL8:
+ 173               	.LSM22:
+ 174 0004 0097      		sbiw r24,0
+ 175               	.LVL9:
+ 176 0006 01F4      		brne .L20
+ 177 0008 20E0      		ldi r18,lo8(0)
+ 178 000a 30E0      		ldi r19,hi8(0)
+ 179 000c 00C0      		rjmp .L21
+ 180               	.L20:
+ 181               	.LSM23:
+ 182 000e 9C01      		movw r18,r24
+ 183 0010 2C5F      		subi r18,lo8(-(4))
+ 184 0012 3F4F      		sbci r19,hi8(-(4))
+ 185               	.L21:
+ 186               	.LSM24:
+ 187 0014 C901      		movw r24,r18
+ 188               	.LVL10:
+ 189               	/* epilogue start */
+ 190 0016 0895      		ret
+ 191               	.LFE50:
+ 193               		.data
+ 194               	.LC0:
+ 195 0000 4164 6469 		.string	"Adding neighbor with link address %02x:%02x:%02x:%02x:%02x:%02x\n"
+ 195      6E67 206E 
+ 195      6569 6768 
+ 195      626F 7220 
+ 195      7769 7468 
+ 196               		.section	.text.uip_neighbor_add,"ax",@progbits
+ 197               	.global	uip_neighbor_add
+ 199               	uip_neighbor_add:
+ 200               	.LFB47:
+ 201               	.LSM25:
+ 202               	.LVL11:
+ 203 0000 0F93      		push r16
+ 204 0002 1F93      		push r17
+ 205 0004 CF93      		push r28
+ 206 0006 DF93      		push r29
+ 207               	/* prologue: function */
+ 208               	/* frame size = 0 */
+ 209 0008 8C01      		movw r16,r24
+ 210 000a EB01      		movw r28,r22
+ 211               	.LSM26:
+ 212 000c 8DB7      		in r24,__SP_L__
+ 213 000e 9EB7      		in r25,__SP_H__
+ 214               	.LVL12:
+ 215 0010 0E97      		sbiw r24,14
+ 216 0012 0FB6      		in __tmp_reg__,__SREG__
+ 217 0014 F894      		cli
+ 218 0016 9EBF      		out __SP_H__,r25
+ 219 0018 0FBE      		out __SREG__,__tmp_reg__
+ 220 001a 8DBF      		out __SP_L__,r24
+ 221 001c EDB7      		in r30,__SP_L__
+ 222 001e FEB7      		in r31,__SP_H__
+ 223 0020 3196      		adiw r30,1
+ 224 0022 80E0      		ldi r24,lo8(.LC0)
+ 225 0024 90E0      		ldi r25,hi8(.LC0)
+ 226 0026 ADB7      		in r26,__SP_L__
+ 227 0028 BEB7      		in r27,__SP_H__
+ 228 002a 1296      		adiw r26,1+1
+ 229 002c 9C93      		st X,r25
+ 230 002e 8E93      		st -X,r24
+ 231 0030 1197      		sbiw r26,1
+ 232 0032 8881      		ld r24,Y
+ 233 0034 8283      		std Z+2,r24
+ 234 0036 1382      		std Z+3,__zero_reg__
+ 235 0038 8981      		ldd r24,Y+1
+ 236 003a 8483      		std Z+4,r24
+ 237 003c 1582      		std Z+5,__zero_reg__
+ 238 003e 8A81      		ldd r24,Y+2
+ 239 0040 8683      		std Z+6,r24
+ 240 0042 1782      		std Z+7,__zero_reg__
+ 241 0044 8B81      		ldd r24,Y+3
+ 242 0046 8087      		std Z+8,r24
+ 243 0048 1186      		std Z+9,__zero_reg__
+ 244 004a 8C81      		ldd r24,Y+4
+ 245 004c 8287      		std Z+10,r24
+ 246 004e 1386      		std Z+11,__zero_reg__
+ 247 0050 8D81      		ldd r24,Y+5
+ 248 0052 8487      		std Z+12,r24
+ 249 0054 1586      		std Z+13,__zero_reg__
+ 250 0056 0E94 0000 		call printf
+ 251               	.LVL13:
+ 252 005a E0E0      		ldi r30,lo8(entries)
+ 253 005c F0E0      		ldi r31,hi8(entries)
+ 254 005e 40E0      		ldi r20,lo8(0)
+ 255 0060 50E0      		ldi r21,hi8(0)
+ 256               	.LVL14:
+ 257 0062 60E0      		ldi r22,lo8(0)
+ 258 0064 70E0      		ldi r23,hi8(0)
+ 259               	.LVL15:
+ 260 0066 B0E0      		ldi r27,lo8(0)
+ 261               	.LVL16:
+ 262 0068 8DB7      		in r24,__SP_L__
+ 263 006a 9EB7      		in r25,__SP_H__
+ 264 006c 0E96      		adiw r24,14
+ 265 006e 0FB6      		in __tmp_reg__,__SREG__
+ 266 0070 F894      		cli
+ 267 0072 9EBF      		out __SP_H__,r25
+ 268 0074 0FBE      		out __SREG__,__tmp_reg__
+ 269 0076 8DBF      		out __SP_L__,r24
+ 270               	.LVL17:
+ 271               	.L29:
+ 272               	.LSM27:
+ 273 0078 A285      		ldd r26,Z+10
+ 274               	.LVL18:
+ 275 007a A038      		cpi r26,lo8(-128)
+ 276 007c 01F0      		breq .L24
+ 277               	.LSM28:
+ 278 007e 2081      		ld r18,Z
+ 279 0080 3181      		ldd r19,Z+1
+ 280 0082 8881      		ld r24,Y
+ 281 0084 9981      		ldd r25,Y+1
+ 282 0086 2817      		cp r18,r24
+ 283 0088 3907      		cpc r19,r25
+ 284 008a 01F4      		brne .L25
+ 285 008c 2281      		ldd r18,Z+2
+ 286 008e 3381      		ldd r19,Z+3
+ 287 0090 8A81      		ldd r24,Y+2
+ 288 0092 9B81      		ldd r25,Y+3
+ 289 0094 2817      		cp r18,r24
+ 290 0096 3907      		cpc r19,r25
+ 291 0098 01F0      		breq .L24
+ 292               	.L25:
+ 293               	.LSM29:
+ 294 009a BA17      		cp r27,r26
+ 295 009c 00F0      		brlo .L26
+ 296               	.LVL19:
+ 297 009e AB2F      		mov r26,r27
+ 298 00a0 00C0      		rjmp .L27
+ 299               	.L26:
+ 300 00a2 BA01      		movw r22,r20
+ 301               	.L27:
+ 302               	.LSM30:
+ 303 00a4 4F5F      		subi r20,lo8(-(1))
+ 304 00a6 5F4F      		sbci r21,hi8(-(1))
+ 305 00a8 3B96      		adiw r30,11
+ 306 00aa 4830      		cpi r20,8
+ 307 00ac 5105      		cpc r21,__zero_reg__
+ 308 00ae 01F0      		breq .L28
+ 309 00b0 BA2F      		mov r27,r26
+ 310 00b2 00C0      		rjmp .L29
+ 311               	.LVL20:
+ 312               	.L24:
+ 313 00b4 BA01      		movw r22,r20
+ 314               	.LVL21:
+ 315               	.L28:
+ 316               	.LSM31:
+ 317 00b6 8BE0      		ldi r24,lo8(11)
+ 318 00b8 90E0      		ldi r25,hi8(11)
+ 319 00ba 689F      		mul r22,r24
+ 320 00bc 9001      		movw r18,r0
+ 321 00be 699F      		mul r22,r25
+ 322 00c0 300D      		add r19,r0
+ 323 00c2 789F      		mul r23,r24
+ 324 00c4 300D      		add r19,r0
+ 325 00c6 1124      		clr r1
+ 326 00c8 F901      		movw r30,r18
+ 327 00ca E050      		subi r30,lo8(-(entries))
+ 328 00cc F040      		sbci r31,hi8(-(entries))
+ 329 00ce 1286      		std Z+10,__zero_reg__
+ 330               	.LSM32:
+ 331 00d0 D801      		movw r26,r16
+ 332               	.LVL22:
+ 333 00d2 8D91      		ld r24,X+
+ 334 00d4 9C91      		ld r25,X
+ 335 00d6 1197      		sbiw r26,1
+ 336 00d8 9183      		std Z+1,r25
+ 337 00da 8083      		st Z,r24
+ 338 00dc 1296      		adiw r26,2
+ 339 00de 8D91      		ld r24,X+
+ 340 00e0 9C91      		ld r25,X
+ 341 00e2 1397      		sbiw r26,2+1
+ 342 00e4 9383      		std Z+3,r25
+ 343 00e6 8283      		std Z+2,r24
+ 344               	.LSM33:
+ 345 00e8 D901      		movw r26,r18
+ 346 00ea A050      		subi r26,lo8(-(entries+4))
+ 347 00ec B040      		sbci r27,hi8(-(entries+4))
+ 348 00ee FE01      		movw r30,r28
+ 349 00f0 86E0      		ldi r24,lo8(6)
+ 350               	.LVL23:
+ 351               	.L30:
+ 352 00f2 0190      		ld r0,Z+
+ 353 00f4 0D92      		st X+,r0
+ 354 00f6 8150      		subi r24,lo8(-(-1))
+ 355 00f8 01F4      		brne .L30
+ 356               	/* epilogue start */
+ 357               	.LSM34:
+ 358 00fa DF91      		pop r29
+ 359 00fc CF91      		pop r28
+ 360 00fe 1F91      		pop r17
+ 361 0100 0F91      		pop r16
+ 362               	.LVL24:
+ 363 0102 0895      		ret
+ 364               	.LFE47:
+ 366               		.lcomm entries,88
+ 367               		.comm TIME,2,1
+ 432               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 uip-neighbor.c
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:19     .text.uip_neighbor_init:00000000 uip_neighbor_init
+                             .bss:00000000 entries
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:45     .text.uip_neighbor_periodic:00000000 uip_neighbor_periodic
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:75     .text.find_entry:00000000 find_entry
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:139    .text.uip_neighbor_update:00000000 uip_neighbor_update
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:164    .text.uip_neighbor_lookup:00000000 uip_neighbor_lookup
+C:\Users\Mike\AppData\Local\Temp/ccIhn3tb.s:199    .text.uip_neighbor_add:00000000 uip_neighbor_add
+                            *COM*:00000002 TIME
+
+UNDEFINED SYMBOLS
+printf
+__do_copy_data
+__do_clear_bss
