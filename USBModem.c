@@ -1,6 +1,6 @@
 #include "USBModem.h"
 
-// UIP Includes. Don't know why these don't work in the USBModem.h file
+// UIP Includes. Don't know why these don't work in the USBModem.h file.
 #include "uip-1.0/atmega/global-conf.h"
 #include "uip-1.0/drivers/interfaces/network.h"
 #include "uip-1.0/atmega/clock-arch.h"
