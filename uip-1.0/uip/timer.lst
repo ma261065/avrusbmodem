@@ -122,16 +122,16 @@
  185               	.Letext0:
 DEFINED SYMBOLS
                             *ABS*:00000000 timer.c
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:2      *ABS*:0000003f __SREG__
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:3      *ABS*:0000003e __SP_H__
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:4      *ABS*:0000003d __SP_L__
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:5      *ABS*:00000034 __CCP__
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:6      *ABS*:00000000 __tmp_reg__
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:7      *ABS*:00000001 __zero_reg__
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:19     .text.timer_reset:00000000 timer_reset
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:44     .text.timer_expired:00000000 timer_expired
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:83     .text.timer_restart:00000000 timer_restart
-C:\Users\Mike\AppData\Local\Temp/ccYf1BYZ.s:109    .text.timer_set:00000000 timer_set
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:19     .text.timer_reset:00000000 timer_reset
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:44     .text.timer_expired:00000000 timer_expired
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:83     .text.timer_restart:00000000 timer_restart
+C:\Users\Mike\AppData\Local\Temp/ccldhTZh.s:109    .text.timer_set:00000000 timer_set
                             *COM*:00000002 TIME
 
 UNDEFINED SYMBOLS

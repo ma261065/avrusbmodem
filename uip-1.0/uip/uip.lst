@@ -2574,49 +2574,49 @@
  2752               	.Letext0:
 DEFINED SYMBOLS
                             *ABS*:00000000 uip.c
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2      *ABS*:0000003f __SREG__
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:3      *ABS*:0000003e __SP_H__
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:4      *ABS*:0000003d __SP_L__
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:5      *ABS*:00000034 __CCP__
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:6      *ABS*:00000000 __tmp_reg__
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:7      *ABS*:00000001 __zero_reg__
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:19     .text.uip_setipid:00000000 uip_setipid
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:19     .text.uip_setipid:00000000 uip_setipid
                              .bss:00000006 ipid
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:35     .text.uip_add32:00000000 uip_add32
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:35     .text.uip_add32:00000000 uip_add32
                             *COM*:00000004 uip_acc32
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:109    .text.chksum:00000000 chksum
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:187    .text.uip_chksum:00000000 uip_chksum
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:214    .text.uip_ipchksum:00000000 uip_ipchksum
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:109    .text.chksum:00000000 chksum
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:187    .text.uip_chksum:00000000 uip_chksum
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:214    .text.uip_ipchksum:00000000 uip_ipchksum
                             *COM*:0000025a uip_buf
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:254    .text.uip_tcpchksum:00000000 uip_tcpchksum
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:322    .text.uip_init:00000000 uip_init
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:254    .text.uip_tcpchksum:00000000 uip_tcpchksum
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:322    .text.uip_init:00000000 uip_init
                             *COM*:00000002 uip_listenports
                             *COM*:0000001e uip_conns
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2595   .bss:0000000c lastport
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2595   .bss:0000000c lastport
                             *COM*:0000000b uip_udp_conns
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2596   .bss:0000000e c
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:350    .text.uip_connect:00000000 uip_connect
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2594   .bss:00000008 iss
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:493    .text.uip_unlisten:00000000 uip_unlisten
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:522    .text.uip_listen:00000000 uip_listen
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:550    .text.uip_add_rcv_nxt:00000000 uip_add_rcv_nxt
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2596   .bss:0000000e c
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:350    .text.uip_connect:00000000 uip_connect
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2594   .bss:00000008 iss
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:493    .text.uip_unlisten:00000000 uip_unlisten
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:522    .text.uip_listen:00000000 uip_listen
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:550    .text.uip_add_rcv_nxt:00000000 uip_add_rcv_nxt
                             *COM*:00000002 uip_conn
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:586    .text.htons:00000000 htons
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:605    .text.uip_send:00000000 uip_send
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:586    .text.htons:00000000 htons
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:605    .text.uip_send:00000000 uip_send
                             *COM*:00000002 uip_slen
                             *COM*:00000002 uip_sappdata
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:645    .text.uip_process:00000000 uip_process
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:645    .text.uip_process:00000000 uip_process
                             *COM*:00000002 uip_appdata
                             *COM*:00000002 uip_len
                             *COM*:00000001 uip_flags
                             *COM*:00000002 uip_udp_conn
                             *COM*:00000004 uip_hostaddr
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2587   .data:00000000 all_zeroes_addr
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2591   .data:00000004 all_ones_addr
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2598   .bss:00000010 tmp16
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2597   .bss:0000000f opt
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2483   .text.uip_udp_new:00000000 uip_udp_new
-C:\Users\Mike\AppData\Local\Temp/cc2f9Xof.s:2582   .bss:00000000 uip_ethaddr
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2587   .data:00000000 all_zeroes_addr
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2591   .data:00000004 all_ones_addr
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2598   .bss:00000010 tmp16
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2597   .bss:0000000f opt
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2483   .text.uip_udp_new:00000000 uip_udp_new
+C:\Users\Mike\AppData\Local\Temp/ccad15sh.s:2582   .bss:00000000 uip_ethaddr
                             *COM*:00000002 TIME
                             *COM*:00000004 uip_netmask
                             *COM*:00000004 uip_draddr
