@@ -84,13 +84,13 @@
  117               	.Letext0:
 DEFINED SYMBOLS
                             *ABS*:00000000 uiplib.c
-C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:2      *ABS*:0000003f __SREG__
-C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:3      *ABS*:0000003e __SP_H__
-C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:4      *ABS*:0000003d __SP_L__
-C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:5      *ABS*:00000034 __CCP__
-C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:6      *ABS*:00000000 __tmp_reg__
-C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:7      *ABS*:00000001 __zero_reg__
-C:\Users\Mike\AppData\Local\Temp/ccLETsxK.s:19     .text.uiplib_ipaddrconv:00000000 uiplib_ipaddrconv
+C:\Users\Mike\AppData\Local\Temp/ccehQ84S.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccehQ84S.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccehQ84S.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccehQ84S.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccehQ84S.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccehQ84S.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccehQ84S.s:19     .text.uiplib_ipaddrconv:00000000 uiplib_ipaddrconv
                             *COM*:00000002 TIME
 
 UNDEFINED SYMBOLS

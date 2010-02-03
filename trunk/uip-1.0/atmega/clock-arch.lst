@@ -101,16 +101,16 @@
  156               	.Letext0:
 DEFINED SYMBOLS
                             *ABS*:00000000 clock-arch.c
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:2      *ABS*:0000003f __SREG__
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:3      *ABS*:0000003e __SP_H__
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:4      *ABS*:0000003d __SP_L__
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:5      *ABS*:00000034 __CCP__
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:6      *ABS*:00000000 __tmp_reg__
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:7      *ABS*:00000001 __zero_reg__
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:19     .text.__vector_23:00000000 __vector_23
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:113    .bss:00000000 clock_datetime
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:51     .text.clock_init:00000000 clock_init
-C:\Users\Mike\AppData\Local\Temp/ccDeiabV.s:80     .text.clock_time:00000000 clock_time
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:19     .text.__vector_23:00000000 __vector_23
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:113    .bss:00000000 clock_datetime
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:51     .text.clock_init:00000000 clock_init
+C:\Users\Mike\AppData\Local\Temp/ccwuEne6.s:80     .text.clock_time:00000000 clock_time
                             *COM*:00000002 TIME
 
 UNDEFINED SYMBOLS

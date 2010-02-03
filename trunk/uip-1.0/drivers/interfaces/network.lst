@@ -511,19 +511,19 @@
  570               	.Letext0:
 DEFINED SYMBOLS
                             *ABS*:00000000 network.c
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:2      *ABS*:0000003f __SREG__
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:3      *ABS*:0000003e __SP_H__
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:4      *ABS*:0000003d __SP_L__
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:5      *ABS*:00000034 __CCP__
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:6      *ABS*:00000000 __tmp_reg__
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:7      *ABS*:00000001 __zero_reg__
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:19     .text.network_init:00000000 network_init
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:527    .bss:00000003 len
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:521    .bss:00000002 Escape
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:509    .bss:00000000 InHeader
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:515    .bss:00000001 InPacket
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:45     .text.network_send:00000000 network_send
-C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:342    .text.network_read:00000000 network_read
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:19     .text.network_init:00000000 network_init
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:527    .bss:00000003 len
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:521    .bss:00000002 Escape
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:509    .bss:00000000 InHeader
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:515    .bss:00000001 InPacket
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:45     .text.network_send:00000000 network_send
+C:\Users\Mike\AppData\Local\Temp/ccEKSiFe.s:342    .text.network_read:00000000 network_read
                             *COM*:00000002 TIME
 
 UNDEFINED SYMBOLS
