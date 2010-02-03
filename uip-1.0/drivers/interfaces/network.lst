@@ -1,0 +1,540 @@
+   1               		.file	"network.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+  15               	.Ltext0:
+  16               		.section	.text.network_init,"ax",@progbits
+  17               	.global	network_init
+  19               	network_init:
+  20               	.LFB47:
+  21               	.LSM0:
+  22               	/* prologue: function */
+  23               	/* frame size = 0 */
+  24               	.LSM1:
+  25 0000 1092 0000 		sts (len)+1,__zero_reg__
+  26 0004 1092 0000 		sts len,__zero_reg__
+  27 0008 1092 0000 		sts Escape,__zero_reg__
+  28 000c 1092 0000 		sts InHeader,__zero_reg__
+  29 0010 1092 0000 		sts InPacket,__zero_reg__
+  30               	/* epilogue start */
+  31               	.LSM2:
+  32 0014 0895      		ret
+  33               	.LFE47:
+  35               		.data
+  36               	.LC0:
+  37 0000 0D0A 5365 		.string	"\r\nSend:\r\n"
+  37      6E64 3A0D 
+  37      0A00 
+  38               	.LC1:
+  39 000a 0D0A 00   		.string	"\r\n"
+  40               	.LC2:
+  41 000d 202E 2000 		.string	" . "
+  42               		.section	.text.network_send,"ax",@progbits
+  43               	.global	network_send
+  45               	network_send:
+  46               	.LFB46:
+  47               	.LSM3:
+  48 0000 AF92      		push r10
+  49 0002 BF92      		push r11
+  50 0004 CF92      		push r12
+  51 0006 DF92      		push r13
+  52 0008 EF92      		push r14
+  53 000a FF92      		push r15
+  54 000c 0F93      		push r16
+  55 000e 1F93      		push r17
+  56 0010 CF93      		push r28
+  57 0012 DF93      		push r29
+  58               	/* prologue: function */
+  59               	/* frame size = 0 */
+  60               	.LSM4:
+  61 0014 1092 0000 		sts InPacket,__zero_reg__
+  62 0018 1092 0000 		sts InHeader,__zero_reg__
+  63               	.LSM5:
+  64 001c 80E0      		ldi r24,lo8(.LC0)
+  65 001e 90E0      		ldi r25,hi8(.LC0)
+  66 0020 0E94 0000 		call Debug
+  67 0024 90E0      		ldi r25,lo8(uip_buf)
+  68 0026 A92E      		mov r10,r25
+  69 0028 90E0      		ldi r25,hi8(uip_buf)
+  70 002a B92E      		mov r11,r25
+  71 002c 6501      		movw r12,r10
+  72 002e EE24      		clr r14
+  73 0030 FF24      		clr r15
+  74               	.LVL0:
+  75 0032 00C0      		rjmp .L4
+  76               	.LVL1:
+  77               	.L11:
+  78               	.LSM6:
+  79 0034 8601      		movw r16,r12
+  80 0036 C0E0      		ldi r28,lo8(0)
+  81 0038 D0E0      		ldi r29,hi8(0)
+  82               	.LVL2:
+  83               	.L6:
+  84               	.LSM7:
+  85 003a 9E01      		movw r18,r28
+  86 003c 2E0D      		add r18,r14
+  87 003e 3F1D      		adc r19,r15
+  88 0040 8091 0000 		lds r24,uip_len
+  89 0044 9091 0000 		lds r25,(uip_len)+1
+  90 0048 2817      		cp r18,r24
+  91 004a 3907      		cpc r19,r25
+  92 004c 00F4      		brsh .L5
+  93               	.LSM8:
+  94 004e F801      		movw r30,r16
+  95 0050 8191      		ld r24,Z+
+  96 0052 8F01      		movw r16,r30
+  97 0054 0E94 0000 		call PrintHex
+  98               	.LSM9:
+  99 0058 2196      		adiw r28,1
+ 100 005a C031      		cpi r28,16
+ 101 005c D105      		cpc r29,__zero_reg__
+ 102 005e 01F4      		brne .L6
+ 103               	.L5:
+ 104               	.LSM10:
+ 105 0060 80E0      		ldi r24,lo8(.LC1)
+ 106 0062 90E0      		ldi r25,hi8(.LC1)
+ 107 0064 0E94 0000 		call Debug
+ 108 0068 8601      		movw r16,r12
+ 109 006a C0E0      		ldi r28,lo8(0)
+ 110 006c D0E0      		ldi r29,hi8(0)
+ 111               	.LVL3:
+ 112               	.L10:
+ 113               	.LSM11:
+ 114 006e 9E01      		movw r18,r28
+ 115 0070 2E0D      		add r18,r14
+ 116 0072 3F1D      		adc r19,r15
+ 117 0074 8091 0000 		lds r24,uip_len
+ 118 0078 9091 0000 		lds r25,(uip_len)+1
+ 119 007c 2817      		cp r18,r24
+ 120 007e 3907      		cpc r19,r25
+ 121 0080 00F4      		brsh .L7
+ 122               	.LSM12:
+ 123 0082 F801      		movw r30,r16
+ 124 0084 8081      		ld r24,Z
+ 125 0086 8052      		subi r24,lo8(-(-32))
+ 126 0088 8F35      		cpi r24,lo8(95)
+ 127 008a 00F4      		brsh .L8
+ 128               	.LSM13:
+ 129 008c 80E2      		ldi r24,lo8(32)
+ 130 008e 0E94 0000 		call DebugChar
+ 131               	.LSM14:
+ 132 0092 F801      		movw r30,r16
+ 133 0094 8081      		ld r24,Z
+ 134 0096 0E94 0000 		call DebugChar
+ 135               	.LSM15:
+ 136 009a 80E2      		ldi r24,lo8(32)
+ 137 009c 0E94 0000 		call DebugChar
+ 138 00a0 00C0      		rjmp .L9
+ 139               	.L8:
+ 140               	.LSM16:
+ 141 00a2 80E0      		ldi r24,lo8(.LC2)
+ 142 00a4 90E0      		ldi r25,hi8(.LC2)
+ 143 00a6 0E94 0000 		call Debug
+ 144               	.L9:
+ 145               	.LSM17:
+ 146 00aa 2196      		adiw r28,1
+ 147 00ac 0F5F      		subi r16,lo8(-(1))
+ 148 00ae 1F4F      		sbci r17,hi8(-(1))
+ 149 00b0 C031      		cpi r28,16
+ 150 00b2 D105      		cpc r29,__zero_reg__
+ 151 00b4 01F4      		brne .L10
+ 152               	.L7:
+ 153               	.LSM18:
+ 154 00b6 80E0      		ldi r24,lo8(.LC1)
+ 155 00b8 90E0      		ldi r25,hi8(.LC1)
+ 156 00ba 0E94 0000 		call Debug
+ 157               	.LSM19:
+ 158 00be 80E1      		ldi r24,lo8(16)
+ 159 00c0 90E0      		ldi r25,hi8(16)
+ 160 00c2 E80E      		add r14,r24
+ 161 00c4 F91E      		adc r15,r25
+ 162 00c6 C80E      		add r12,r24
+ 163 00c8 D91E      		adc r13,r25
+ 164               	.L4:
+ 165 00ca 8091 0000 		lds r24,uip_len
+ 166 00ce 9091 0000 		lds r25,(uip_len)+1
+ 167 00d2 E816      		cp r14,r24
+ 168 00d4 F906      		cpc r15,r25
+ 169 00d6 00F4      		brsh .+2
+ 170 00d8 00C0      		rjmp .L11
+ 171               	.LSM20:
+ 172 00da 8EE7      		ldi r24,lo8(126)
+ 173 00dc 0E94 0000 		call modem_putc
+ 174               	.LSM21:
+ 175 00e0 8FEF      		ldi r24,lo8(-1)
+ 176 00e2 0E94 0000 		call modem_putc
+ 177               	.LSM22:
+ 178 00e6 8FEF      		ldi r24,lo8(-1)
+ 179 00e8 9FEF      		ldi r25,hi8(-1)
+ 180 00ea 6FEF      		ldi r22,lo8(-1)
+ 181 00ec 0E94 0000 		call CRC
+ 182 00f0 8C01      		movw r16,r24
+ 183               	.LVL4:
+ 184               	.LSM23:
+ 185 00f2 83E0      		ldi r24,lo8(3)
+ 186 00f4 0E94 0000 		call modem_putc
+ 187               	.LSM24:
+ 188 00f8 C801      		movw r24,r16
+ 189 00fa 63E0      		ldi r22,lo8(3)
+ 190 00fc 0E94 0000 		call CRC
+ 191 0100 8C01      		movw r16,r24
+ 192               	.LVL5:
+ 193               	.LSM25:
+ 194 0102 80E0      		ldi r24,lo8(0)
+ 195 0104 0E94 0000 		call modem_putc
+ 196               	.LSM26:
+ 197 0108 C801      		movw r24,r16
+ 198 010a 60E0      		ldi r22,lo8(0)
+ 199 010c 0E94 0000 		call CRC
+ 200 0110 8C01      		movw r16,r24
+ 201               	.LVL6:
+ 202               	.LSM27:
+ 203 0112 81E2      		ldi r24,lo8(33)
+ 204 0114 0E94 0000 		call modem_putc
+ 205               	.LSM28:
+ 206 0118 C801      		movw r24,r16
+ 207 011a 61E2      		ldi r22,lo8(33)
+ 208 011c 0E94 0000 		call CRC
+ 209 0120 8C01      		movw r16,r24
+ 210               	.LVL7:
+ 211 0122 C0E0      		ldi r28,lo8(0)
+ 212 0124 D0E0      		ldi r29,hi8(0)
+ 213               	.LVL8:
+ 214               	.LBB2:
+ 215               	.LSM29:
+ 216 0126 80E2      		ldi r24,lo8(32)
+ 217 0128 F82E      		mov r15,r24
+ 218 012a 00C0      		rjmp .L12
+ 219               	.L16:
+ 220               	.LSM30:
+ 221 012c F501      		movw r30,r10
+ 222 012e 9081      		ld r25,Z
+ 223 0130 892F      		mov r24,r25
+ 224 0132 8D57      		subi r24,lo8(-(-125))
+ 225 0134 8230      		cpi r24,lo8(2)
+ 226 0136 00F4      		brsh .L13
+ 227               	.LSM31:
+ 228 0138 8DE7      		ldi r24,lo8(125)
+ 229 013a 0E94 0000 		call modem_putc
+ 230               	.LSM32:
+ 231 013e F501      		movw r30,r10
+ 232 0140 8081      		ld r24,Z
+ 233 0142 8F25      		eor r24,r15
+ 234 0144 00C0      		rjmp .L24
+ 235               	.L13:
+ 236               	.LSM33:
+ 237 0146 892F      		mov r24,r25
+ 238               	.L24:
+ 239 0148 0E94 0000 		call modem_putc
+ 240               	.LSM34:
+ 241 014c C801      		movw r24,r16
+ 242 014e F501      		movw r30,r10
+ 243 0150 6081      		ld r22,Z
+ 244 0152 0E94 0000 		call CRC
+ 245 0156 8C01      		movw r16,r24
+ 246               	.LSM35:
+ 247 0158 CE01      		movw r24,r28
+ 248 015a 8F73      		andi r24,lo8(63)
+ 249 015c 9070      		andi r25,hi8(63)
+ 250 015e 892B      		or r24,r25
+ 251 0160 01F4      		brne .L15
+ 252 0162 2097      		sbiw r28,0
+ 253 0164 01F0      		breq .L15
+ 254               	.LSM36:
+ 255 0166 0E94 0000 		call SendDataToAndFromModem
+ 256               	.L15:
+ 257               	.LSM37:
+ 258 016a 2196      		adiw r28,1
+ 259 016c 0894      		sec
+ 260 016e A11C      		adc r10,__zero_reg__
+ 261 0170 B11C      		adc r11,__zero_reg__
+ 262               	.L12:
+ 263 0172 8091 0000 		lds r24,uip_len
+ 264 0176 9091 0000 		lds r25,(uip_len)+1
+ 265 017a C817      		cp r28,r24
+ 266 017c D907      		cpc r29,r25
+ 267 017e 00F0      		brlo .L16
+ 268               	.LBE2:
+ 269               	.LSM38:
+ 270 0180 E801      		movw r28,r16
+ 271               	.LVL9:
+ 272 0182 C095      		com r28
+ 273 0184 D095      		com r29
+ 274               	.LVL10:
+ 275               	.LSM39:
+ 276 0186 CE01      		movw r24,r28
+ 277 0188 9070      		andi r25,hi8(255)
+ 278 018a 8D57      		subi r24,lo8(-(-125))
+ 279 018c 9040      		sbci r25,hi8(-(-125))
+ 280 018e 0297      		sbiw r24,2
+ 281 0190 00F4      		brsh .L17
+ 282               	.LSM40:
+ 283 0192 8DE7      		ldi r24,lo8(125)
+ 284 0194 0E94 0000 		call modem_putc
+ 285               	.LSM41:
+ 286 0198 80E2      		ldi r24,lo8(32)
+ 287 019a 8C27      		eor r24,r28
+ 288 019c 00C0      		rjmp .L25
+ 289               	.L17:
+ 290               	.LSM42:
+ 291 019e 8C2F      		mov r24,r28
+ 292               	.L25:
+ 293 01a0 0E94 0000 		call modem_putc
+ 294               	.LSM43:
+ 295 01a4 CE01      		movw r24,r28
+ 296 01a6 8050      		subi r24,lo8(-(-32000))
+ 297 01a8 9D47      		sbci r25,hi8(-(-32000))
+ 298 01aa 8050      		subi r24,lo8(512)
+ 299 01ac 9240      		sbci r25,hi8(512)
+ 300 01ae 00F4      		brsh .L19
+ 301               	.LSM44:
+ 302 01b0 8DE7      		ldi r24,lo8(125)
+ 303 01b2 0E94 0000 		call modem_putc
+ 304               	.LSM45:
+ 305 01b6 80E2      		ldi r24,lo8(32)
+ 306 01b8 8D27      		eor r24,r29
+ 307               	.LVL11:
+ 308 01ba 00C0      		rjmp .L26
+ 309               	.LVL12:
+ 310               	.L19:
+ 311               	.LSM46:
+ 312 01bc 8D2F      		mov r24,r29
+ 313               	.LVL13:
+ 314               	.L26:
+ 315 01be 0E94 0000 		call modem_putc
+ 316               	.LSM47:
+ 317 01c2 8EE7      		ldi r24,lo8(126)
+ 318 01c4 0E94 0000 		call modem_putc
+ 319               	.LSM48:
+ 320 01c8 0E94 0000 		call SendDataToAndFromModem
+ 321               	/* epilogue start */
+ 322               	.LSM49:
+ 323 01cc DF91      		pop r29
+ 324               	.LVL14:
+ 325 01ce CF91      		pop r28
+ 326               	.LVL15:
+ 327 01d0 1F91      		pop r17
+ 328 01d2 0F91      		pop r16
+ 329 01d4 FF90      		pop r15
+ 330 01d6 EF90      		pop r14
+ 331               	.LVL16:
+ 332 01d8 DF90      		pop r13
+ 333 01da CF90      		pop r12
+ 334 01dc BF90      		pop r11
+ 335 01de AF90      		pop r10
+ 336 01e0 0895      		ret
+ 337               	.LFE46:
+ 339               		.section	.text.network_read,"ax",@progbits
+ 340               	.global	network_read
+ 342               	network_read:
+ 343               	.LFB45:
+ 344               	.LSM50:
+ 345 0000 0F93      		push r16
+ 346 0002 1F93      		push r17
+ 347 0004 CF93      		push r28
+ 348 0006 DF93      		push r29
+ 349               	/* prologue: function */
+ 350               	/* frame size = 0 */
+ 351               	.LSM51:
+ 352 0008 0E94 0000 		call modem_getc
+ 353 000c 9C01      		movw r18,r24
+ 354               	.LVL17:
+ 355               	.LSM52:
+ 356 000e 90FD      		sbrc r25,0
+ 357 0010 00C0      		rjmp .L28
+ 358               	.LSM53:
+ 359 0012 01E0      		ldi r16,lo8(1)
+ 360               	.LSM54:
+ 361 0014 10E2      		ldi r17,lo8(32)
+ 362               	.LSM55:
+ 363 0016 CFEF      		ldi r28,lo8(-1)
+ 364 0018 DFEF      		ldi r29,hi8(-1)
+ 365               	.L39:
+ 366               	.LSM56:
+ 367 001a 9091 0000 		lds r25,InPacket
+ 368 001e 9923      		tst r25
+ 369 0020 01F4      		brne .L29
+ 370 0022 8091 0000 		lds r24,InHeader
+ 371               	.LVL18:
+ 372 0026 8823      		tst r24
+ 373 0028 01F4      		brne .L29
+ 374 002a 2E37      		cpi r18,126
+ 375 002c 3105      		cpc r19,__zero_reg__
+ 376 002e 01F4      		brne .L29
+ 377               	.LSM57:
+ 378 0030 0093 0000 		sts InHeader,r16
+ 379               	.LSM58:
+ 380 0034 1092 0000 		sts (len)+1,__zero_reg__
+ 381 0038 1092 0000 		sts len,__zero_reg__
+ 382               	.LVL19:
+ 383               	.L29:
+ 384               	.LSM59:
+ 385 003c 8091 0000 		lds r24,InHeader
+ 386 0040 8130      		cpi r24,lo8(1)
+ 387 0042 01F4      		brne .L30
+ 388               	.LSM60:
+ 389 0044 2132      		cpi r18,33
+ 390 0046 3105      		cpc r19,__zero_reg__
+ 391 0048 01F4      		brne .L31
+ 392               	.LSM61:
+ 393 004a 1092 0000 		sts InHeader,__zero_reg__
+ 394               	.LSM62:
+ 395 004e 8093 0000 		sts InPacket,r24
+ 396               	.LSM63:
+ 397 0052 D093 0000 		sts (len)+1,r29
+ 398 0056 C093 0000 		sts len,r28
+ 399 005a 00C0      		rjmp .L32
+ 400               	.L31:
+ 401               	.LSM64:
+ 402 005c 8091 0000 		lds r24,len
+ 403 0060 9091 0000 		lds r25,(len)+1
+ 404 0064 0197      		sbiw r24,1
+ 405 0066 01F4      		brne .L32
+ 406 0068 232B      		or r18,r19
+ 407 006a 01F0      		breq .L32
+ 408 006c 2FEF      		ldi r18,lo8(-1)
+ 409 006e 3FEF      		ldi r19,hi8(-1)
+ 410               	.LVL20:
+ 411 0070 00C0      		rjmp .L33
+ 412               	.LVL21:
+ 413               	.L30:
+ 414               	.LSM65:
+ 415 0072 9130      		cpi r25,lo8(1)
+ 416 0074 01F4      		brne .L32
+ 417               	.LSM66:
+ 418 0076 2D37      		cpi r18,125
+ 419 0078 3105      		cpc r19,__zero_reg__
+ 420 007a 01F4      		brne .L34
+ 421               	.LSM67:
+ 422 007c 9093 0000 		sts Escape,r25
+ 423               	.LSM68:
+ 424 0080 8091 0000 		lds r24,len
+ 425 0084 9091 0000 		lds r25,(len)+1
+ 426 0088 0197      		sbiw r24,1
+ 427 008a 9093 0000 		sts (len)+1,r25
+ 428 008e 8093 0000 		sts len,r24
+ 429 0092 00C0      		rjmp .L32
+ 430               	.L34:
+ 431               	.LSM69:
+ 432 0094 8091 0000 		lds r24,Escape
+ 433 0098 8130      		cpi r24,lo8(1)
+ 434 009a 01F4      		brne .L35
+ 435               	.LSM70:
+ 436 009c 1092 0000 		sts Escape,__zero_reg__
+ 437               	.LSM71:
+ 438 00a0 E091 0000 		lds r30,len
+ 439 00a4 F091 0000 		lds r31,(len)+1
+ 440 00a8 E050      		subi r30,lo8(-(uip_buf))
+ 441 00aa F040      		sbci r31,hi8(-(uip_buf))
+ 442 00ac 822F      		mov r24,r18
+ 443               	.LVL22:
+ 444 00ae 8127      		eor r24,r17
+ 445 00b0 8083      		st Z,r24
+ 446 00b2 00C0      		rjmp .L32
+ 447               	.LVL23:
+ 448               	.L35:
+ 449               	.LSM72:
+ 450 00b4 2E37      		cpi r18,126
+ 451 00b6 3105      		cpc r19,__zero_reg__
+ 452 00b8 01F4      		brne .L36
+ 453               	.LSM73:
+ 454 00ba 1092 0000 		sts InPacket,__zero_reg__
+ 455               	.LSM74:
+ 456 00be 80E0      		ldi r24,lo8(.LC1)
+ 457 00c0 90E0      		ldi r25,hi8(.LC1)
+ 458 00c2 0E94 0000 		call Debug
+ 459               	.LVL24:
+ 460               	.LSM75:
+ 461 00c6 2091 0000 		lds r18,len
+ 462 00ca 3091 0000 		lds r19,(len)+1
+ 463 00ce 2250      		subi r18,lo8(-(-2))
+ 464 00d0 3040      		sbci r19,hi8(-(-2))
+ 465 00d2 00C0      		rjmp .L33
+ 466               	.LVL25:
+ 467               	.L36:
+ 468               	.LSM76:
+ 469 00d4 E091 0000 		lds r30,len
+ 470 00d8 F091 0000 		lds r31,(len)+1
+ 471 00dc E050      		subi r30,lo8(-(uip_buf))
+ 472 00de F040      		sbci r31,hi8(-(uip_buf))
+ 473 00e0 2083      		st Z,r18
+ 474               	.L32:
+ 475               	.LSM77:
+ 476 00e2 8091 0000 		lds r24,len
+ 477 00e6 9091 0000 		lds r25,(len)+1
+ 478 00ea 0196      		adiw r24,1
+ 479 00ec 9093 0000 		sts (len)+1,r25
+ 480 00f0 8093 0000 		sts len,r24
+ 481               	.LSM78:
+ 482 00f4 0E94 0000 		call modem_getc
+ 483               	.LVL26:
+ 484 00f8 9C01      		movw r18,r24
+ 485               	.LVL27:
+ 486               	.LSM79:
+ 487 00fa 90FF      		sbrs r25,0
+ 488 00fc 00C0      		rjmp .L39
+ 489               	.L28:
+ 490 00fe 20E0      		ldi r18,lo8(0)
+ 491 0100 30E0      		ldi r19,hi8(0)
+ 492               	.L33:
+ 493               	.LSM80:
+ 494 0102 C901      		movw r24,r18
+ 495               	.LVL28:
+ 496               	/* epilogue start */
+ 497 0104 DF91      		pop r29
+ 498 0106 CF91      		pop r28
+ 499 0108 1F91      		pop r17
+ 500 010a 0F91      		pop r16
+ 501 010c 0895      		ret
+ 502               	.LFE45:
+ 504               	.global	InHeader
+ 505               	.global	InHeader
+ 506               		.section .bss
+ 509               	InHeader:
+ 510 0000 00        		.skip 1,0
+ 511               	.global	InPacket
+ 512               	.global	InPacket
+ 515               	InPacket:
+ 516 0001 00        		.skip 1,0
+ 517               	.global	Escape
+ 518               	.global	Escape
+ 521               	Escape:
+ 522 0002 00        		.skip 1,0
+ 523               	.global	len
+ 524               	.global	len
+ 527               	len:
+ 528 0003 0000      		.skip 2,0
+ 529               		.comm TIME,2,1
+ 570               	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 network.c
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:2      *ABS*:0000003f __SREG__
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:3      *ABS*:0000003e __SP_H__
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:4      *ABS*:0000003d __SP_L__
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:5      *ABS*:00000034 __CCP__
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:6      *ABS*:00000000 __tmp_reg__
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:7      *ABS*:00000001 __zero_reg__
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:19     .text.network_init:00000000 network_init
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:527    .bss:00000003 len
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:521    .bss:00000002 Escape
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:509    .bss:00000000 InHeader
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:515    .bss:00000001 InPacket
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:45     .text.network_send:00000000 network_send
+C:\Users\Mike\AppData\Local\Temp/ccPI6nJ7.s:342    .text.network_read:00000000 network_read
+                            *COM*:00000002 TIME
+
+UNDEFINED SYMBOLS
+Debug
+uip_buf
+uip_len
+PrintHex
+DebugChar
+modem_putc
+CRC
+SendDataToAndFromModem
+modem_getc
+__do_copy_data
+__do_clear_bss
