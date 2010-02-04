@@ -1,6 +1,8 @@
 #ifndef _PPP_H_
 #define _PPP_H_
 
+#include <stdbool.h>
+
 #include "USBModem.h"
 #include "Lib/RingBuff.h"
 #include "Lib/Debug.h"
