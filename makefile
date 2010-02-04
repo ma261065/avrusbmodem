@@ -118,7 +118,7 @@ TARGET = USBModem
 OBJDIR = .
 
 # Path to the LUFA library
-LUFA_PATH = ../../LUFA/Drivers/USB
+LUFA_PATH = ./LUFA
 
 # Path to the uIP library
 UIP_PATH = ./uip-1.0
@@ -134,16 +134,16 @@ SRC = $(TARGET).c                                                 	\
 	  $(UIP_PATH)/uip/uiplib.c			  			  				\
 	  $(UIP_PATH)/atmega/clock-arch.c                               \
       $(UIP_PATH)/drivers/interfaces/network.c		  				\
-      $(LUFA_PATH)/LowLevel/DevChapter9.c							\
-	  $(LUFA_PATH)/LowLevel/Endpoint.c           					\
-	  $(LUFA_PATH)/LowLevel/Host.c           					    \
-	  $(LUFA_PATH)/LowLevel/HostChapter9.c  					    \
-	  $(LUFA_PATH)/LowLevel/LowLevel.c      					    \
- 	  $(LUFA_PATH)/LowLevel/Pipe.c               					\
-	  $(LUFA_PATH)/HighLevel/Events.c        					    \
-	  $(LUFA_PATH)/HighLevel/USBInterrupt.c  					    \
-	  $(LUFA_PATH)/HighLevel/USBTask.c        						\
-	  $(LUFA_PATH)/HighLevel/ConfigDescriptor.c  					\
+      $(LUFA_PATH)/Drivers/USB/LowLevel/DevChapter9.c				\
+	  $(LUFA_PATH)/Drivers/USB//LowLevel/Endpoint.c          		\
+	  $(LUFA_PATH)/Drivers/USB//LowLevel/Host.c           			\
+	  $(LUFA_PATH)/Drivers/USB//LowLevel/HostChapter9.c  			\
+	  $(LUFA_PATH)/Drivers/USB//LowLevel/LowLevel.c      			\
+ 	  $(LUFA_PATH)/Drivers/USB//LowLevel/Pipe.c               		\
+	  $(LUFA_PATH)/Drivers/USB//HighLevel/Events.c        			\
+	  $(LUFA_PATH)/Drivers/USB//HighLevel/USBInterrupt.c  			\
+	  $(LUFA_PATH)/Drivers/USB//HighLevel/USBTask.c        			\
+	  $(LUFA_PATH)/Drivers/USB//HighLevel/ConfigDescriptor.c  		\
       
 	  
 # List C++ source files here. (C dependencies are automatically generated.)
