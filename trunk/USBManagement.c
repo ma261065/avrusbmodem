@@ -197,7 +197,7 @@ void USBManagement_SendReceivePipes(void)
 		Pipe_Freeze();
 		
 		while (Pipe_BytesInPipe())
-		  Buffer_StoreElement(&Modem_SendBuffer, Pipe_Read_Byte());
+		  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_Byte());
 		  
 		Pipe_ClearIN();
 	}

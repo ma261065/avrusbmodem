@@ -94,7 +94,7 @@ void ConnectionManagement_DialConnection(void)
 			Debug_Print(Command);
 			
 			char* CommandPtr = Command;
-			while (*CommandPtr != 0x00)
+			while (*CommandPtr)
 			  Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
 		}
 	}
@@ -103,14 +103,14 @@ void ConnectionManagement_DialConnection(void)
 void ConnectionManagement_InitializeTCPStack(void)
 {
 	Debug_Print("Initialise TCP Stack\r\n");
-			
+
+	// uIP component init
 	network_init();
-
 	clock_init();
-
-	timer_set(&periodic_timer, CLOCK_SECOND / 2);
-
 	uip_init();
+
+	// Periodic connection management timer init
+	timer_set(&periodic_timer, CLOCK_SECOND / 2);
 
 	// Set this machine's IP address
 	uip_ipaddr_t LocalIPAddress;
@@ -140,7 +140,9 @@ void ConnectionManagement_ConnectToRemoteHost(void)
 			TIME = 3001;			// Make the first GET happen straight away
 		}
 		else
+		{
 			Debug_Print("Failed to Connect\r\n");
+		}
 
 		Debug_Print("Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256);
 		Debug_Print("0x"); Debug_PrintHex(uip_mss() & 255); 
@@ -195,9 +197,11 @@ void ConnectionManagement_TCPIPTask(void)
 					Debug_PrintChar(' ');
 				}
 				else
+				{
 					Debug_Print(" . ");
-
+				}
 			}
+
 			Debug_Print("\r\n");
 		}
 
