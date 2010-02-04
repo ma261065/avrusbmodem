@@ -121,7 +121,7 @@ OBJDIR = .
 LUFA_PATH = ./LUFA
 
 # Path to the uIP library
-UIP_PATH = ./uip-1.0
+UIP_PATH = ./uip-Contiki
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c                                                 	\
@@ -129,11 +129,10 @@ SRC = $(TARGET).c                                                 	\
       uart.c					  								  	\
 	  modem.c	  							  					  	\
 	  ppp.c					    				  				  	\
-	  $(UIP_PATH)/uip/timer.c                                       \
-	  $(UIP_PATH)/uip/uip.c                                         \
-	  $(UIP_PATH)/uip/uiplib.c			  			  				\
-	  $(UIP_PATH)/atmega/clock-arch.c                               \
-      $(UIP_PATH)/drivers/interfaces/network.c		  				\
+	  $(UIP_PATH)/timer.c                                           \
+	  $(UIP_PATH)/uip.c                                             \
+	  $(UIP_PATH)/clock.c                                           \
+      $(UIP_PATH)/network.c											\
       $(LUFA_PATH)/Drivers/USB/LowLevel/DevChapter9.c				\
 	  $(LUFA_PATH)/Drivers/USB//LowLevel/Endpoint.c          		\
 	  $(LUFA_PATH)/Drivers/USB//LowLevel/Host.c           			\
@@ -193,6 +192,8 @@ CDEFS  = -DF_CPU=$(F_CPU)UL -DF_CLOCK=$(F_CLOCK)UL -DBOARD=BOARD_$(BOARD)
 CDEFS += -DUSE_NONSTANDARD_DESCRIPTOR_NAMES -DUSB_HOST_ONLY -DNO_STREAM_CALLBACKS
 CDEFS += -DUSE_STATIC_OPTIONS="(USB_OPT_REG_ENABLED | USB_OPT_AUTO_PLL)"
 
+CDEFS += -DUIP_CONF_LL_802154=0 -DUIP_CONF_LL_80211=0 -DUIP_CONF_ROUTER=0 -DUIP_CONF_ICMP6=0
+CDEFS += -DUIP_ARCH_ADD32=0 -DUIP_CONF_ICMP_DEST_UNREACH=1 -DUIP_ARCH_CHKSUM=0
 
 # Place -D or -U options here for ASM sources
 ADEFS = -DF_CPU=$(F_CPU)
