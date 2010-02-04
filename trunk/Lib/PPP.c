@@ -19,7 +19,6 @@ enum {LCPState, PAPState, IPCPState} PPPState;					// PPP negotiation states
 void DoPPP(void)
 {
 	signed int c;												// Received serial character
-	int ModemData;
 	int ExitFlag = 0;
 	int CharCount = 0;
 
@@ -30,9 +29,9 @@ void DoPPP(void)
 	do
 	{
 		// Receive a full PPP packet
-		if (!((ModemData = modem_getc()) & MODEM_NO_DATA))		// Incoming character?
+		if (Modem_ReceiveBuffer.Elements)		// Incoming character?
 		{
-			c = ModemData;										// Get the character
+			c = Buffer_GetElement(&Modem_ReceiveBuffer);		// Get the character
 	     
 		 	if (c == 0x7e)										// Start or end of a packet 
 			{	
@@ -156,7 +155,7 @@ void DoPPP(void)
 				tx_ptr++;
 			}
 
-			modem_putc(c);										// Put character in transmitter
+			Buffer_StoreElement(&Modem_SendBuffer, c);			// Put character in transmitter
 		}
 
 		// Nothing to Send or Receive

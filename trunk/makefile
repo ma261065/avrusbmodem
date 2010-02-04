@@ -127,7 +127,7 @@ UIP_PATH = ./uip-Contiki
 SRC = $(TARGET).c                                                 	\
 	  ConfigDescriptor.c                                          	\
       Lib/Debug.c					  								\
-	  Lib/Modem.c	  							  					\
+	  Lib/RingBuff.c	  						  					\
 	  Lib/PPP.c					    				  				\
 	  $(UIP_PATH)/timer.c                                           \
 	  $(UIP_PATH)/uip.c                                             \

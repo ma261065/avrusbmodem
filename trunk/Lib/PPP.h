@@ -2,7 +2,7 @@
 #define _PPP_H_
 
 #include "USBModem.h"
-#include "Lib/Modem.h"
+#include "Lib/RingBuff.h"
 #include "Lib/Debug.h"
 #include "util/crc16.h"
 

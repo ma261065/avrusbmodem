@@ -7,63 +7,56 @@ uint16_t len = 0;
 
 unsigned int network_read(void)
 {
-	int c = modem_getc();
+	int c;
 	
-	if (c & MODEM_NO_DATA)
+	while (Modem_ReceiveBuffer.Elements)
 	{
-		return 0;
-	}
-	else
-	{
-		do
+		c = Buffer_GetElement(&Modem_ReceiveBuffer);
+	
+		if (InPacket == 0 && InHeader == 0 && c == 0x7e)	// New Packet
 		{
-			if (InPacket == 0 && InHeader == 0 && c == 0x7e)	// New Packet
-			{
-				InHeader = 1;
-				len = 0;
-			}
-
-			if (InHeader == 1)
-			{
-				if (c == 0x21)									// End of Header (Header is 00 21)
-				{
-					InHeader = 0;
-					InPacket = 1;
-					len = -1;
-				}
-				else if (len == 1 && c != 0x00)					// Got a non-SLIP packet, probably LCP-TERM. Need to re-establish link.
-				{
-					return -1;
-				}
-			}
-			else if (InPacket == 1)
-			{
-				if (c == 0x7d)									// Escaped character. Set flag and process next time around
-				{
-					Escape = 1;
-					len--;
-				}
-				else if (Escape == 1)							// Escaped character. Process now.
-				{
-					Escape = 0;
-					*(uip_buf + len) = (c ^ 0x20);
-				}
-				else if (c == 0x7e)								// End of packet
-				{
-					InPacket = 0;
-					Debug_Print("\r\n");
-					return len - 2; 							// (-2) = Strip off checksum and framing
-				}
-				else
-				{	
-					*(uip_buf + len) = c;
-				}
-			}			
-			
-			len++;
-			c = modem_getc();
+			InHeader = 1;
+			len = 0;
 		}
-		while (!(c & MODEM_NO_DATA));
+
+		if (InHeader == 1)
+		{
+			if (c == 0x21)									// End of Header (Header is 00 21)
+			{
+				InHeader = 0;
+				InPacket = 1;
+				len = -1;
+			}
+			else if (len == 1 && c != 0x00)					// Got a non-SLIP packet, probably LCP-TERM. Need to re-establish link.
+			{
+				return -1;
+			}
+		}
+		else if (InPacket == 1)
+		{
+			if (c == 0x7d)									// Escaped character. Set flag and process next time around
+			{
+				Escape = 1;
+				len--;
+			}
+			else if (Escape == 1)							// Escaped character. Process now.
+			{
+				Escape = 0;
+				*(uip_buf + len) = (c ^ 0x20);
+			}
+			else if (c == 0x7e)								// End of packet
+			{
+				InPacket = 0;
+				Debug_Print("\r\n");
+				return len - 2; 							// (-2) = Strip off checksum and framing
+			}
+			else
+			{	
+				*(uip_buf + len) = c;
+			}
+		}			
+		
+		len++;
 	}
 
 	return 0;	// Packet not finished yet if we got here.
@@ -116,19 +109,19 @@ void network_send(void)
 	// See http://tools.ietf.org/html/rfc1662
 	
 	// Start with the framing
-	modem_putc(0x7e);
+	Buffer_StoreElement(&Modem_SendBuffer, 0x7e);
 
 	// Header	
-	modem_putc(0xff);
+	Buffer_StoreElement(&Modem_SendBuffer, 0xff);
 	checksum = CRC(checksum, 0xff);
 
-	modem_putc(0x03);
+	Buffer_StoreElement(&Modem_SendBuffer, 0x03);
 	checksum = CRC(checksum, 0x03);
 
-	modem_putc(0x00);
+	Buffer_StoreElement(&Modem_SendBuffer, 0x00);
 	checksum = CRC(checksum, 0x00);
 
-	modem_putc(0x21);
+	Buffer_StoreElement(&Modem_SendBuffer, 0x21);
 	checksum = CRC(checksum, 0x21);
 
 	// Add the data, escaping it if necessary
@@ -136,20 +129,18 @@ void network_send(void)
 	{
 			if (*(uip_buf + i) == 0x7d || *(uip_buf + i) == 0x7e)
 			{
-				modem_putc(0x7d);
-				modem_putc(*(uip_buf + i) ^ 0x20);
+				Buffer_StoreElement(&Modem_SendBuffer, 0x7d);
+				Buffer_StoreElement(&Modem_SendBuffer, *(uip_buf + i) ^ 0x20);
 			}
 			else
 			{
-				modem_putc(*(uip_buf + i));
+				Buffer_StoreElement(&Modem_SendBuffer, *(uip_buf + i));
 			}
 
 			checksum = CRC(checksum, *(uip_buf + i));
 		
-			if (i % 64 == 0 && i != 0)									// Periodically flush the buffer to the modem
-			{
-				SendDataToAndFromModem();
-			}
+			if (i % 64 == 0 && i != 0)		// Periodically flush the buffer to the modem
+			  SendDataToAndFromModem();
 	}
 
 	// Add the checksum to the end of the packet, escaping it if necessary
@@ -157,25 +148,25 @@ void network_send(void)
 
 	if ((checksum & 255) == 0x7d || (checksum & 255) == 0x7e)
 	{
-		modem_putc(0x7d);
-		modem_putc((checksum & 255) ^ 0x20);
+		Buffer_StoreElement(&Modem_SendBuffer, 0x7d);
+		Buffer_StoreElement(&Modem_SendBuffer, (checksum & 255) ^ 0x20);
 	}
    	else
 	{
-		modem_putc(checksum & 255);								// Insert checksum MSB
+		Buffer_StoreElement(&Modem_SendBuffer, checksum & 255);	// Insert checksum MSB
 	}
 	
 	if ((checksum / 256) == 0x7d || (checksum / 256) == 0x7e)
 	{
-		modem_putc(0x7d);
-		modem_putc((checksum / 256) ^ 0x20);
+		Buffer_StoreElement(&Modem_SendBuffer, 0x7d);
+		Buffer_StoreElement(&Modem_SendBuffer, (checksum / 256) ^ 0x20);
 	}
 	else
 	{
-		modem_putc(checksum / 256);								// Insert checksum LSB
+		Buffer_StoreElement(&Modem_SendBuffer, checksum / 256);	// Insert checksum LSB
 	}
    
-	modem_putc(0x7e);											// Framing
+	Buffer_StoreElement(&Modem_SendBuffer, 0x7e);				// Framing
 
 
 	SendDataToAndFromModem();									// Flush the rest of the buffer

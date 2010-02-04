@@ -31,6 +31,9 @@
 #include "USBModem.h"
 
 // Global Variables
+RingBuff_t Modem_SendBuffer;
+RingBuff_t Modem_ReceiveBuffer;
+
 char ConnectedState = 0;
 char IPAddr1, IPAddr2, IPAddr3, IPAddr4;
 char WatchdogTicks = 0;
@@ -71,7 +74,6 @@ void SetupHardware(void)
 	clock_prescale_set(clock_div_1);
 
 	// Hardware Initialization
-	modem_init();
 	LEDs_Init();
 	SerialStream_Init(UART_BAUD_RATE, false);
 	
@@ -83,13 +85,17 @@ void SetupHardware(void)
 	OCR1A = 78;												// 10ms timer. 8,000,000 / 1,024 * 0.01
 	TIMSK1 = _BV(OCIE1A); 									// Enable interrupt on Timer compare
 	
-	LEDs_SetAllLEDs(LEDS_NO_LEDS);							// Turn the LEDs off
-
+	// Set up ring buffers
+	Buffer_Initialize(&Modem_SendBuffer);
+	Buffer_Initialize(&Modem_ReceiveBuffer);
+	
+	// Set the Watchdog timer to interrupt (not reset) every 8 seconds
 	wdt_reset();
-	WDTCSR = _BV(WDCE) | _BV(WDE);						
-	WDTCSR = _BV(WDIE) | _BV(WDP0) | _BV(WDP3);				// Set the Watchdog timer to interrupt (not reset) every 8 seconds
+	WDTCSR = _BV(WDCE) | _BV(WDE);		
+	WDTCSR = _BV(WDIE) | _BV(WDP0) | _BV(WDP3);
 
-	TIME = 0;												// Reset the 10ms timer	
+	// Reset the 10ms timer	
+	TIME = 0;
 }
 
 // Main program entry point. This routine configures the hardware required by the application, then runs the application tasks.
@@ -156,12 +162,12 @@ int main(void)
 				uip_ipaddr(&RemoteIPAddress, 192,0,32,10);	// www.example.com
 
 				ConnectedState = 3;
-				TIME_SET(2000);			// Make the first CONNECT happen straight away
+				TIME = 2000;			// Make the first CONNECT happen straight away
 				break;
 			case 3:
 				if (TIME > 1000)		//Try to connect every 1 second
 				{
-					TIME_SET(0);
+					TIME = 0;
 					
 					// Connect to the remote machine
 					ThisConn = uip_connect(&RemoteIPAddress, HTONS(80));
@@ -170,7 +176,7 @@ int main(void)
 					{
 						Debug_Print("Connected to host\r\n");
 						ConnectedState = 4;
-						TIME_SET(3001);			// Make the first GET happen straight away
+						TIME = 3001;			// Make the first GET happen straight away
 					}
 					else
 						Debug_Print("Failed to Connect\r\n");
@@ -224,7 +230,7 @@ extern void TCPCallback(void)
 
 	if (uip_poll() && TIME > 3000)
 	{
-		TIME_SET(0);
+		TIME = 0;
 		
 		Debug_Print("\r\nSending GET\r\n");
 		SendGET();
@@ -269,7 +275,7 @@ void TCPIPTask(void)
 	if (uip_len == -1)								// Got a non-SLIP packet. Probably a LCP-TERM Re-establish link.
 	{
 		Debug_Print("Got non-PPP packet\r\n");
-		TIME_SET(0);
+		TIME = 0;
 		ConnectedState = 0;
 		return;
 	}
@@ -374,25 +380,15 @@ const char *DialCommands[] =
 void Dial(void)
 {
 	char Command[64];
-	int c;
 
 	if (USB_HostState == HOST_STATE_Configured)	
 	{
-		c = modem_getc();
-		
-		if (!(c & MODEM_NO_DATA))
-		{
-			do
-			{
-				Debug_PrintChar(c);
-				c = modem_getc();
-			}
-			while (!(c & MODEM_NO_DATA));
-		}
+		while (Modem_ReceiveBuffer.Elements)
+		  Debug_PrintChar(Buffer_GetElement(&Modem_ReceiveBuffer));
 			
 		if (TIME > 100)
 		{
-			TIME_SET(0);
+			TIME = 0;
 			strcpy(Command, DialCommands[DialSteps++]);
 
 			if (strcmp(Command, "PPP") == 0)
@@ -406,7 +402,9 @@ void Dial(void)
 			Debug_Print("Sending command: ");
 			Debug_Print(Command);
 			
-			modem_puts(Command);
+			char* CommandPtr = Command;
+			while (*CommandPtr != 0x00)
+			  Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
 		}
 	}
 }
@@ -524,8 +522,6 @@ void CDC_Host_Task(void)
 void SendDataToAndFromModem(void)
 {
 	uint8_t ErrorCode;
-	uint8_t Buffer[MODEM_TX_BUFFER_SIZE];
-	uint16_t BufferLength = 0;
 
 	if (USB_HostState != HOST_STATE_Configured)
 		return;
@@ -536,10 +532,9 @@ void SendDataToAndFromModem(void)
 
 	// Select the OUT data pipe for transmission
 	Pipe_SelectPipe(CDC_DATAPIPE_OUT);
-	Pipe_SetPipeToken(PIPE_TOKEN_OUT);
 	Pipe_Unfreeze();
 
-	if (!modem_TxBufferEmpty())
+	while (Modem_SendBuffer.Elements)
 	{
 		if (!(Pipe_IsReadWriteAllowed()))
 		{
@@ -552,16 +547,12 @@ void SendDataToAndFromModem(void)
 		  		return;
 			}
 		}
-
-		// Copy from the circular buffer to a temporary transmission buffer		
-		BufferLength = modem_getTxBuffer(Buffer, (char)sizeof(Buffer));
-
-		if ((ErrorCode = Pipe_Write_Stream_LE(Buffer, BufferLength)) != PIPE_RWSTREAM_NoError)
-			Debug_Print("Error writing Pipe\r\n");
-
-		// Send the data in the OUT pipe to the attached device
-		Pipe_ClearOUT();
+		Pipe_Write_Byte(Buffer_GetElement(&Modem_SendBuffer));
 	}
+	
+	// Send remaining data in pipe bank
+	if (Pipe_BytesInPipe())
+	  Pipe_ClearOUT();
 
 	// Freeze pipe after use
 	Pipe_Freeze();
@@ -573,41 +564,20 @@ void SendDataToAndFromModem(void)
 	
 	// Select the data IN pipe
 	Pipe_SelectPipe(CDC_DATAPIPE_IN);
-	Pipe_SetPipeToken(PIPE_TOKEN_IN);/////
 	Pipe_Unfreeze();
 
 	// Check if data is in the pipe
 	if (Pipe_IsINReceived())
 	{
-			// Re-freeze IN pipe after the packet has been received
-			Pipe_Freeze();
-
-			// Check if data is in the pipe
-			if (Pipe_IsReadWriteAllowed())
-			{
-				// Get the length of the pipe data, and create a new temporary buffer to hold it
-				BufferLength = Pipe_BytesInPipe();
-
-				if (BufferLength >= MODEM_RX_BUFFER_SIZE)
-					BufferLength = MODEM_RX_BUFFER_SIZE - 1;
-
-				uint8_t Buffer[BufferLength];
+		// Re-freeze IN pipe after the packet has been received
+		Pipe_Freeze();
 		
-				// Read in the pipe data to the temporary buffer
-				if ((ErrorCode = Pipe_Read_Stream_LE(Buffer, BufferLength)) != PIPE_RWSTREAM_NoError)
-					Debug_Print("Error reading Pipe\r\n");
-		
-				// Clear the pipe after it is read, ready for the next packet
-				Pipe_ClearIN();
-
-				// Copy the temporary buffer contents to the circular buffer
-				modem_putRxBuffer(Buffer, BufferLength);
-			}
+		while (Pipe_BytesInPipe())
+		  Buffer_StoreElement(&Modem_SendBuffer, Pipe_Read_Byte());
+		  
+		Pipe_ClearIN();
 	}
 	
-	// Re-freeze IN pipe after use
-	Pipe_Freeze();		
-
 	// Select and unfreeze the notification pipe
 	Pipe_SelectPipe(CDC_NOTIFICATIONPIPE);
 	Pipe_Unfreeze();

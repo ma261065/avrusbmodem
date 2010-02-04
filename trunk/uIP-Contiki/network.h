@@ -11,7 +11,7 @@
 #include <uIP-Contiki/uip.h>
 
 #include "USBModem.h"
-#include "Lib/Modem.h"
+#include "Lib/RingBuff.h"
 
 /*Initialize the network*/
 void network_init(void);
