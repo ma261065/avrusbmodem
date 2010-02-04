@@ -140,7 +140,7 @@ void network_send(void)
 			checksum = CRC(checksum, *(uip_buf + i));
 		
 			if (i % 64 == 0 && i != 0)		// Periodically flush the buffer to the modem
-			  SendDataToAndFromModem();
+			  USBManagement_SendReceivePipes();
 	}
 
 	// Add the checksum to the end of the packet, escaping it if necessary
@@ -169,7 +169,7 @@ void network_send(void)
 	Buffer_StoreElement(&Modem_SendBuffer, 0x7e);				// Framing
 
 
-	SendDataToAndFromModem();									// Flush the rest of the buffer
+	USBManagement_SendReceivePipes();									// Flush the rest of the buffer
 }
 
 void network_init(void)

@@ -10,8 +10,9 @@ extern char ConnectedState;
 extern char IPAddr1, IPAddr2, IPAddr3, IPAddr4;					// The IP address allocated to us by the remote end
 
 unsigned int PacketType = NONE;									// Type of the last received packet
-unsigned char EscapeFlag = 0;									// Flag if last character was an escape sequence
-unsigned char LocalReady, RemoteReady = 0;						// Flags for the ready-state of this end and the remote end
+bool EscapeFlag;												// Flag if last character was an escape sequence
+bool LocalReady, RemoteReady;									// Flags for the ready-state of this end and the remote end
+
 enum {LCPState, PAPState, IPCPState} PPPState;					// PPP negotiation states
 
 
@@ -19,7 +20,7 @@ enum {LCPState, PAPState, IPCPState} PPPState;					// PPP negotiation states
 void DoPPP(void)
 {
 	signed int c;												// Received serial character
-	int ExitFlag = 0;
+	bool ExitFlag = 0;
 	int CharCount = 0;
 
 	// This will kick-start each phase of the PPP negotiations (LCP, PAP, IPCP)
@@ -51,22 +52,22 @@ void DoPPP(void)
 	           			PacketType = rx_str[2] * 256 + rx_str[3];
 
 						ProcessReceivedPacket();				// Process the packet we received
-						ExitFlag = 1;
+						ExitFlag = true;
 					}
 					else
 					{
 						Debug_Print("*** BAD CRC ***\r\n");
-						ExitFlag = 1;
+						ExitFlag = true;
 					}
 	        	}
 				
-				EscapeFlag = 0;									// Clear escape character flag
+				EscapeFlag = false;								// Clear escape character flag
 			   	rx_ptr = 0;										// Get ready for next packet
 	        	checksum1 = 0xffff;								// Start new checksum
 	     	}
 		  	else if (c == 0x7d)									// If escape character then set escape flag
 			{
-				EscapeFlag = 1;
+				EscapeFlag = true;
 	     	}
 			else												// Process the character
 			{
@@ -75,7 +76,7 @@ void DoPPP(void)
 				if (EscapeFlag)									// If escape flag set from previous character
 				{
 	           		c ^= 0x20;									// Recover next character
-	           		EscapeFlag = 0;								// Clear escape flag
+	           		EscapeFlag = false;							// Clear escape flag
 	        	}
 	        
 				// Uncompress PPP framing header
@@ -117,7 +118,7 @@ void DoPPP(void)
 				
 				Debug_Print("7e\r\n");
 				
-				ExitFlag = 1;
+				ExitFlag = true;
 	     	}
 			else if (EscapeFlag)								// Sending escape sequence?
 			{
@@ -128,12 +129,12 @@ void DoPPP(void)
 					Debug_Print("\r\n");
 
 				c ^= 0x20;										// Yes then convert character
-	        	EscapeFlag = 0;									// Clear escape flag
+	        	EscapeFlag = false;								// Clear escape flag
 	        	tx_ptr++;										// Point to next character
 	     	}
 			else if (c < 0x20 || c == 0x7d || c == 0x7e) 		// If escape sequence required?
 			{
-	        	EscapeFlag = 1;									// Set escape flag
+	        	EscapeFlag = true;									// Set escape flag
 	        	c = 0x7d;										// Send escape character
 	     	}
 			else 
@@ -143,7 +144,7 @@ void DoPPP(void)
 					c = 0x7e;									// Send frame character if first character of packet
 					Debug_Print("\r\n\r\nSend:\r\n");
 					CharCount = 0;
-					EscapeFlag = 0;
+					EscapeFlag = false;
 				}
 
 	       		CharCount++;
@@ -157,10 +158,11 @@ void DoPPP(void)
 
 			Buffer_StoreElement(&Modem_SendBuffer, c);			// Put character in transmitter
 		}
-
-		// Nothing to Send or Receive
-		else													
-			ExitFlag = 1;
+		else
+		{
+			// Nothing to Send or Receive
+			ExitFlag = true;
+		}
 	}
 	while (ExitFlag == 0);
 }
@@ -181,7 +183,7 @@ void ProcessReceivedPacket(void)
 		switch (rx_str[4])										// Switch on packet type
 		{
 			case REQ:
-				RemoteReady = 0;								// Clear remote ready flag
+				RemoteReady = false;							// Clear remote ready flag
            
 		   		Debug_Print("REQ ");
 				
@@ -191,7 +193,7 @@ void ProcessReceivedPacket(void)
 				  	{
 	                	c = ACK;								// ACK packet
                  
-						RemoteReady = 1;						// Set remote ready flag
+						RemoteReady = true;						// Set remote ready flag
 
 						Debug_Print("- We ACK\r\n");
 	              	}
@@ -216,7 +218,7 @@ void ProcessReceivedPacket(void)
 				if (rx_str[5] == number)						// Does reply ID match the request
 			   	{
 					Debug_Print("ACK\r\n");
-					LocalReady = 1;								// Set local ready flag
+					LocalReady = true;							// Set local ready flag
 				}
 				else
 					Debug_Print("Out of sync ACK\r\n");
@@ -224,12 +226,12 @@ void ProcessReceivedPacket(void)
         
 			case NAK:
 				Debug_Print("NAK\r\n");
-				LocalReady = 0;									// Clear local ready flag
+				LocalReady = false;								// Clear local ready flag
 	        break;
         
 			case REJ:
 				Debug_Print("REJ\r\n");
-	        	LocalReady = 0;									// Clear local ready flag
+	        	LocalReady = false;								// Clear local ready flag
 	        break;
         
 			case TERM:

@@ -31,9 +31,6 @@
 #include "USBModem.h"
 
 // Global Variables
-RingBuff_t Modem_SendBuffer;
-RingBuff_t Modem_ReceiveBuffer;
-
 char ConnectedState = 0;
 char IPAddr1, IPAddr2, IPAddr3, IPAddr4;
 char WatchdogTicks = 0;
@@ -53,7 +50,7 @@ ISR(WDT_vect)												// Watchdog Timer interrupt handler
 {
 	if (++WatchdogTicks >= 23)								// 23 * 8s = 3 minutes. If we've received no data in 3 minutes reboot.
 	{
-		WDTCSR = _BV(WDCE) | _BV(WDE);						// Set watchdog timer to reboot rather than interrupt next time it fires
+		WDTCSR = ((1 << WDCE) | (1 << WDE));				// Set watchdog timer to reboot rather than interrupt next time it fires
 		Debug_Print("Watchdog reboot\r\n");
 	}
 }
@@ -81,9 +78,9 @@ void SetupHardware(void)
 	USB_Init();
 
 	// Timer 1
-	TCCR1B = _BV(WGM12) | _BV(CS10) | _BV(CS12);			// CK/1024 prescale, CTC mode
-	OCR1A = 78;												// 10ms timer. 8,000,000 / 1,024 * 0.01
-	TIMSK1 = _BV(OCIE1A); 									// Enable interrupt on Timer compare
+	TCCR1B = ((1 << WGM12) | (1 << CS10) | (1 << CS12));	// CK/1024 prescale, CTC mode
+	OCR1A  = ((F_CPU / 1024) / 100);						// 10ms timer period
+	TIMSK1 = (1 << OCIE1A);									// Enable interrupt on Timer compare
 	
 	// Set up ring buffers
 	Buffer_Initialize(&Modem_SendBuffer);
@@ -91,8 +88,8 @@ void SetupHardware(void)
 	
 	// Set the Watchdog timer to interrupt (not reset) every 8 seconds
 	wdt_reset();
-	WDTCSR = _BV(WDCE) | _BV(WDE);		
-	WDTCSR = _BV(WDIE) | _BV(WDP0) | _BV(WDP3);
+	WDTCSR = ((1 << WDCE) | (1 << WDE));		
+	WDTCSR = ((1 << WDIE) | (1 << WDP0) | (1 << WDP3));
 
 	// Reset the 10ms timer	
 	TIME = 0;
@@ -132,8 +129,8 @@ int main(void)
 	for(;;)
 	{
 		USB_USBTask();
-		CDC_Host_Task();
-		SendDataToAndFromModem();
+		USBManagement_ManageUSBStateMachine();
+		USBManagement_SendReceivePipes();
 		
 		switch (ConnectedState)
 		{
@@ -407,190 +404,6 @@ void Dial(void)
 			  Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
 		}
 	}
-}
-
-
-// Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and
-// starts the library USB task to begin the enumeration and USB management process.
- 
-void EVENT_USB_Host_DeviceAttached(void)
-{
-	//puts_P(PSTR(ESC_FG_GREEN "Device Attached.\r\n" ESC_FG_WHITE));
-	Debug_Print("Device Attached\r\n");
-	LEDs_SetAllLEDs(LEDMASK_USB_ENUMERATING);
-}
-
-// Event handler for the USB_DeviceUnattached event. This indicates that a device has been removed from the host, and
-//  stops the library USB task management process.
-void EVENT_USB_Host_DeviceUnattached(void)
-{
-	//puts_P(PSTR(ESC_FG_GREEN "\r\nDevice Unattached.\r\n" ESC_FG_WHITE));
-	Debug_Print("Device Unattached\r\n");
-	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
-	ConnectedState = 0;
-}
-
-// Event handler for the USB_DeviceEnumerationComplete event. This indicates that a device has been successfully
-//  enumerated by the host and is now ready to be used by the application.
-void EVENT_USB_Host_DeviceEnumerationComplete(void)
-{
-	Debug_Print("Enumeration complete\r\n");
-	LEDs_SetAllLEDs(LEDMASK_USB_READY);
-}
-
-// Event handler for the USB_HostError event. This indicates that a hardware error occurred while in host mode. */
-void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
-{
-	USB_ShutDown();
-
-	Debug_Print("Host Mode Error\r\n");
-	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
-	for(;;);
-}
-
-// Event handler for the USB_DeviceEnumerationFailed event. This indicates that a problem occurred while
-// enumerating an attached USB device.
-void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode, const uint8_t SubErrorCode)
-{
-	Debug_Print("Enumeration failed\r\n");
-	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
-}
-
-// Task to set the configuration of the attached device after it has been enumerated, and to read in
-// data received from the attached CDC device and print it to the serial port.
-void CDC_Host_Task(void)
-{
-	uint8_t ErrorCode;
-
-	switch (USB_HostState)
-	{
-		case HOST_STATE_WaitForDeviceRemoval:
-			Debug_Print("Waiting for device removal\r\n");
-
-			// Wait until USB device disconnected
-			while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);
-			break;
-		case HOST_STATE_Addressed:
-			Debug_Print("Sending configuration command\r\n");
-
-			// Standard request to set the device configuration to configuration 1
-			// For the Huawei modem, this will cause the device to disconnect and change modes
-			USB_ControlRequest = (USB_Request_Header_t)
-				{
-					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_STANDARD | REQREC_DEVICE),
-					.bRequest      = REQ_SetConfiguration,
-					.wValue        = 1,
-					.wIndex        = 0,
-					.wLength       = 0,
-				};
-
-			// Select the control pipe for the request transfer
-			Pipe_SelectPipe(PIPE_CONTROLPIPE);
-
-			// Send the request and display any error
-			if ((ErrorCode = USB_Host_SendControlRequest(NULL)) != HOST_SENDCONTROL_Successful)
-			{
-				Debug_Print("Control Error (Set Configuration).\r\n");
-			}
-
-			Debug_Print("Looking for modem device...");
-			
-			// Get and process the configuration descriptor data
-			// First time through we expect an error. Once the device has re-attached it should be OK
-			if ((ErrorCode = ProcessConfigurationDescriptor()) != SuccessfulConfigRead)
-			{
-				if (ErrorCode == ControlError)
-				  Debug_Print("Control Error (Get Configuration).\r\n");
-				else
-				  Debug_Print("Not a modem device\r\n");
-
-				// Indicate error via status LEDs
-				LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
-
-				// Wait until USB device disconnected
-				USB_HostState = HOST_STATE_WaitForDeviceRemoval;
-				break;
-			}
-
-			Debug_Print("CDC Device Enumerated\r\n");
-
-			USB_HostState = HOST_STATE_Configured;
-			break;
-	}
-}
-
-void SendDataToAndFromModem(void)
-{
-	uint8_t ErrorCode;
-
-	if (USB_HostState != HOST_STATE_Configured)
-		return;
-
-	////////////////////////////////
-	// From Circular Buffer to Modem
-	////////////////////////////////
-
-	// Select the OUT data pipe for transmission
-	Pipe_SelectPipe(CDC_DATAPIPE_OUT);
-	Pipe_Unfreeze();
-
-	while (Modem_SendBuffer.Elements)
-	{
-		if (!(Pipe_IsReadWriteAllowed()))
-		{
-			Pipe_ClearOUT();
-
-			if ((ErrorCode = Pipe_WaitUntilReady()) != PIPE_READYWAIT_NoError)
-			{
-				// Freeze pipe after use
-				Pipe_Freeze();
-		  		return;
-			}
-		}
-		Pipe_Write_Byte(Buffer_GetElement(&Modem_SendBuffer));
-	}
-	
-	// Send remaining data in pipe bank
-	if (Pipe_BytesInPipe())
-	  Pipe_ClearOUT();
-
-	// Freeze pipe after use
-	Pipe_Freeze();
-
-	
-	////////////////////////////////
-	// From Modem to Circular Buffer
-	////////////////////////////////
-	
-	// Select the data IN pipe
-	Pipe_SelectPipe(CDC_DATAPIPE_IN);
-	Pipe_Unfreeze();
-
-	// Check if data is in the pipe
-	if (Pipe_IsINReceived())
-	{
-		// Re-freeze IN pipe after the packet has been received
-		Pipe_Freeze();
-		
-		while (Pipe_BytesInPipe())
-		  Buffer_StoreElement(&Modem_SendBuffer, Pipe_Read_Byte());
-		  
-		Pipe_ClearIN();
-	}
-	
-	// Select and unfreeze the notification pipe
-	Pipe_SelectPipe(CDC_NOTIFICATIONPIPE);
-	Pipe_Unfreeze();
-	
-	// Check if data is in the pipe
-	if (Pipe_IsINReceived())
-	{
-		// Discard the event notification
-		Pipe_ClearIN();
-	}
-	
-	// Freeze notification IN pipe after use
-	Pipe_Freeze();
 }
 
 void device_enqueue(char *x, int len)
