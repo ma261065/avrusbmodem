@@ -305,7 +305,7 @@ void ProcessReceivedPacket(void)
 				{
 					Debug_Print("**LINK CONNECTED**\r\n");
 					PPPState = LCPState;						// Move into initial state for when we get called next time (after link disconnect)
-					ConnectedState = 2;
+					ConnectedState = CONNECTION_MANAGE_STATE_InitializeTCPStack;
            		}
 			break;
        

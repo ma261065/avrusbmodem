@@ -35,7 +35,7 @@ struct timer     periodic_timer;
 uint8_t          DialSteps = 0;
 uip_ipaddr_t     RemoteIPAddress;
 
-const char PROGMEM *DialCommands[] = 
+const char *DialCommands[] = 
 {	
 	"AT\r\n",
 	"AT&F\r\n",
@@ -80,13 +80,13 @@ void ConnectionManagement_DialConnection(void)
 		if (TIME > 100)
 		{
 			TIME = 0;
-			strcpy_P(Command, DialCommands[DialSteps++]);
+			strcpy(Command, DialCommands[DialSteps++]);
 
 			if (strcmp(Command, "PPP") == 0)
 			{
 				Debug_Print("Starting PPP\r\n");
 				DialSteps = 0;
-				ConnectedState = 1;
+				ConnectedState = CONNECTION_MANAGE_STATE_DoPPPNegotiation;
 				return;
 			}
 
@@ -120,7 +120,7 @@ void ConnectionManagement_InitializeTCPStack(void)
 	// Set remote IP address
 	uip_ipaddr(&RemoteIPAddress, 192, 0, 32, 10);	// www.example.com
 
-	ConnectedState = 3;
+	ConnectedState = CONNECTION_MANAGE_STATE_ConnectToRemoteHost;
 	TIME = 2000;			// Make the first CONNECT happen straight away
 }
 
@@ -136,7 +136,7 @@ void ConnectionManagement_ConnectToRemoteHost(void)
 		if (ThisConn != 0)
 		{
 			Debug_Print("Connected to host\r\n");
-			ConnectedState = 4;
+			ConnectedState = CONNECTION_MANAGE_STATE_ManageTCPConnection;
 			TIME = 3001;			// Make the first GET happen straight away
 		}
 		else
@@ -158,7 +158,7 @@ void ConnectionManagement_TCPIPTask(void)
 	{
 		Debug_Print("Got non-PPP packet\r\n");
 		TIME = 0;
-		ConnectedState = 0;
+		ConnectedState = CONNECTION_MANAGE_STATE_DialConnection;
 		return;
 	}
 
@@ -265,14 +265,14 @@ void TCPCallback(void)
 	{
 		Debug_Print("Closed - Reconnecting...");
 		_delay_ms(1000);
-		ConnectedState = 3;
+		ConnectedState = CONNECTION_MANAGE_STATE_ConnectToRemoteHost;
 	}
 
 	if (uip_aborted())
 	{
 		Debug_Print("Aborted - Reconnecting... ");
 		_delay_ms(1000);
-		ConnectedState = 3;
+		ConnectedState = CONNECTION_MANAGE_STATE_ConnectToRemoteHost;
 	}
 
 	if (uip_timedout())
@@ -280,7 +280,7 @@ void TCPCallback(void)
 		Debug_Print("Timeout - Reconnecting...");
 		uip_abort();
 		_delay_ms(1000);
-		ConnectedState = 3;
+		ConnectedState = CONNECTION_MANAGE_STATE_ConnectToRemoteHost;
 	}
 
 	if (uip_poll() && TIME > 3000)
