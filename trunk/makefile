@@ -126,23 +126,25 @@ UIP_PATH = ./uip-Contiki
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c                                                 	\
 	  ConfigDescriptor.c                                          	\
-      uart.c					  								  	\
-	  modem.c	  							  					  	\
-	  ppp.c					    				  				  	\
+      Lib/Debug.c					  								\
+	  Lib/Modem.c	  							  					\
+	  Lib/PPP.c					    				  				\
 	  $(UIP_PATH)/timer.c                                           \
 	  $(UIP_PATH)/uip.c                                             \
 	  $(UIP_PATH)/clock.c                                           \
       $(UIP_PATH)/network.c											\
+      $(LUFA_PATH)/Drivers/Peripheral/Serial.c						\
+      $(LUFA_PATH)/Drivers/Peripheral/SerialStream.c				\
       $(LUFA_PATH)/Drivers/USB/LowLevel/DevChapter9.c				\
-	  $(LUFA_PATH)/Drivers/USB//LowLevel/Endpoint.c          		\
-	  $(LUFA_PATH)/Drivers/USB//LowLevel/Host.c           			\
-	  $(LUFA_PATH)/Drivers/USB//LowLevel/HostChapter9.c  			\
-	  $(LUFA_PATH)/Drivers/USB//LowLevel/LowLevel.c      			\
- 	  $(LUFA_PATH)/Drivers/USB//LowLevel/Pipe.c               		\
-	  $(LUFA_PATH)/Drivers/USB//HighLevel/Events.c        			\
-	  $(LUFA_PATH)/Drivers/USB//HighLevel/USBInterrupt.c  			\
-	  $(LUFA_PATH)/Drivers/USB//HighLevel/USBTask.c        			\
-	  $(LUFA_PATH)/Drivers/USB//HighLevel/ConfigDescriptor.c  		\
+	  $(LUFA_PATH)/Drivers/USB/LowLevel/Endpoint.c          		\
+	  $(LUFA_PATH)/Drivers/USB/LowLevel/Host.c           			\
+	  $(LUFA_PATH)/Drivers/USB/LowLevel/HostChapter9.c  			\
+	  $(LUFA_PATH)/Drivers/USB/LowLevel/LowLevel.c      			\
+ 	  $(LUFA_PATH)/Drivers/USB/LowLevel/Pipe.c               		\
+	  $(LUFA_PATH)/Drivers/USB/HighLevel/Events.c        			\
+	  $(LUFA_PATH)/Drivers/USB/HighLevel/USBInterrupt.c  			\
+	  $(LUFA_PATH)/Drivers/USB/HighLevel/USBTask.c        			\
+	  $(LUFA_PATH)/Drivers/USB/HighLevel/ConfigDescriptor.c  		\
       
 	  
 # List C++ source files here. (C dependencies are automatically generated.)

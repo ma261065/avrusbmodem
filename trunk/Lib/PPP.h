@@ -2,8 +2,8 @@
 #define _PPP_H_
 
 #include "USBModem.h"
-#include "modem.h"
-#include "uart.h"
+#include "Lib/Modem.h"
+#include "Lib/Debug.h"
 #include "util/crc16.h"
 
 // Defines for Internet constants

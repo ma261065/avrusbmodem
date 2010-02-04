@@ -38,17 +38,17 @@ void DoPPP(void)
 			{	
 	        	if (rx_ptr == 0)								// Start of packet
 				{
-					Debug("\r\n\r\nReceive:\r\n7e ");
+					Debug_Print("\r\n\r\nReceive:\r\n7e ");
 					CharCount = 1;
 				}
 				else											// End of packet
 				{
-					Debug("7e\r\n");
+					Debug_Print("7e\r\n");
 
 					// If CRC passes, then accept packet
 				 	if (~checksum1secondlast == (rx_str[rx_ptr - 1] * 256 + rx_str[rx_ptr - 2]))
 					{
-						Debug("CRC OK\r\n");
+						Debug_Print("CRC OK\r\n");
 	           			PacketType = rx_str[2] * 256 + rx_str[3];
 
 						ProcessReceivedPacket();				// Process the packet we received
@@ -56,7 +56,7 @@ void DoPPP(void)
 					}
 					else
 					{
-						Debug("*** BAD CRC ***\r\n");
+						Debug_Print("*** BAD CRC ***\r\n");
 						ExitFlag = 1;
 					}
 	        	}
@@ -95,10 +95,10 @@ void DoPPP(void)
 				if (rx_ptr > MaxRx) 
 					rx_ptr = MaxRx;								// Increment pointer. Max is end of buffer
 				
-				PrintHex(c);
+				Debug_PrintHex(c);
 
 				if (CharCount % 16 == 0)
-					Debug("\r\n");
+					Debug_Print("\r\n");
 
 	        	checksum1secondlast = checksum1last;			// Keep a rolling count of the last 3 checksums
 				checksum1last = checksum1;						// Eventually we need to see if the checksum is valid
@@ -116,17 +116,17 @@ void DoPPP(void)
 	        	tx_end = 0;										// Mark buffer empty
 	        	c = 0x7e;										// Send end-of-frame character
 				
-				Debug("7e\r\n");
+				Debug_Print("7e\r\n");
 				
 				ExitFlag = 1;
 	     	}
 			else if (EscapeFlag)								// Sending escape sequence?
 			{
 				CharCount++;
-				PrintHex(c);
+				Debug_PrintHex(c);
 
 				if (CharCount % 16 == 0)
-					Debug("\r\n");
+					Debug_Print("\r\n");
 
 				c ^= 0x20;										// Yes then convert character
 	        	EscapeFlag = 0;									// Clear escape flag
@@ -142,16 +142,16 @@ void DoPPP(void)
 	       		if (!tx_ptr)
 				{
 					c = 0x7e;									// Send frame character if first character of packet
-					Debug("\r\n\r\nSend:\r\n");
+					Debug_Print("\r\n\r\nSend:\r\n");
 					CharCount = 0;
 					EscapeFlag = 0;
 				}
 
 	       		CharCount++;
-				PrintHex(c);
+				Debug_PrintHex(c);
 
 				if (CharCount % 16 == 0)
-					Debug("\r\n");
+					Debug_Print("\r\n");
 
 				tx_ptr++;
 			}
@@ -177,14 +177,14 @@ void ProcessReceivedPacket(void)
   	
 	if (PacketType == LCP)
 	{
-		Debug("Got LCP ");
+		Debug_Print("Got LCP ");
 
 		switch (rx_str[4])										// Switch on packet type
 		{
 			case REQ:
 				RemoteReady = 0;								// Clear remote ready flag
            
-		   		Debug("REQ ");
+		   		Debug_Print("REQ ");
 				
 				if ((c = TestOptions(0x00c7)))					// Options 1, 2, 3, 7, 8
 				{											
@@ -194,18 +194,18 @@ void ProcessReceivedPacket(void)
                  
 						RemoteReady = 1;						// Set remote ready flag
 
-						Debug("- We ACK\r\n");
+						Debug_Print("- We ACK\r\n");
 	              	}
 					else
 					{
 	                	rx_str[10] = 0xc0;						// Else NAK password authentication
 	                 	c = NAK;
-						Debug("- We NAK\r\n");
+						Debug_Print("- We NAK\r\n");
 	              	}
 				}
 				else											// Else REJ bad options
 				{
-					Debug("- We REJ\r\n");
+					Debug_Print("- We REJ\r\n");
 			   		c = REJ;
 				}
 			
@@ -216,25 +216,25 @@ void ProcessReceivedPacket(void)
 			case ACK:
 				if (rx_str[5] == number)						// Does reply ID match the request
 			   	{
-					Debug("ACK\r\n");
+					Debug_Print("ACK\r\n");
 					LocalReady = 1;								// Set local ready flag
 				}
 				else
-					Debug("Out of sync ACK\r\n");
+					Debug_Print("Out of sync ACK\r\n");
 			break;
         
 			case NAK:
-				Debug("NAK\r\n");
+				Debug_Print("NAK\r\n");
 				LocalReady = 0;									// Clear local ready flag
 	        break;
         
 			case REJ:
-				Debug("REJ\r\n");
+				Debug_Print("REJ\r\n");
 	        	LocalReady = 0;									// Clear local ready flag
 	        break;
         
 			case TERM:
-				Debug("TERM\r\n");
+				Debug_Print("TERM\r\n");
 	        break;
 		}
 
@@ -249,19 +249,19 @@ void ProcessReceivedPacket(void)
 
 	else if (PacketType == PAP)
 	{
-		Debug("Got PAP ");
+		Debug_Print("Got PAP ");
 
     	switch (rx_str[4])										// Switch on packet type
 		{
 	        case REQ:
-				Debug("REQ\r\n");				
+				Debug_Print("REQ\r\n");				
 	        break;												// Ignore incoming PAP REQ
 	        case ACK:
-				Debug("ACK\r\n");
+				Debug_Print("ACK\r\n");
 	           	PPPState = IPCPState;							// PAP ACK means that this state is done
 	        break;
 	        case NAK:
-				Debug("NAK\r\n");
+				Debug_Print("NAK\r\n");
 	        break;												// Ignore incoming PAP NAK
 		}
   	}
@@ -278,40 +278,40 @@ void ProcessReceivedPacket(void)
 		// IPCP option 0x83 Secondary DNS Address
 		// IPCP option 0x84 Secondary NBNS Address
 
-		Debug("Got IPCP ");
+		Debug_Print("Got IPCP ");
 
     	switch (rx_str[4])										// Switch on packet type
 		{		
         	case REQ:
-				Debug("REQ ");	
+				Debug_Print("REQ ");	
         		
 				if (TestOptions(0x0004))						// Option 3 - We got an IP address
 		   		{
 					c = ACK;									// We ACK
-					Debug("- We ACK\r\n");
+					Debug_Print("- We ACK\r\n");
            		}
 				else
 				{				
               		c = REJ;									// Otherwise we reject bad options
-					Debug("- We REJ\r\n");
+					Debug_Print("- We REJ\r\n");
            		}
            		
 				CreatePacket(IPCP, c, rx_str[5], rx_str + 7);	// Create IPCP packet from Rx buffer
 			break; 				
         
 			case ACK:
-				Debug("ACK\r\n");	
+				Debug_Print("ACK\r\n");	
 				
 				if (rx_str[5] == number)						// If IPCP response id matches request id
 				{
-					Debug("**LINK CONNECTED**\r\n");
+					Debug_Print("**LINK CONNECTED**\r\n");
 					PPPState = LCPState;						// Move into initial state for when we get called next time (after link disconnect)
 					ConnectedState = 2;
            		}
 			break;
        
 			case NAK:   										// This is where we get our address
-				Debug("NAK\r\n");	
+				Debug_Print("NAK\r\n");	
 				IPAddr1 = addr1 = rx_str[10];
 				IPAddr2 = addr2 = rx_str[11];   				// Store address for use in IP packets 
 				IPAddr3 = addr3 = rx_str[12];
@@ -323,28 +323,28 @@ void ProcessReceivedPacket(void)
 			break; 				
 
 			case REJ:
-				Debug("REJ\r\n");	
+				Debug_Print("REJ\r\n");	
 			break;												// Ignore incoming IPCP REJ
 			
 			case TERM:
-				Debug("TERM\r\n");	
+				Debug_Print("TERM\r\n");	
 			break;												// Ignore incoming IPCP TERM
 		}
 	}
 
 	else if (PacketType == IP)
 	{
-		Debug("Got IP\r\n");									// Should never get this as we should have handed over to the TCP stack
+		Debug_Print("Got IP\r\n");									// Should never get this as we should have handed over to the TCP stack
 	} 
 
 	else if (PacketType == CHAP)								// Should never get this as we ask for PAP authentication
 	{
-		Debug("Got CHAP\r\n");
+		Debug_Print("Got CHAP\r\n");
 	}
 
 	else if (PacketType)										// Ignore any other received packet types
 	{				
-		Debug("Got unknown packet\r\n");
+		Debug_Print("Got unknown packet\r\n");
   	}
 
 	PacketType = NONE;											// Indicate that packet is processed
@@ -359,7 +359,7 @@ void MakeInitialPacket(void)
 
 	if (PPPState == LCPState && TIME > 300)						// Once every 3 seconds try negotiating LCP
 	{		
-		Debug("\r\nMaking LCP Packet");
+		Debug_Print("\r\nMaking LCP Packet");
 		
 		TIME_SET(0);											// Reset timer
 		number++;												// Increment ID to make packets unique
@@ -370,7 +370,7 @@ void MakeInitialPacket(void)
 
 	else if (PPPState == PAPState && TIME > 100)				// Once every second try negotiating password
 	{	
-		Debug("\r\nMaking PAP Packet");
+		Debug_Print("\r\nMaking PAP Packet");
 		
 		TIME_SET(0);											// Reset timer
 		number++;												// Increment ID to make packets unique
@@ -380,7 +380,7 @@ void MakeInitialPacket(void)
 
 	else if (PPPState == IPCPState && TIME > 500)				// Once every 5 seconds try negotiating IPCP
 	{
-		Debug("\r\nMaking IPCP Packet");
+		Debug_Print("\r\nMaking IPCP Packet");
 
 		TIME_SET(0);											// Reset timer
 		number++;												// Increment ID to make packets unique

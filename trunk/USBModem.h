@@ -47,8 +47,8 @@
 		#include <string.h>
 
 		#include <LUFA/Version.h>
-		#include <LUFA/Drivers/Misc/TerminalCodes.h>
 		#include <LUFA/Drivers/USB/USB.h>
+		#include <LUFA/Drivers/Peripheral/SerialStream.h>
 		#include <LUFA/Drivers/Board/LEDs.h>
 		
 		#include <uIP-Contiki/network.h>
@@ -56,11 +56,14 @@
 		#include <uIP-Contiki/uip.h>
 
 		#include "ConfigDescriptor.h"
-		#include "modem.h"
-		#include "uart.h"
-		#include "ppp.h"
+		#include "Lib/Modem.h"
+		#include "Lib/Debug.h"
+		#include "Lib/PPP.h"
 
 	/* Macros: */
+		/** Serial baud rate for debugging */
+		#define UART_BAUD_RATE            19200
+	
 		/** Pipe number for the CDC data IN pipe */
 		#define CDC_DATAPIPE_IN           1
 
@@ -81,6 +84,9 @@
 
 		/** LED mask for the library LED driver, to indicate that an error has occurred in the USB interface. */
 		#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
+	
+	/* External Variables: */
+		extern char WatchdogTicks;
 		
 	/* Function Prototypes: */
 		void SetupHardware(void);
@@ -98,15 +104,13 @@
 		void modem_putc(unsigned char data);
 		void modem_puts(const char *s);
 		void Dial(void);
-		void device_enqueue(char *x, int len);
-		bool device_queue_full(void);
 		void TCPIPTask(void);
 		extern void TCPCallback(void);
-		extern void DebugChar(char DebugText);
-		extern void Debug(char *DebugText);
-		void PrintHex(unsigned char c);
 		void SendGET(void);
 		void SendPOST(void);
+
+		void device_enqueue(char *x, int len);
+		bool device_queue_full(void);
 
 		void wdt_init(void) __attribute__((naked)) __attribute__((section(".init3")));
 #endif
