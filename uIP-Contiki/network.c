@@ -113,34 +113,34 @@ void network_send(void)
 
 	// Header	
 	Buffer_StoreElement(&Modem_SendBuffer, 0xff);
-	checksum = CRC(checksum, 0xff);
+	checksum = CALC_CRC16(checksum, 0xff);
 
 	Buffer_StoreElement(&Modem_SendBuffer, 0x03);
-	checksum = CRC(checksum, 0x03);
+	checksum = CALC_CRC16(checksum, 0x03);
 
 	Buffer_StoreElement(&Modem_SendBuffer, 0x00);
-	checksum = CRC(checksum, 0x00);
+	checksum = CALC_CRC16(checksum, 0x00);
 
 	Buffer_StoreElement(&Modem_SendBuffer, 0x21);
-	checksum = CRC(checksum, 0x21);
+	checksum = CALC_CRC16(checksum, 0x21);
 
 	// Add the data, escaping it if necessary
 	for (int i = 0; i < uip_len; i++)
 	{
-			if (*(uip_buf + i) == 0x7d || *(uip_buf + i) == 0x7e)
-			{
-				Buffer_StoreElement(&Modem_SendBuffer, 0x7d);
-				Buffer_StoreElement(&Modem_SendBuffer, *(uip_buf + i) ^ 0x20);
-			}
-			else
-			{
-				Buffer_StoreElement(&Modem_SendBuffer, *(uip_buf + i));
-			}
+		if (*(uip_buf + i) == 0x7d || *(uip_buf + i) == 0x7e)
+		{
+			Buffer_StoreElement(&Modem_SendBuffer, 0x7d);
+			Buffer_StoreElement(&Modem_SendBuffer, *(uip_buf + i) ^ 0x20);
+		}
+		else
+		{
+			Buffer_StoreElement(&Modem_SendBuffer, *(uip_buf + i));
+		}
 
-			checksum = CRC(checksum, *(uip_buf + i));
-		
-			if (i % 64 == 0 && i != 0)		// Periodically flush the buffer to the modem
-			  USBManagement_SendReceivePipes();
+		checksum = CALC_CRC16(checksum, *(uip_buf + i));
+	
+		if (i % 64 == 0 && i != 0)		// Periodically flush the buffer to the modem
+		  USBManagement_SendReceivePipes();
 	}
 
 	// Add the checksum to the end of the packet, escaping it if necessary

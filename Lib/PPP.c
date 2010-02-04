@@ -1,13 +1,43 @@
+/*
+    LUFA Powered Wireless 3G Modem Host
+	
+    Copyright (C) Mike Alexander, 2010.
+     Copyright (C) Dean Camera, 2010.
+*/
+
+/*
+  Copyright 2010  Mike Alexander (mike [at] mikealex [dot] com)
+  Copyright 2010  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+
+  Permission to use, copy, modify, distribute, and sell this 
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in 
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting 
+  documentation, and that the name of the author not be used in 
+  advertising or publicity pertaining to distribution of the 
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
+*/
+
 #include "ppp.h"
 
-unsigned char addr1, addr2, addr3, addr4;						// Assigned IP address
-unsigned int rx_ptr, tx_ptr, tx_end;							// Pointers into buffers
-unsigned int checksum1, checksum1last, checksum1secondlast, checksum2;	// Rx and Tx checksums
-unsigned char number;											// Unique packet ID
-unsigned char tx_str[MaxRx + 1];								// Transmitter buffer
-unsigned char rx_str[MaxTx + 1];								// Receiver buffer
+uint8_t addr1, addr2, addr3, addr4;						// Assigned IP address
+uint16_t rx_ptr, tx_ptr, tx_end;							// Pointers into buffers
+uint16_t checksum1, checksum1last, checksum1secondlast, checksum2;	// Rx and Tx checksums
+uint8_t number;											// Unique packet ID
+uint8_t tx_str[MaxRx + 1];								// Transmitter buffer
+uint8_t rx_str[MaxTx + 1];								// Receiver buffer
 
-unsigned int PacketType = NONE;									// Type of the last received packet
+uint16_t PacketType = NONE;									// Type of the last received packet
 bool EscapeFlag;												// Flag if last character was an escape sequence
 bool LocalReady, RemoteReady;									// Flags for the ready-state of this end and the remote end
 
@@ -15,14 +45,14 @@ enum {LCPState, PAPState, IPCPState} PPPState;					// PPP negotiation states
 
 
 // The main loop, login script, PPP state machine
-void DoPPP(void)
+void PPP_ManagePPPNegotiation(void)
 {
-	signed int c;												// Received serial character
+	int16_t c;												// Received serial character
 	bool ExitFlag = 0;
 	int CharCount = 0;
 
 	// This will kick-start each phase of the PPP negotiations (LCP, PAP, IPCP)
-	MakeInitialPacket();
+	PPP_MakeInitialPacket();
 
 	// Stay in this loop until we have either received a full PPP packet, or until we have sent a full PPP packet, or we have nothing to do
 	do
@@ -49,7 +79,7 @@ void DoPPP(void)
 						Debug_Print("CRC OK\r\n");
 	           			PacketType = rx_str[2] * 256 + rx_str[3];
 
-						ProcessReceivedPacket();				// Process the packet we received
+						PPP_ProcessReceivedPacket();			// Process the packet we received
 						ExitFlag = true;
 					}
 					else
@@ -100,7 +130,7 @@ void DoPPP(void)
 
 	        	checksum1secondlast = checksum1last;			// Keep a rolling count of the last 3 checksums
 				checksum1last = checksum1;						// Eventually we need to see if the checksum is valid
-				checksum1 = CRC(checksum1, c);					// and we need the one two back (as the current one includes the checksum itself)
+				checksum1 = CALC_CRC16(checksum1, c);			// and we need the one two back (as the current one includes the checksum itself)
 	     	}
 	  	} 
 	   	
@@ -166,9 +196,9 @@ void DoPPP(void)
 }
 
 
-void ProcessReceivedPacket(void)
+void PPP_ProcessReceivedPacket(void)
 {	
-	signed int c;	
+	int16_t c;	
 
 	// *****************************
 	// **         LCP             **
@@ -185,7 +215,7 @@ void ProcessReceivedPacket(void)
            
 		   		Debug_Print("REQ ");
 				
-				if ((c = TestOptions(0x00c7)))					// Options 1, 2, 3, 7, 8
+				if ((c = PPP_TestOptions(0x00c7)))				// Options 1, 2, 3, 7, 8
 				{											
 	            	if (c > 1)
 				  	{
@@ -209,7 +239,7 @@ void ProcessReceivedPacket(void)
 				}
 			
 				TIME = 0;									// Stop the timer from expiring
-	           	CreatePacket(LCP, c, rx_str[5], rx_str + 7); 	// Create LCP packet from Rx buffer
+	           	PPP_CreatePacket(LCP, c, rx_str[5], rx_str + 7); 	// Create LCP packet from Rx buffer
 			break;
         
 			case ACK:
@@ -284,7 +314,7 @@ void ProcessReceivedPacket(void)
         	case REQ:
 				Debug_Print("REQ ");	
         		
-				if (TestOptions(0x0004))						// Option 3 - We got an IP address
+				if (PPP_TestOptions(0x0004))					// Option 3 - We got an IP address
 		   		{
 					c = ACK;									// We ACK
 					Debug_Print("- We ACK\r\n");
@@ -295,7 +325,7 @@ void ProcessReceivedPacket(void)
 					Debug_Print("- We REJ\r\n");
            		}
            		
-				CreatePacket(IPCP, c, rx_str[5], rx_str + 7);	// Create IPCP packet from Rx buffer
+				PPP_CreatePacket(IPCP, c, rx_str[5], rx_str + 7);	// Create IPCP packet from Rx buffer
 			break; 				
         
 			case ACK:
@@ -318,7 +348,7 @@ void ProcessReceivedPacket(void)
 				
 				number++;										// If we get a NAK, send the next REQ packet with a new number
 				
-				CreatePacket(IPCP, REQ, number, rx_str + 7);	// Make IPCP packet from Rx buffer
+				PPP_CreatePacket(IPCP, REQ, number, rx_str + 7);	// Make IPCP packet from Rx buffer
 			break; 				
 
 			case REJ:
@@ -351,7 +381,7 @@ void ProcessReceivedPacket(void)
 
 
 // Make the first packet to start each phase of the PPP negotiations (LCP, PAP, IPCP)
-void MakeInitialPacket(void)
+void PPP_MakeInitialPacket(void)
 {
 	if (tx_end)													// Don't make a new packet if we have data in the buffer already
 		return;
@@ -364,7 +394,7 @@ void MakeInitialPacket(void)
 		number++;												// Increment ID to make packets unique
 
 		// Request LCP options 2, 5, 7, 8, 0D, 11, 13
-		CreatePacket(LCP, REQ, number, (unsigned char*)"\x12\x01\x04\x05\xa0\x02\x06\x00\x0a\x00\x00\x07\x02\x08\x02");
+		PPP_CreatePacket(LCP, REQ, number, (uint8_t*)"\x12\x01\x04\x05\xa0\x02\x06\x00\x0a\x00\x00\x07\x02\x08\x02");
 	}
 
 	else if (PPPState == PAPState && TIME > 100)				// Once every second try negotiating password
@@ -374,7 +404,7 @@ void MakeInitialPacket(void)
 		TIME = 0;											// Reset timer
 		number++;												// Increment ID to make packets unique
 
-     	CreatePacket(PAP, REQ, number, (unsigned char*)"\x06\x00\x00"); 
+     	PPP_CreatePacket(PAP, REQ, number, (uint8_t*)"\x06\x00\x00"); 
   	}
 
 	else if (PPPState == IPCPState && TIME > 500)				// Once every 5 seconds try negotiating IPCP
@@ -385,7 +415,7 @@ void MakeInitialPacket(void)
 		number++;												// Increment ID to make packets unique
 		
 		// Request IPCP options 3 (IP Address), 81 (Primary DNS) & 83 (Secondary DNS) with addr 0.0.0.0 for each one
-		CreatePacket(IPCP, REQ, number, (unsigned char*)"\x16\x03\x06\x00\x00\x00\x00\x81\x06\x00\x00\x00\x00\x83\x06\x00\x00\x00\x00");
+		PPP_CreatePacket(IPCP, REQ, number, (uint8_t*)"\x16\x03\x06\x00\x00\x00\x00\x81\x06\x00\x00\x00\x00\x83\x06\x00\x00\x00\x00");
 	}
 }
 
@@ -397,35 +427,35 @@ void MakeInitialPacket(void)
 //   packetID is the packet ID
 //   *str is the packet data to be added after the header
 // Returns the packet as a string in tx_str
-void CreatePacket(unsigned int protocol, unsigned char packetType, unsigned char packetID, const unsigned char *str)
+void PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, const uint8_t *str)
 {
-	unsigned int length, temp;
+	uint16_t length, temp;
 
 	tx_ptr = 1;													// Point to 2nd char in transmit buffer. 1st char is length
 	tx_str[0] = ' ';											// Dummy first character. Will be overwritten by frame char (0x7e) when the packet is sent out
 	checksum2 = 0xffff;											// Initialise checksum
 
-	AddToPacket(0xff);											// Insert PPP header Oxff
-	AddToPacket(0x03);											// Insert PPP header 0x03
-	AddToPacket(protocol / 256);								// Insert high byte of protocol field
-	AddToPacket(protocol & 255);								// Insert low byte of protocol field
+	PPP_AddToPacket(0xff);										// Insert PPP header Oxff
+	PPP_AddToPacket(0x03);										// Insert PPP header 0x03
+	PPP_AddToPacket(protocol / 256);							// Insert high byte of protocol field
+	PPP_AddToPacket(protocol & 255);							// Insert low byte of protocol field
 
-	AddToPacket(packetType);									// Insert packet type (e.g. REQ, ACK, NAK)
-	AddToPacket(packetID);										// Insert packet ID number
+	PPP_AddToPacket(packetType);								// Insert packet type (e.g. REQ, ACK, NAK)
+	PPP_AddToPacket(packetID);									// Insert packet ID number
 
-	AddToPacket(0);												// Insert MSB of length (i.e. max length = 256)
+	PPP_AddToPacket(0);											// Insert MSB of length (i.e. max length = 256)
 	length = (*str) - 3;										// Calculate the length of data we actually have to copy
 
 	while (length)
 	{															// Copy the whole string into packet
 		length--;												// Decrement packet length
-	  	AddToPacket(*str);										// Add current character to packet
+	  	PPP_AddToPacket(*str);									// Add current character to packet
 		str++;													// Point to next character
 	}
 
 	temp = ~checksum2;
-	AddToPacket(temp & 255);									// Insert checksum MSB
-	AddToPacket(temp / 256);									// Insert checksum LSB
+	PPP_AddToPacket(temp & 255);								// Insert checksum MSB
+	PPP_AddToPacket(temp / 256);								// Insert checksum LSB
 
 	tx_end = tx_ptr;											// Set end of buffer marker to end of packet
 	tx_ptr = 0;													// Point to the beginning of the packet
@@ -436,9 +466,9 @@ void CreatePacket(unsigned int protocol, unsigned char packetType, unsigned char
 //   option is the 16 bit field, where a 1 accepts the option one greater than the bit # (e.g. 0x0004 for option 5) 
 //   returns 2 for LCP NAK, 1 is only correct fields found, and zero means bad options
 //   return also modifies RX_STR to list unacceptable options if NAK or REJ required
-unsigned char TestOptions(unsigned int option)
+uint8_t PPP_TestOptions(uint16_t option)
 {
-	unsigned int size;											// size is length of option string
+	uint16_t size;											// size is length of option string
 	unsigned ptr1 = 8;											// ptr1 points data insert location
     unsigned ptr2 = 8;											// ptr2 points to data origin
 	char pass = 3;												// pass is the return value
@@ -493,23 +523,9 @@ unsigned char TestOptions(unsigned int option)
    return pass;
 }
 
-// Calculate the CRC16 value
-unsigned int CRC(unsigned int crcvalue, unsigned char c)
-{
-	return _crc_ccitt_update(crcvalue, c);
-
-   //unsigned int b;
-
-   //b = (crcvalue ^ c) & 0xFF;
-   //b = (b ^ (b << 4)) & 0xFF;				
-   //b = (b << 8) ^ (b << 3) ^ (b >> 4);
-   
-   //return ((crcvalue >> 8) ^ b);
-}
-
 // Add character to the new packet & update the checksum
-void AddToPacket(unsigned char c)
+void PPP_AddToPacket(uint8_t c)
 {
-	checksum2 = CRC(checksum2, c);								// Add CRC from this char to running total
+	checksum2 = CALC_CRC16(checksum2, c);						// Add CRC from this char to running total
   	tx_str[tx_ptr++] = c;										// Store character in the transmit buffer
 }

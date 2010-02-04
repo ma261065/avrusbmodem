@@ -54,7 +54,7 @@ void ConnectionManagement_ManageConnectionState(void)
 			ConnectionManagement_DialConnection();
 			break;
 		case CONNECTION_MANAGE_STATE_DoPPPNegotiation:
-			DoPPP();
+			PPP_ManagePPPNegotiation();
 			break;
 		case CONNECTION_MANAGE_STATE_InitializeTCPStack:
 			ConnectionManagement_InitializeTCPStack();
