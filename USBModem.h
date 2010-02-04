@@ -55,10 +55,11 @@
 		#include <uIP-Contiki/timer.h>
 		#include <uIP-Contiki/uip.h>
 
-		#include "ConfigDescriptor.h"
-		#include "Lib/Modem.h"
+		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
 		#include "Lib/PPP.h"
+
+		#include "ConfigDescriptor.h"
 
 	/* Macros: */
 		/** Serial baud rate for debugging */
@@ -86,6 +87,8 @@
 		#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
 	
 	/* External Variables: */
+		extern RingBuff_t Modem_SendBuffer;
+		extern RingBuff_t Modem_ReceiveBuffer;
 		extern char WatchdogTicks;
 		
 	/* Function Prototypes: */
