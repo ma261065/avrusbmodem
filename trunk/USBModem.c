@@ -1,7 +1,34 @@
+/*
+    LUFA Powered Wireless 3G Modem Host
+	
+    Copyright (C) Mike Alexander, 2010.
+     Copyright (C) Dean Camera, 2010.
+*/
+
+/*
+  Copyright 2010  Mike Alexander (mike [at] mikealex [dot] com)
+  Copyright 2010  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+
+  Permission to use, copy, modify, distribute, and sell this 
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in 
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting 
+  documentation, and that the name of the author not be used in 
+  advertising or publicity pertaining to distribution of the 
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
+*/
+
 #include "USBModem.h"
-
-// UIP Includes. Don't know why these don't work in the USBModem.h file.
-
 
 // Global Variables
 char ConnectedState = 0;
@@ -15,7 +42,6 @@ struct timer periodic_timer;
 unsigned int TIME;											// 10 millseconds counter
 
 // Defines
-#define TIME_SET(a) TIME = a								// Set 10 millisecond counter to value 'a'
 #define UART_BAUD_RATE 19200
 
 // Interrupt Handlers
@@ -50,7 +76,6 @@ int main(void)
 	clock_prescale_set(clock_div_1);
 
 	// Hardware Initialization
-	//SerialStream_Init(19200, false);
 	uart1_init(UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU)); 	// Initialise the UART
 	modem_init();
 	LEDs_Init();
@@ -95,9 +120,8 @@ int main(void)
 	WDTCSR = _BV(WDCE) | _BV(WDE);						
 	WDTCSR = _BV(WDIE) | _BV(WDP0) | _BV(WDP3);				// Set the Watchdog timer to interrupt (not reset) every 8 seconds
 
-	TIME_SET(0);											// Reset the 10ms timer
+	TIME = 0;												// Reset the 10ms timer
 	
-	// Loop forever	
 	for(;;)
 	{
 		USB_USBTask();
@@ -108,12 +132,10 @@ int main(void)
 		{
 			case 0:
 				Dial();
-			break;
-			
+				break;
 			case 1:
 				DoPPP();
-			break;
-			
+				break;
 			case 2:
 				Debug("Initialise TCP Stack\r\n");
 			
@@ -134,8 +156,7 @@ int main(void)
 
 				ConnectedState = 3;
 				TIME_SET(2000);			// Make the first CONNECT happen straight away
-			break;
-			
+				break;
 			case 3:
 				if (TIME > 1000)		//Try to connect every 1 second
 				{
@@ -157,11 +178,10 @@ int main(void)
 					Debug("0x"); PrintHex(uip_mss() & 255); 
 					Debug("\r\n");
 				}
-			break;
-			
+				break;
 			case 4:
 				TCPIPTask();
-			break;
+				break;
 		}
 	}
 }
@@ -377,11 +397,7 @@ void Dial(void)
 	{
 		c = modem_getc();
 		
-		if (c & MODEM_NO_DATA)
-		{
-			// Nothing to process
-		}
-		else
+		if (!(c & MODEM_NO_DATA))
 		{
 			do
 			{
@@ -447,9 +463,6 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 	USB_ShutDown();
 
 	Debug("Host Mode Error\r\n");
-	//printf_P(PSTR(ESC_FG_RED "Host Mode Error\r\n"
-	//                       " -- Error Code %d\r\n" ESC_FG_WHITE), ErrorCode);
-
 	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
 	for(;;);
 }
@@ -459,14 +472,8 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode, const uint8_t SubErrorCode)
 {
 	Debug("Enumeration failed\r\n");
-	//printf_P(PSTR(ESC_FG_RED "Dev Enum Error\r\n"
-	  //                       " -- Error Code %d\r\n"
-	    //                     " -- Sub Error Code %d\r\n"
-	      //                   " -- In State %d\r\n" ESC_FG_WHITE), ErrorCode, SubErrorCode, USB_HostState);
-	
 	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
 }
-
 
 // Task to set the configuration of the attached device after it has been enumerated, and to read in
 // data received from the attached CDC device and print it to the serial port.
@@ -477,14 +484,12 @@ void CDC_Host_Task(void)
 	switch (USB_HostState)
 	{
 		case HOST_STATE_WaitForDeviceRemoval:
-				Debug("Waiting for device removal\r\n");
+			Debug("Waiting for device removal\r\n");
 
-				// Wait until USB device disconnected
-				while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);
-		break;
-
+			// Wait until USB device disconnected
+			while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);
+			break;
 		case HOST_STATE_Addressed:
-
 			Debug("Sending configuration command\r\n");
 
 			// Standard request to set the device configuration to configuration 1
@@ -529,56 +534,7 @@ void CDC_Host_Task(void)
 			Debug("CDC Device Enumerated\r\n");
 
 			USB_HostState = HOST_STATE_Configured;
-		break;
-		
-		case HOST_STATE_Configured:
-		/*	// Select and the data IN pipe 
-			Pipe_SelectPipe(CDC_DATAPIPE_IN);
-			Pipe_Unfreeze();
-
-			// Check to see if a packet has been received 
-			if (Pipe_IsINReceived())
-			{
-				// Re-freeze IN pipe after the packet has been received
-				Pipe_Freeze();
-
-				// Check if data is in the pipe
-				if (Pipe_IsReadWriteAllowed())
-				{
-					// Get the length of the pipe data, and create a new buffer to hold it
-					uint16_t BufferLength = Pipe_BytesInPipe();
-					uint8_t  Buffer[BufferLength];
-					
-					// Read in the pipe data to the temporary buffer
-					Pipe_Read_Stream_LE(Buffer, BufferLength);
-									
-					// Print out the buffer contents to the USART
-					for (uint16_t BufferByte = 0; BufferByte < BufferLength; BufferByte++)
-					  putchar(Buffer[BufferByte]);
-				}
-
-				// Clear the pipe after it is read, ready for the next packet
-				Pipe_ClearIN();
-			}
-
-			// Re-freeze IN pipe after use 
-			Pipe_Freeze();
-
-			// Select and unfreeze the notification pipe
-			Pipe_SelectPipe(CDC_NOTIFICATIONPIPE);
-			Pipe_Unfreeze();
-			
-			// Check if a packet has been received
-			if (Pipe_IsINReceived())
-			{
-				// Discard the unused event notification
-				Pipe_ClearIN();
-			}
-			
-			// Freeze notification IN pipe after use
-			Pipe_Freeze();
-			*/			
-		break;
+			break;
 	}
 }
 
