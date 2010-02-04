@@ -1,11 +1,10 @@
 #include "USBModem.h"
 
 // UIP Includes. Don't know why these don't work in the USBModem.h file.
-#include "uip-1.0/atmega/global-conf.h"
-#include "uip-1.0/drivers/interfaces/network.h"
-#include "uip-1.0/atmega/clock-arch.h"
-#include "uip-1.0/uip/timer.h"
-#include "uip-1.0/atmega/global-conf.h"
+#include "network.h"
+#include "clock.h"
+#include "timer.h"
+#include "uip.h"
 
 // Global Variables
 char ConnectedState = 0;

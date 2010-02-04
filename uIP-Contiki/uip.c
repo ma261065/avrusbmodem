@@ -73,7 +73,6 @@
 
 #include "uip.h"
 #include "uipopt.h"
-#include "uip_arp.h"
 
 #if !UIP_CONF_IPV6 /* If UIP_CONF_IPV6 is defined, we compile the
 		      uip6.c file instead of this one. Therefore
