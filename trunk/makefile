@@ -176,7 +176,7 @@ DEBUG = dwarf-2
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRAINCDIRS = $(LUFA_PATH) uip-1.0/uip uip-1.0/ATMEGA uip-1.0/apps/simple-httpd
+EXTRAINCDIRS = $(LUFA_PATH) $(UIP_PATH)
 
 
 # Compiler flag to set the C Standard level.

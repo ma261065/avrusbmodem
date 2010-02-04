@@ -10,7 +10,7 @@
 #include "USBModem.h"
 #include "modem.h"
 #include "uart.h"
-#include "uip-fw.h"
+#include "uip.h"
 
 /*Initialize the network*/
 void network_init(void);
