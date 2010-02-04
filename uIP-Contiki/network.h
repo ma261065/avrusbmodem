@@ -7,10 +7,11 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+
+#include <uIP-Contiki/uip.h>
+
 #include "USBModem.h"
-#include "modem.h"
-#include "uart.h"
-#include "uip.h"
+#include "Lib/Modem.h"
 
 /*Initialize the network*/
 void network_init(void);

@@ -1,0 +1,61 @@
+/*
+    LUFA Powered Wireless 3G Modem Host
+	
+    Copyright (C) Mike Alexander, 2010.
+     Copyright (C) Dean Camera, 2010.
+*/
+
+/*
+  Copyright 2010  Mike Alexander (mike [at] mikealex [dot] com)
+  Copyright 2010  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+
+  Permission to use, copy, modify, distribute, and sell this 
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in 
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting 
+  documentation, and that the name of the author not be used in 
+  advertising or publicity pertaining to distribution of the 
+  software without specific, written prior permission.
+
+  The author disclaim all warranties with regard to this
+  software, including all implied warranties of merchantability
+  and fitness.  In no event shall the author be liable for any
+  special, indirect or consequential damages or any damages
+  whatsoever resulting from loss of use, data or profits, whether
+  in an action of contract, negligence or other tortious action,
+  arising out of or in connection with the use or performance of
+  this software.
+*/
+
+#include "Debug.h"
+
+bool DebugModeEnabled = false;
+
+
+void Debug_PrintChar(char DebugText)
+{
+	if (DebugModeEnabled)
+	  putchar(DebugText);
+}
+
+void Debug_Print(char *DebugText)
+{
+	if (DebugModeEnabled)
+	  puts(DebugText);
+}
+
+void Debug_PrintHex(unsigned char c)
+{
+	if ((c >> 4) > 9)
+		Debug_PrintChar((c >> 4) + 'a' - 10);
+	else
+		Debug_PrintChar((c >> 4) + '0');
+
+	if ((c & 0x0f) > 9)
+		Debug_PrintChar((c & 0x0f) + 'a' - 10);
+	else
+		Debug_PrintChar((c & 0x0f) + '0');
+
+	Debug_PrintChar(' ');
+}

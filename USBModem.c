@@ -33,16 +33,12 @@
 // Global Variables
 char ConnectedState = 0;
 char IPAddr1, IPAddr2, IPAddr3, IPAddr4;
-char DebugMode = 0;
 char WatchdogTicks = 0;
 unsigned char DialSteps = 0;
 struct uip_conn* ThisConn;
 uip_ipaddr_t LocalIPAddress, RemoteIPAddress;
 struct timer periodic_timer;
 unsigned int TIME;											// 10 millseconds counter
-
-// Defines
-#define UART_BAUD_RATE 19200
 
 // Interrupt Handlers
 ISR(TIMER1_COMPA_vect)										// Timer 1 interrupt handler
@@ -55,7 +51,7 @@ ISR(WDT_vect)												// Watchdog Timer interrupt handler
 	if (++WatchdogTicks >= 23)								// 23 * 8s = 3 minutes. If we've received no data in 3 minutes reboot.
 	{
 		WDTCSR = _BV(WDCE) | _BV(WDE);						// Set watchdog timer to reboot rather than interrupt next time it fires
-		Debug("Watchdog reboot\r\n");
+		Debug_Print("Watchdog reboot\r\n");
 	}
 }
 
@@ -69,45 +65,18 @@ void wdt_init(void)
     return;
 }
 
-// Main program entry point. This routine configures the hardware required by the application, then runs the application tasks.
-int main(void)
+void SetupHardware(void)
 {
 	// Disable clock division
 	clock_prescale_set(clock_div_1);
 
 	// Hardware Initialization
-	uart1_init(UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU)); 	// Initialise the UART
 	modem_init();
 	LEDs_Init();
-
-	// Blink the lights for a bit
-	LEDs_SetAllLEDs(LEDMASK_USB_READY);
-	_delay_ms(500);
-	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
-	_delay_ms(500);
-	LEDs_SetAllLEDs(LEDMASK_USB_READY);
+	SerialStream_Init(UART_BAUD_RATE, false);
 	
 	// Initialize USB Subsystem
 	USB_Init();
-	
-	//Startup message
-	uart1_puts("\r\nUSB Modem - Press space bar to debug\r\n");			// Make sure the first 5 chars do not contain a space as terminal will echo this back
-	
-	for (int i = 0; i <= 5; i++)
-	{
-		uart1_putc('.');
-		
-		if (uart1_getc() == ' ')
-		{
-			DebugMode = 1;
-			uart1_puts("\r\nDebugging\r\n");
-			break;
-		}
-		
-		_delay_ms(500);
-	}
-
-	uart1_puts("\r\n");
 
 	// Timer 1
 	TCCR1B = _BV(WGM12) | _BV(CS10) | _BV(CS12);			// CK/1024 prescale, CTC mode
@@ -120,7 +89,39 @@ int main(void)
 	WDTCSR = _BV(WDCE) | _BV(WDE);						
 	WDTCSR = _BV(WDIE) | _BV(WDP0) | _BV(WDP3);				// Set the Watchdog timer to interrupt (not reset) every 8 seconds
 
-	TIME = 0;												// Reset the 10ms timer
+	TIME = 0;												// Reset the 10ms timer	
+}
+
+// Main program entry point. This routine configures the hardware required by the application, then runs the application tasks.
+int main(void)
+{	
+	SetupHardware();
+	
+	//Startup message
+	puts("\r\nUSB Modem - Press space bar to debug\r\n");			// Make sure the first 5 chars do not contain a space as terminal will echo this back
+	
+	for (int i = 0; i <= 5; i++)
+	{
+		putchar('.');
+		
+		if (getchar() == ' ')
+		{
+			DebugModeEnabled = true;
+			puts("\r\nDebugging\r\n");
+			break;
+		}
+		
+		_delay_ms(500);
+	}
+
+	puts("\r\n");
+
+	// Blink the lights for a bit
+	LEDs_SetAllLEDs(LEDMASK_USB_READY);
+	_delay_ms(500);
+	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
+	_delay_ms(500);
+	LEDs_SetAllLEDs(LEDMASK_USB_READY);
 	
 	for(;;)
 	{
@@ -137,7 +138,7 @@ int main(void)
 				DoPPP();
 				break;
 			case 2:
-				Debug("Initialise TCP Stack\r\n");
+				Debug_Print("Initialise TCP Stack\r\n");
 			
 				network_init();
 	
@@ -167,16 +168,16 @@ int main(void)
 
 					if (ThisConn != 0)
 					{
-						Debug("Connected to host\r\n");
+						Debug_Print("Connected to host\r\n");
 						ConnectedState = 4;
 						TIME_SET(3001);			// Make the first GET happen straight away
 					}
 					else
-						Debug("Failed to Connect\r\n");
+						Debug_Print("Failed to Connect\r\n");
 
-					Debug("Maximum Segment Size: 0x"); PrintHex(uip_mss() / 256);
-					Debug("0x"); PrintHex(uip_mss() & 255); 
-					Debug("\r\n");
+					Debug_Print("Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256);
+					Debug_Print("0x"); Debug_PrintHex(uip_mss() & 255); 
+					Debug_Print("\r\n");
 				}
 				break;
 			case 4:
@@ -188,34 +189,34 @@ int main(void)
 
 extern void TCPCallback(void)
 {
-	DebugChar('*');
+	Debug_PrintChar('*');
 
 	if (uip_newdata())
-		Debug("NewData ");
+		Debug_Print("NewData ");
 
 	if (uip_acked())
-		Debug("Acked ");
+		Debug_Print("Acked ");
 	
 	if (uip_connected())
-		Debug("Connected ");
+		Debug_Print("Connected ");
 
 	if (uip_closed())
 	{
-		Debug("Closed - Reconnecting...");
+		Debug_Print("Closed - Reconnecting...");
 		_delay_ms(1000);
 		ConnectedState = 3;
 	}
 
 	if (uip_aborted())
 	{
-		Debug("Aborted - Reconnecting... ");
+		Debug_Print("Aborted - Reconnecting... ");
 		_delay_ms(1000);
 		ConnectedState = 3;
 	}
 
 	if (uip_timedout())
 	{
-		Debug("Timeout - Reconnecting...");
+		Debug_Print("Timeout - Reconnecting...");
 		uip_abort();
 		_delay_ms(1000);
 		ConnectedState = 3;
@@ -225,13 +226,13 @@ extern void TCPCallback(void)
 	{
 		TIME_SET(0);
 		
-		Debug("\r\nSending GET\r\n");
+		Debug_Print("\r\nSending GET\r\n");
 		SendGET();
 	}
 	
 	if (uip_rexmit())
 	{
-		Debug("\r\nRetransmit GET\r\n");
+		Debug_Print("\r\nRetransmit GET\r\n");
 		SendGET();
 	}
 
@@ -267,7 +268,7 @@ void TCPIPTask(void)
 
 	if (uip_len == -1)								// Got a non-SLIP packet. Probably a LCP-TERM Re-establish link.
 	{
-		Debug("Got non-PPP packet\r\n");
+		Debug_Print("Got non-PPP packet\r\n");
 		TIME_SET(0);
 		ConnectedState = 0;
 		return;
@@ -278,7 +279,7 @@ void TCPIPTask(void)
 	
 		/********************** Debug **********************/
 
-		Debug("\r\nReceive:\r\n");
+		Debug_Print("\r\nReceive:\r\n");
 	
 		for (i = 0; i < uip_len; i += 16)
 		{	
@@ -288,10 +289,10 @@ void TCPIPTask(void)
 				if ((i + j) >= uip_len)
 					break;
 
-				PrintHex(*(uip_buf + i + j));
+				Debug_PrintHex(*(uip_buf + i + j));
 			}
 			
-			Debug("\r\n");	
+			Debug_Print("\r\n");	
 			
 			// Print the ASCII
 			for (j = 0; j < 16; j++)
@@ -301,15 +302,15 @@ void TCPIPTask(void)
 
 				if (*(uip_buf + i + j) >= 0x20 && *(uip_buf + i + j) <= 0x7e)
 				{
-					DebugChar(' ');
-					DebugChar(*(uip_buf + i + j));
-					DebugChar(' ');
+					Debug_PrintChar(' ');
+					Debug_PrintChar(*(uip_buf + i + j));
+					Debug_PrintChar(' ');
 				}
 				else
-					Debug(" . ");
+					Debug_Print(" . ");
 
 			}
-			Debug("\r\n");
+			Debug_Print("\r\n");
 		}
 
 		/********************** Debug **********************/
@@ -338,43 +339,25 @@ void TCPIPTask(void)
 		}
 	}
 
+	char c;
+
 	// Read any available data from the serial port.
 	// If we see a '!' in the input stream, switch debug mode on. If we see a "@", switch debug mode off.
-	int c = uart1_getc();
-	
-	while (c != UART_NO_DATA)
+	while ((c = getchar()) != EOF)
 	{
 		if (c == '!')
 		{
-			uart1_puts("\r\nDebug on\r\n");
-			DebugMode = 1;
+			puts("\r\nDebug on\r\n");
+			DebugModeEnabled = true;
 		}
 		else if (c == '@')
 		{
-			uart1_puts("\r\nDebug off\r\n");
-			DebugMode = 0;
+			puts("\r\nDebug off\r\n");
+			DebugModeEnabled = false;
 		}
 
-		c = uart1_getc();
+		c = getchar();
 	}	
-}
-
-void device_enqueue(char *x, int len)
-{
-	Debug("\r\nData:\r\n");
-
-	for (int i = 0; i < len; i++)
-	{
-		WatchdogTicks = 0;							// Reset the watchdog count
-		uart1_putc(*(x + i));
-	}
-
-	Debug("\r\n");
-}
-
-bool device_queue_full(void)						// TODO: Figure out how to return a proper value here
-{
-	return false;
 }
 
 const char *DialCommands[] = 
@@ -401,7 +384,7 @@ void Dial(void)
 		{
 			do
 			{
-				DebugChar(c);
+				Debug_PrintChar(c);
 				c = modem_getc();
 			}
 			while (!(c & MODEM_NO_DATA));
@@ -414,14 +397,14 @@ void Dial(void)
 
 			if (strcmp(Command, "PPP") == 0)
 			{
-				Debug("Starting PPP\r\n");
+				Debug_Print("Starting PPP\r\n");
 				DialSteps = 0;
 				ConnectedState = 1;
 				return;
 			}
 
-			Debug("Sending command: ");
-			Debug(Command);
+			Debug_Print("Sending command: ");
+			Debug_Print(Command);
 			
 			modem_puts(Command);
 		}
@@ -435,7 +418,7 @@ void Dial(void)
 void EVENT_USB_Host_DeviceAttached(void)
 {
 	//puts_P(PSTR(ESC_FG_GREEN "Device Attached.\r\n" ESC_FG_WHITE));
-	Debug("Device Attached\r\n");
+	Debug_Print("Device Attached\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_ENUMERATING);
 }
 
@@ -444,7 +427,7 @@ void EVENT_USB_Host_DeviceAttached(void)
 void EVENT_USB_Host_DeviceUnattached(void)
 {
 	//puts_P(PSTR(ESC_FG_GREEN "\r\nDevice Unattached.\r\n" ESC_FG_WHITE));
-	Debug("Device Unattached\r\n");
+	Debug_Print("Device Unattached\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
 	ConnectedState = 0;
 }
@@ -453,7 +436,7 @@ void EVENT_USB_Host_DeviceUnattached(void)
 //  enumerated by the host and is now ready to be used by the application.
 void EVENT_USB_Host_DeviceEnumerationComplete(void)
 {
-	Debug("Enumeration complete\r\n");
+	Debug_Print("Enumeration complete\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_READY);
 }
 
@@ -462,7 +445,7 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 {
 	USB_ShutDown();
 
-	Debug("Host Mode Error\r\n");
+	Debug_Print("Host Mode Error\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
 	for(;;);
 }
@@ -471,7 +454,7 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 // enumerating an attached USB device.
 void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode, const uint8_t SubErrorCode)
 {
-	Debug("Enumeration failed\r\n");
+	Debug_Print("Enumeration failed\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
 }
 
@@ -484,13 +467,13 @@ void CDC_Host_Task(void)
 	switch (USB_HostState)
 	{
 		case HOST_STATE_WaitForDeviceRemoval:
-			Debug("Waiting for device removal\r\n");
+			Debug_Print("Waiting for device removal\r\n");
 
 			// Wait until USB device disconnected
 			while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);
 			break;
 		case HOST_STATE_Addressed:
-			Debug("Sending configuration command\r\n");
+			Debug_Print("Sending configuration command\r\n");
 
 			// Standard request to set the device configuration to configuration 1
 			// For the Huawei modem, this will cause the device to disconnect and change modes
@@ -509,19 +492,19 @@ void CDC_Host_Task(void)
 			// Send the request and display any error
 			if ((ErrorCode = USB_Host_SendControlRequest(NULL)) != HOST_SENDCONTROL_Successful)
 			{
-				Debug("Control Error (Set Configuration).\r\n");
+				Debug_Print("Control Error (Set Configuration).\r\n");
 			}
 
-			Debug("Looking for modem device...");
+			Debug_Print("Looking for modem device...");
 			
 			// Get and process the configuration descriptor data
 			// First time through we expect an error. Once the device has re-attached it should be OK
 			if ((ErrorCode = ProcessConfigurationDescriptor()) != SuccessfulConfigRead)
 			{
 				if (ErrorCode == ControlError)
-				  Debug("Control Error (Get Configuration).\r\n");
+				  Debug_Print("Control Error (Get Configuration).\r\n");
 				else
-				  Debug("Not a modem device\r\n");
+				  Debug_Print("Not a modem device\r\n");
 
 				// Indicate error via status LEDs
 				LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
@@ -531,7 +514,7 @@ void CDC_Host_Task(void)
 				break;
 			}
 
-			Debug("CDC Device Enumerated\r\n");
+			Debug_Print("CDC Device Enumerated\r\n");
 
 			USB_HostState = HOST_STATE_Configured;
 			break;
@@ -574,7 +557,7 @@ void SendDataToAndFromModem(void)
 		BufferLength = modem_getTxBuffer(Buffer, (char)sizeof(Buffer));
 
 		if ((ErrorCode = Pipe_Write_Stream_LE(Buffer, BufferLength)) != PIPE_RWSTREAM_NoError)
-			Debug("Error writing Pipe\r\n");
+			Debug_Print("Error writing Pipe\r\n");
 
 		// Send the data in the OUT pipe to the attached device
 		Pipe_ClearOUT();
@@ -612,7 +595,7 @@ void SendDataToAndFromModem(void)
 		
 				// Read in the pipe data to the temporary buffer
 				if ((ErrorCode = Pipe_Read_Stream_LE(Buffer, BufferLength)) != PIPE_RWSTREAM_NoError)
-					Debug("Error reading Pipe\r\n");
+					Debug_Print("Error reading Pipe\r\n");
 		
 				// Clear the pipe after it is read, ready for the next packet
 				Pipe_ClearIN();
@@ -640,29 +623,20 @@ void SendDataToAndFromModem(void)
 	Pipe_Freeze();
 }
 
-void DebugChar(char DebugText)
+void device_enqueue(char *x, int len)
 {
-	if (DebugMode == 1)
-		uart1_putc(DebugText);
+	Debug_Print("\r\nData:\r\n");
+
+	for (int i = 0; i < len; i++)
+	{
+		WatchdogTicks = 0;							// Reset the watchdog count
+		putchar(*(x + i));
+	}
+
+	Debug_Print("\r\n");
 }
 
-void Debug(char *DebugText)
+bool device_queue_full(void)						// TODO: Figure out how to return a proper value here
 {
-	if (DebugMode == 1)
-		uart1_puts(DebugText);
-}
-
-void PrintHex(unsigned char c)
-{
-	if ((c >> 4) > 9)
-		DebugChar((c >> 4) + 'a' - 10);
-	else
-		DebugChar((c >> 4) + '0');
-
-	if ((c & 0x0f) > 9)
-		DebugChar((c & 0x0f) + 'a' - 10);
-	else
-		DebugChar((c & 0x0f) + '0');
-
-	DebugChar(' ');
+	return false;
 }

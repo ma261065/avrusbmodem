@@ -75,7 +75,7 @@ void modem_putc(unsigned char data)
     if (tmphead == MODEM_TxTail) 	// Error - transmit buffer overflow
 	{
         MODEM_LastRxError = MODEM_BUFFER_OVERFLOW >> 8;
-		Debug("Modem Buffer Overflow\r\n");
+		Debug_Print("Modem Buffer Overflow\r\n");
 		return;
     }
     

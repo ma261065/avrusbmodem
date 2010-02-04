@@ -51,7 +51,7 @@ unsigned int network_read(void)
 				else if (c == 0x7e)								// End of packet
 				{
 					InPacket = 0;
-					Debug("\r\n");
+					Debug_Print("\r\n");
 					return len - 2; 							// (-2) = Strip off checksum and framing
 				}
 				else
@@ -78,7 +78,7 @@ void network_send(void)
 	
 
 	/********************** Debug **********************/
-	Debug("\r\nSend:\r\n");
+	Debug_Print("\r\nSend:\r\n");
 	
 	for (i = 0; i < uip_len; i += 16)
 	{	
@@ -87,11 +87,11 @@ void network_send(void)
 			if ((i + j) >= uip_len)
 				break;
 
-			PrintHex(*(uip_buf + i + j));
+			Debug_PrintHex(*(uip_buf + i + j));
 
 		}
 		
-		Debug("\r\n");	
+		Debug_Print("\r\n");	
 		
 		for (j = 0; j < 16; j++)
 		{
@@ -100,15 +100,15 @@ void network_send(void)
 
 			if (*(uip_buf + i + j) >= 0x20 && *(uip_buf + i + j) <= 0x7e)
 			{
-				DebugChar(' ');
-				DebugChar(*(uip_buf + i + j));
-				DebugChar(' ');
+				Debug_PrintChar(' ');
+				Debug_PrintChar(*(uip_buf + i + j));
+				Debug_PrintChar(' ');
 			}
 			else
-				Debug(" . ");
+				Debug_Print(" . ");
 
 		}
-		Debug("\r\n");
+		Debug_Print("\r\n");
 	}
 	/********************** Debug **********************/
 
