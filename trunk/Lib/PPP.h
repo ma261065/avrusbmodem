@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "USBModem.h"
+#include "ConnectionManagement.h"
 #include "Lib/RingBuff.h"
 #include "Lib/Debug.h"
 #include "util/crc16.h"
@@ -24,9 +24,6 @@
 
 #define	MaxRx	512											// Maximum size of receive buffer
 #define	MaxTx	512											// Maximum size of transmit buffer (was 46)
-
-unsigned int TIME;											// 10 millseconds counter
-#define TIME_SET(a) TIME = a								// Set 10 millisecond counter to value 'a'
 
 unsigned int CRC(unsigned int crcvalue, unsigned char c);
 void AddToPacket(unsigned char c);

@@ -6,8 +6,6 @@ unsigned int checksum1, checksum1last, checksum1secondlast, checksum2;	// Rx and
 unsigned char number;											// Unique packet ID
 unsigned char tx_str[MaxRx + 1];								// Transmitter buffer
 unsigned char rx_str[MaxTx + 1];								// Receiver buffer
-extern char ConnectedState;
-extern char IPAddr1, IPAddr2, IPAddr3, IPAddr4;					// The IP address allocated to us by the remote end
 
 unsigned int PacketType = NONE;									// Type of the last received packet
 bool EscapeFlag;												// Flag if last character was an escape sequence
@@ -210,7 +208,7 @@ void ProcessReceivedPacket(void)
 			   		c = REJ;
 				}
 			
-				TIME_SET(0);									// Stop the timer from expiring
+				TIME = 0;									// Stop the timer from expiring
 	           	CreatePacket(LCP, c, rx_str[5], rx_str + 7); 	// Create LCP packet from Rx buffer
 			break;
         
@@ -362,7 +360,7 @@ void MakeInitialPacket(void)
 	{		
 		Debug_Print("\r\nMaking LCP Packet");
 		
-		TIME_SET(0);											// Reset timer
+		TIME = 0;											// Reset timer
 		number++;												// Increment ID to make packets unique
 
 		// Request LCP options 2, 5, 7, 8, 0D, 11, 13
@@ -373,7 +371,7 @@ void MakeInitialPacket(void)
 	{	
 		Debug_Print("\r\nMaking PAP Packet");
 		
-		TIME_SET(0);											// Reset timer
+		TIME = 0;											// Reset timer
 		number++;												// Increment ID to make packets unique
 
      	CreatePacket(PAP, REQ, number, (unsigned char*)"\x06\x00\x00"); 
@@ -383,7 +381,7 @@ void MakeInitialPacket(void)
 	{
 		Debug_Print("\r\nMaking IPCP Packet");
 
-		TIME_SET(0);											// Reset timer
+		TIME = 0;											// Reset timer
 		number++;												// Increment ID to make packets unique
 		
 		// Request IPCP options 3 (IP Address), 81 (Primary DNS) & 83 (Secondary DNS) with addr 0.0.0.0 for each one

@@ -137,6 +137,9 @@ void USBManagement_ManageUSBStateMachine(void)
 
 			USB_HostState = HOST_STATE_Configured;
 			break;
+		case HOST_STATE_Configured:
+			USBManagement_SendReceivePipes();
+			break;
 	}
 }
 
