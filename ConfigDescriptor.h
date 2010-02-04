@@ -1,21 +1,21 @@
 /*
-             LUFA Library
-     Copyright (C) Dean Camera, 2009.
-              
-  dean [at] fourwalledcubicle [dot] com
-      www.fourwalledcubicle.com
+    LUFA Powered Wireless 3G Modem Host
+	
+    Copyright (C) Mike Alexander, 2010.
+     Copyright (C) Dean Camera, 2010.
 */
 
 /*
-  Copyright 2009  Dean Camera (dean [at] fourwalledcubicle [dot] com)
+  Copyright 2010  Mike Alexander (mike [at] mikealex [dot] com)
+  Copyright 2010  Dean Camera (dean [at] fourwalledcubicle [dot] com)
 
-  Permission to use, copy, modify, and distribute this software
-  and its documentation for any purpose and without fee is hereby
-  granted, provided that the above copyright notice appear in all
-  copies and that both that the copyright notice and this
-  permission notice and warranty disclaimer appear in supporting
-  documentation, and that the name of the author not be used in
-  advertising or publicity pertaining to distribution of the
+  Permission to use, copy, modify, distribute, and sell this 
+  software and its documentation for any purpose is hereby granted
+  without fee, provided that the above copyright notice appear in 
+  all copies and that both that the copyright notice and this
+  permission notice and warranty disclaimer appear in supporting 
+  documentation, and that the name of the author not be used in 
+  advertising or publicity pertaining to distribution of the 
   software without specific, written prior permission.
 
   The author disclaim all warranties with regard to this
@@ -43,22 +43,22 @@
 		
 	/* Macros: */
 		/** Interface Class value for the CDC class */
-		#define CDC_CONTROL_CLASS              0xff//0x02
+		#define CDC_CONTROL_CLASS              0xff
 
-		/** Interface Class value for the CDC Communication Interface subclass */
-		#define CDC_CONTROL_SUBCLASS           0xff//0x02
+		/** Interface Class value for the CDC subclass */
+		#define CDC_CONTROL_SUBCLASS           0xff
 
 		/** Interface Class value for the CDC protocol */
-		#define CDC_CONTROL_PROTOCOL           0xff//0x01
+		#define CDC_CONTROL_PROTOCOL           0xff
 		
 		/** Interface Class value for the CDC data class */
-		#define CDC_DATA_CLASS                 0xff//0x0A
+		#define CDC_DATA_CLASS                 0xff
 
 		/** Interface Class value for the CDC data subclass */
-		#define CDC_DATA_SUBCLASS              0xff//0x00
+		#define CDC_DATA_SUBCLASS              0xff
 
 		/** Interface Class value for the CDC data protocol */
-		#define CDC_DATA_PROTOCOL              0xff//0x00
+		#define CDC_DATA_PROTOCOL              0xff
 
 		/** Maximum size of a device configuration descriptor which can be processed by the host, in bytes */
 		#define MAX_CONFIG_DESCRIPTOR_SIZE     512
