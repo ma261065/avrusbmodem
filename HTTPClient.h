@@ -42,9 +42,10 @@
 		#include "Lib/Debug.h"
 	
 	/* External Variables: */
-		extern struct uip_conn* ThisConn;
+		extern uip_ipaddr_t RemoteIPAddress;
 	
 	/* Function Prototypes: */
+		bool HTTPClient_Connect(void);
 		void HTTPClient_TCPCallback(void);
 		void HTTPClient_SendGET(void);
 		

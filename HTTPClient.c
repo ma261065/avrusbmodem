@@ -30,8 +30,30 @@
 
 #include "HTTPClient.h"
 
+uip_ipaddr_t     RemoteIPAddress;
 struct uip_conn* ThisConn;
 
+
+bool HTTPClient_Connect(void)
+{
+	// Connect to the remote machine
+	ThisConn = uip_connect(&RemoteIPAddress, HTONS(80));
+
+	Debug_Print("Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256);
+	Debug_Print("0x"); Debug_PrintHex(uip_mss() & 255); 
+	Debug_Print("\r\n");	
+
+	if (ThisConn != NULL)
+	{
+		Debug_Print("Connected to host\r\n");
+		return true;
+	}
+	else
+	{
+		Debug_Print("Failed to Connect\r\n");
+		return false;
+	}
+}
 
 void HTTPClient_TCPCallback(void)
 {

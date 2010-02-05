@@ -30,9 +30,8 @@
 
 #include "LinkManagement.h"
 
-struct timer     Periodic_Timer;
-uint8_t          DialSteps = 0;
-uip_ipaddr_t     RemoteIPAddress;
+struct timer Periodic_Timer;
+uint8_t      DialSteps = 0;
 
 const char* DialCommands[] = 
 {	
@@ -86,10 +85,11 @@ void LinkManagement_DialConnection(void)
 				return;
 			}
 
+			char* CommandPtr = (char*)DialCommands[DialSteps++];
+
 			Debug_Print("Sending command: ");
-			Debug_Print((char*)DialCommands[DialSteps]);
+			Debug_Print(CommandPtr);
 			
-			const char* CommandPtr = DialCommands[DialSteps++];
 			while (*CommandPtr)
 			  Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
 		}
@@ -122,27 +122,15 @@ void LinkManagement_InitializeTCPStack(void)
 
 void LinkManagement_ConnectToRemoteHost(void)
 {
-	if (TIME > 1000)		//Try to connect every 1 second
+	if (TIME > 1000)		// Try to connect every 1 second
 	{
 		TIME = 0;
 		
-		// Connect to the remote machine
-		ThisConn = uip_connect(&RemoteIPAddress, HTONS(80));
-
-		if (ThisConn != NULL)
+		if (HTTPClient_Connect())
 		{
-			Debug_Print("Connected to host\r\n");
+			TIME = 3001;	// Make the first GET happen straight away
 			ConnectedState = LINKMANAGEMENT_STATE_ManageTCPConnection;
-			TIME = 3001;			// Make the first GET happen straight away
 		}
-		else
-		{
-			Debug_Print("Failed to Connect\r\n");
-		}
-
-		Debug_Print("Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256);
-		Debug_Print("0x"); Debug_PrintHex(uip_mss() & 255); 
-		Debug_Print("\r\n");
 	}
 }
 
