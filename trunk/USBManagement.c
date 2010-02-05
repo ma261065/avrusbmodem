@@ -158,37 +158,29 @@ void USBManagement_SendReceivePipes(void)
 
 	// Select the OUT data pipe for transmission
 	Pipe_SelectPipe(CDC_DATAPIPE_OUT);
-	Pipe_SetPipeToken(PIPE_TOKEN_OUT);
+	//Pipe_SetPipeToken(PIPE_TOKEN_OUT);
 	Pipe_Unfreeze();
 
-	if (Modem_SendBuffer.Elements)
-	{
-		if (!(Pipe_IsReadWriteAllowed()))
-		{
-			Pipe_ClearOUT();
-
-			if ((ErrorCode = Pipe_WaitUntilReady()) != PIPE_READYWAIT_NoError)
-			{
-				// Freeze pipe after use
-				Pipe_Freeze();
-		  		return;
-			}
-		}
-
-		// Copy from the circular buffer to a temporary transmission buffer		
-		BufferLength = Modem_SendBuffer.Elements;
-		
-		uint8_t* BufferPos = Buffer;
-		while (Modem_SendBuffer.Elements)
-		  *(BufferPos++) = Buffer_GetElement(&Modem_SendBuffer);
-
-		if ((ErrorCode = Pipe_Write_Stream_LE(Buffer, BufferLength)) != PIPE_RWSTREAM_NoError)
-			Debug_Print("Error writing Pipe\r\n");
-
-		// Send the data in the OUT pipe to the attached device
-		Pipe_ClearOUT();
-	}
-
+	while (Modem_SendBuffer.Elements) 
+         { 
+                 if (!(Pipe_IsReadWriteAllowed())) 
+                 { 
+                         Pipe_ClearOUT(); 
+  
+                         if ((ErrorCode = Pipe_WaitUntilReady()) != PIPE_READYWAIT_NoError) 
+                         { 
+                                 // Freeze pipe after use 
+                                 Pipe_Freeze(); 
+                                 return; 
+                         } 
+                 } 
+                 Pipe_Write_Byte(Buffer_GetElement(&Modem_SendBuffer)); 
+         } 
+          
+         // Send remaining data in pipe bank 
+         if (Pipe_BytesInPipe()) 
+           Pipe_ClearOUT(); 
+ 
 	// Freeze pipe after use
 	Pipe_Freeze();
 
@@ -199,7 +191,7 @@ void USBManagement_SendReceivePipes(void)
 	
 	// Select the data IN pipe
 	Pipe_SelectPipe(CDC_DATAPIPE_IN);
-	Pipe_SetPipeToken(PIPE_TOKEN_IN);
+	//Pipe_SetPipeToken(PIPE_TOKEN_IN);
 	Pipe_Unfreeze();
 
 	// Check if data is in the pipe

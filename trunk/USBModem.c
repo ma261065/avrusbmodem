@@ -104,7 +104,7 @@ int main(void)
 	{
 		putchar('.');
 		
-		if (getchar() == ' ')
+		//if (getchar() == ' ')
 		{
 			DebugModeEnabled = true;
 			puts("\r\nDebugging\r\n");
