@@ -133,7 +133,7 @@ void ConnectionManagement_ConnectToRemoteHost(void)
 		// Connect to the remote machine
 		ThisConn = uip_connect(&RemoteIPAddress, HTONS(80));
 
-		if (ThisConn != 0)
+		if (ThisConn != NULL)
 		{
 			Debug_Print("Connected to host\r\n");
 			ConnectedState = CONNECTION_MANAGE_STATE_ManageTCPConnection;
