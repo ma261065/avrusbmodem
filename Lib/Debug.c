@@ -33,10 +33,10 @@
 bool DebugModeEnabled = false;
 
 
-void Debug_PrintChar(char DebugText)
+void Debug_PrintChar(char DebugChar)
 {
 	if (DebugModeEnabled)
-	  putchar(DebugText);
+	  putchar(DebugChar);
 }
 
 void Debug_Print(char *DebugText)
@@ -48,7 +48,7 @@ void Debug_Print(char *DebugText)
 	}
 }
 
-void Debug_PrintHex(unsigned char c)
+void Debug_PrintHex(uint8_t c)
 {
 	if ((c >> 4) > 9)
 		Debug_PrintChar((c >> 4) + 'a' - 10);
