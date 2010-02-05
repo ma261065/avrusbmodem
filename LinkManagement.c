@@ -79,7 +79,7 @@ void LinkManagement_DialConnection(void)
 		{
 			TIME = 0;
 
-			if (!(strlen(DialCommands[DialSteps])))
+			if (DialCommands[DialSteps] == NULL)
 			{
 				Debug_Print("Starting PPP\r\n");
 				DialSteps = 0;

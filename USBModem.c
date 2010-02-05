@@ -95,9 +95,8 @@ int main(void)
 {	
 	SetupHardware();
 	
-	//Startup message
-	puts("\r\nUSB Modem - Press space bar to debug\r\n");			// Make sure the first 5 chars do not contain a space as terminal will echo this back
-	
+	// Startup message - make sure the first 5 chars do not contain a space as terminal will echo this back
+	puts("\r\nUSB Modem - Press space bar to debug\r\n");
 	for (int i = 0; i <= 5; i++)
 	{
 		putchar('.');
@@ -111,7 +110,6 @@ int main(void)
 		
 		_delay_ms(500);
 	}
-
 	puts("\r\n");
 
 	// Blink the lights for a bit
@@ -123,9 +121,9 @@ int main(void)
 	
 	for(;;)
 	{
-		USB_USBTask();
-		USBManagement_ManageUSBStateMachine();
 		LinkManagement_ManageConnectionState();
+		USBManagement_ManageUSBStateMachine();
+		USB_USBTask();
 
 		// Read any available data from the serial port.
 		// If we see a '!' in the input stream, switch debug mode on. If we see a "@", switch debug mode off.
