@@ -54,7 +54,7 @@ ISR(WDT_vect)												// Watchdog Timer interrupt handler
 
 // Once the watchdog is enabled, then it stays enabled, even after a reset! 
 // A function needs to be added to the .init3 section (i.e. during the startup code, before main()) to disable the watchdog early enough so it does not continually reset the AVR.
-void wdt_init(void)
+void WDT_Init(void)
 {
     MCUSR = 0;
     wdt_disable();
@@ -129,22 +129,4 @@ int main(void)
 		USBManagement_ManageUSBStateMachine();
 		LinkManagement_ManageConnectionState();
 	}
-}
-
-void device_enqueue(char *x, int len)
-{
-	Debug_Print("\r\nData:\r\n");
-
-	for (int i = 0; i < len; i++)
-	{
-		WatchdogTicks = 0;							// Reset the watchdog count
-		putchar(*(x + i));
-	}
-
-	Debug_Print("\r\n");
-}
-
-bool device_queue_full(void)						// TODO: Figure out how to return a proper value here
-{
-	return false;
 }

@@ -83,10 +83,6 @@
 		
 	/* Function Prototypes: */
 		void SetupHardware(void);
-
-		void device_enqueue(char *x, int len);
-		bool device_queue_full(void);
-
-		void wdt_init(void) ATTR_NAKED ATTR_INIT_SECTION(3);
+		void WDT_Init(void) ATTR_NAKED ATTR_INIT_SECTION(3);
 
 #endif
