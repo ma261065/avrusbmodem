@@ -60,13 +60,13 @@ void HTTPClient_TCPCallback(void)
 	Debug_PrintChar('*');
 
 	if (uip_newdata())
-		Debug_Print("NewData ");
+	  Debug_Print("NewData ");
 
 	if (uip_acked())
-		Debug_Print("Acked ");
+	  Debug_Print("Acked ");
 	
 	if (uip_connected())
-		Debug_Print("Connected ");
+	  Debug_Print("Connected ");
 
 	if (uip_closed())
 	{
@@ -90,7 +90,7 @@ void HTTPClient_TCPCallback(void)
 		ConnectedState = LINKMANAGEMENT_STATE_ConnectToRemoteHost;
 	}
 
-	if (uip_poll() && TIME > 3000)
+	if (uip_poll() && (TIME > 3000))
 	{
 		TIME = 0;
 		
@@ -106,24 +106,40 @@ void HTTPClient_TCPCallback(void)
 
 	if (uip_newdata())
 	{
-		device_enqueue(uip_appdata, uip_datalen());
+		HTTPClient_QueueData(uip_appdata, uip_datalen());
 		
-		if (device_queue_full())
-		{
-			uip_stop();
-		}
+		if (HTTPClient_IsDataQueueFull())
+		  uip_stop();
 	}
 
 	if (uip_poll() && uip_stopped(ThisConn))
 	{
-		if (!device_queue_full())
-		{
-			uip_restart();
-		}
+		if (!(HTTPClient_IsDataQueueFull()))
+		  uip_restart();
 	}
 }
 
 void HTTPClient_SendGET(void)
 {
-	uip_send("GET / HTTP/1.1\r\nHost: www.example.com\r\nConnection: Keep-Alive\r\n\r\n", 65);
+	char GETRequest[] = "GET / HTTP/1.1\r\nHost: www.example.com\r\nConnection: Keep-Alive\r\n\r\n";
+
+	uip_send(GETRequest, strlen(GETRequest));
+}
+
+void HTTPClient_QueueData(char *x, int len)
+{
+	Debug_Print("\r\nData:\r\n");
+
+	for (int i = 0; i < len; i++)
+	{
+		WatchdogTicks = 0;							// Reset the watchdog count
+		putchar(*(x + i));
+	}
+
+	Debug_Print("\r\n");
+}
+
+bool HTTPClient_IsDataQueueFull(void)
+{
+	return false;
 }

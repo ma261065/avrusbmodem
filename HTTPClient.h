@@ -37,6 +37,8 @@
 #define _HTTPCLIENT_H_
 
 	/* Includes: */
+		#include <stdbool.h>
+	
 		#include <uIP-Contiki/uip.h>
 
 		#include "Lib/Debug.h"
@@ -48,5 +50,7 @@
 		bool HTTPClient_Connect(void);
 		void HTTPClient_TCPCallback(void);
 		void HTTPClient_SendGET(void);
+		void HTTPClient_QueueData(char *x, int len);
+		bool HTTPClient_IsDataQueueFull(void);
 		
 #endif
