@@ -30,25 +30,17 @@
 
 /** \file
  *
- *  Header file for USBModem.c.
+ *  Header file for LinkManagement.c.
  */
 
-#ifndef _USB_MODEM_H_
-#define _USB_MODEM_H_
+#ifndef _LINK_MANAGEMENT_H_
+#define _LINK_MANAGEMENT_H_
 
 	/* Includes: */
-		#include <avr/io.h>
-		#include <avr/wdt.h>
 		#include <avr/pgmspace.h>
-		#include <avr/power.h>
-		#include <stdio.h>
+		#include <stdlib.h>
+		#include <string.h>
 
-		#include <LUFA/Version.h>
-		#include <LUFA/Common/Common.h>
-		#include <LUFA/Drivers/USB/USB.h>
-		#include <LUFA/Drivers/Peripheral/SerialStream.h>
-		#include <LUFA/Drivers/Board/LEDs.h>
-		
 		#include <uIP-Contiki/network.h>
 		#include <uIP-Contiki/timer.h>
 		#include <uIP-Contiki/uip.h>
@@ -56,37 +48,29 @@
 		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
 		#include "Lib/PPP.h"
-
-		#include "ConfigDescriptor.h"
-		#include "USBManagement.h"
-		#include "LinkManagement.h"
-
-	/* Macros: */
-		/** Serial baud rate for debugging */
-		#define UART_BAUD_RATE            19200
-
-		/** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
-		#define LEDMASK_USB_NOTREADY      LEDS_LED1
-
-		/** LED mask for the library LED driver, to indicate that the USB interface is enumerating. */
-		#define LEDMASK_USB_ENUMERATING  (LEDS_LED2 | LEDS_LED3)
-
-		/** LED mask for the library LED driver, to indicate that the USB interface is ready. */
-		#define LEDMASK_USB_READY        (LEDS_LED2 | LEDS_LED4)
-
-		/** LED mask for the library LED driver, to indicate that an error has occurred in the USB interface. */
-		#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
+		
+		#include "HTTPClient.h"
+	
+	/* Enums: */
+		enum Link_Management_States_t
+		{
+			LINKMANAGEMENT_STATE_DialConnection      = 0,
+			LINKMANAGEMENT_STATE_DoPPPNegotiation    = 1,
+			LINKMANAGEMENT_STATE_InitializeTCPStack  = 2,
+			LINKMANAGEMENT_STATE_ConnectToRemoteHost = 3,
+			LINKMANAGEMENT_STATE_ManageTCPConnection = 4,
+		};
 	
 	/* External Variables: */
-		extern uint8_t WatchdogTicks;
-		extern uint8_t ConnectedState;
-		
+		extern uint16_t TIME;								// 10 millseconds counter
+		extern uint8_t  ConnectedState;
+		extern uint8_t  IPAddr1, IPAddr2, IPAddr3, IPAddr4;	// The IP address allocated to us by the remote end
+	
 	/* Function Prototypes: */
-		void SetupHardware(void);
-
-		void device_enqueue(char *x, int len);
-		bool device_queue_full(void);
-
-		void wdt_init(void) ATTR_NAKED ATTR_INIT_SECTION(3);
+		void LinkManagement_ManageConnectionState(void);
+		void LinkManagement_DialConnection(void);
+		void LinkManagement_InitializeTCPStack(void);
+		void LinkManagement_ConnectToRemoteHost(void);
+		void LinkManagement_TCPIPTask(void);
 
 #endif

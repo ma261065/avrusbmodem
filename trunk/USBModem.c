@@ -104,7 +104,7 @@ int main(void)
 	{
 		putchar('.');
 		
-		//if (getchar() == ' ')
+		if (getchar() == ' ')
 		{
 			DebugModeEnabled = true;
 			puts("\r\nDebugging\r\n");
@@ -127,7 +127,7 @@ int main(void)
 	{
 		USB_USBTask();
 		USBManagement_ManageUSBStateMachine();
-		ConnectionManagement_ManageConnectionState();
+		LinkManagement_ManageConnectionState();
 	}
 }
 

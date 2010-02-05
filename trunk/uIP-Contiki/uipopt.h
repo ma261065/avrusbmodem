@@ -669,7 +669,7 @@ typedef uint32_t uip_stats_t;
  * response to TCP/IP events.
  *
  */
-#define UIP_APPCALL     TCPCallback
+#define UIP_APPCALL     HTTPClient_TCPCallback
 void UIP_APPCALL(void);
 
 /**
