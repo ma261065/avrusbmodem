@@ -43,9 +43,6 @@
 
 		#include "Lib/Debug.h"
 	
-	/* External Variables: */
-		extern uip_ipaddr_t RemoteIPAddress;
-	
 	/* Function Prototypes: */
 		bool HTTPClient_Connect(void);
 		void HTTPClient_TCPCallback(void);

@@ -125,23 +125,16 @@ int main(void)
 		USBManagement_ManageUSBStateMachine();
 		USB_USBTask();
 
-		// Read any available data from the serial port.
-		// If we see a '!' in the input stream, switch debug mode on. If we see a "@", switch debug mode off.
-		char c;
-		while ((c = getchar()) > 0)
+		switch (getchar())
 		{
-			if (c == '!')
-			{
+			case '!':
 				puts("\r\nDebug on\r\n");
 				DebugModeEnabled = true;
-			}
-			else if (c == '@')
-			{
+				break;
+			case '@':
 				puts("\r\nDebug off\r\n");
 				DebugModeEnabled = false;
-			}
-
-			c = getchar();
+				break;
 		}
 	}
 }

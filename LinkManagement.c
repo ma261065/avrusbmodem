@@ -79,15 +79,15 @@ void LinkManagement_DialConnection(void)
 		{
 			TIME = 0;
 
-			if (DialCommands[DialSteps] == NULL)
+			char* CommandPtr = (char*)DialCommands[DialSteps++];
+
+			if (CommandPtr == NULL)
 			{
 				Debug_Print("Starting PPP\r\n");
 				DialSteps = 0;
 				ConnectedState = LINKMANAGEMENT_STATE_DoPPPNegotiation;
 				return;
 			}
-
-			char* CommandPtr = (char*)DialCommands[DialSteps++];
 
 			Debug_Print("Sending command: ");
 			Debug_Print(CommandPtr);
@@ -102,21 +102,18 @@ void LinkManagement_InitializeTCPStack(void)
 {
 	Debug_Print("Initialise TCP Stack\r\n");
 
-	// uIP component init
+	// uIP Initialization
 	network_init();
 	clock_init();
 	uip_init();
 
-	// Periodic connection management timer init
+	// Periodic Connection Timer Initialization
 	timer_set(&Periodic_Timer, CLOCK_SECOND / 2);
 
 	// Set this machine's IP address
 	uip_ipaddr_t LocalIPAddress;
 	uip_ipaddr(&LocalIPAddress, IPAddr1, IPAddr2, IPAddr3, IPAddr4);
 	uip_sethostaddr(&LocalIPAddress);
-
-	// Set remote IP address
-	uip_ipaddr(&RemoteIPAddress, 192, 0, 32, 10);	// www.example.com
 
 	ConnectedState = LINKMANAGEMENT_STATE_ConnectToRemoteHost;
 	TIME = 2000;			// Make the first CONNECT happen straight away
@@ -138,8 +135,6 @@ void LinkManagement_ConnectToRemoteHost(void)
 
 void LinkManagement_TCPIPTask(void)
 {
-	int i, j;
-
 	uip_len = network_read();
 
 	if (uip_len == -1)								// Got a non-SLIP packet. Probably a LCP-TERM Re-establish link.
@@ -152,18 +147,15 @@ void LinkManagement_TCPIPTask(void)
 
 	if (uip_len > 0)								// We have some data to process
 	{
-	
-		/********************** Debug **********************/
-
 		Debug_Print("\r\nReceive:\r\n");
-	
-		for (i = 0; i < uip_len; i += 16)
+
+		for (uint16_t i = 0; i < uip_len; i += 16)
 		{	
 			// Print the hex
-			for (j = 0; j < 16; j++)
+			for (uint8_t j = 0; j < 16; j++)
 			{
 				if ((i + j) >= uip_len)
-					break;
+				  break;
 
 				Debug_PrintHex(*(uip_buf + i + j));
 			}
@@ -171,10 +163,10 @@ void LinkManagement_TCPIPTask(void)
 			Debug_Print("\r\n");	
 			
 			// Print the ASCII
-			for (j = 0; j < 16; j++)
+			for (uint8_t j = 0; j < 16; j++)
 			{
 				if ((i + j) >= uip_len)
-					break;
+				  break;
 
 				if (*(uip_buf + i + j) >= 0x20 && *(uip_buf + i + j) <= 0x7e)
 				{
@@ -191,29 +183,23 @@ void LinkManagement_TCPIPTask(void)
 			Debug_Print("\r\n");
 		}
 
-		/********************** Debug **********************/
-
 		uip_input();
  
 	 	// If the above function invocation resulted in data that should be sent out on the network, the global variable uip_len is set to a value > 0.
 	 	if (uip_len > 0)
-		{
-	 		network_send();
-	 	}
+	 	  network_send();
 	}
 	else if (timer_expired(&Periodic_Timer))
 	{
 		timer_reset(&Periodic_Timer);
 
-		for (int i = 0; i < UIP_CONNS; i++)
+		for (uint8_t i = 0; i < UIP_CONNS; i++)
 		{
 	 		uip_periodic(i);
  
 	 		// If the above function invocation resulted in data that should be sent out on the network, the global variable uip_len is set to a value > 0.
 	 		if (uip_len > 0)
-	 		{
-	 			network_send();
-	 		}
+	 		  network_send();
 		}
 	}
 }
