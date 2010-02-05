@@ -31,11 +31,11 @@
 #include "ConnectionManagement.h"
 
 struct uip_conn* ThisConn;
-struct timer     periodic_timer;
+struct timer     Periodic_Timer;
 uint8_t          DialSteps = 0;
 uip_ipaddr_t     RemoteIPAddress;
 
-const char *DialCommands[] = 
+const char* DialCommands[] = 
 {	
 	"AT\r\n",
 	"AT&F\r\n",
@@ -110,7 +110,7 @@ void ConnectionManagement_InitializeTCPStack(void)
 	uip_init();
 
 	// Periodic connection management timer init
-	timer_set(&periodic_timer, CLOCK_SECOND / 2);
+	timer_set(&Periodic_Timer, CLOCK_SECOND / 2);
 
 	// Set this machine's IP address
 	uip_ipaddr_t LocalIPAddress;
@@ -215,9 +215,9 @@ void ConnectionManagement_TCPIPTask(void)
 	 		network_send();
 	 	}
 	}
-	else if (timer_expired(&periodic_timer))
+	else if (timer_expired(&Periodic_Timer))
 	{
-		timer_reset(&periodic_timer);
+		timer_reset(&Periodic_Timer);
 
 		for (int i = 0; i < UIP_CONNS; i++)
 		{

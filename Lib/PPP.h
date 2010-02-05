@@ -32,12 +32,12 @@
 #define _PPP_H_
 
 	/* Includes: */
+		#include <util/crc16.h>
 		#include <stdbool.h>
 
 		#include "ConnectionManagement.h"
 		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
-		#include "util/crc16.h"
 
 	/* Macros: */
 		#define CALC_CRC16(crcvalue, c)    _crc_ccitt_update(crcvalue, c);
