@@ -156,6 +156,7 @@ void USBManagement_SendReceivePipes(void)
 
 	// Select the OUT data pipe for transmission
 	Pipe_SelectPipe(CDC_DATAPIPE_OUT);
+	Pipe_SetPipeToken(PIPE_TOKEN_OUT);
 	Pipe_Unfreeze();
 
 	while (Modem_SendBuffer.Elements)
@@ -171,6 +172,7 @@ void USBManagement_SendReceivePipes(void)
 		  		return;
 			}
 		}
+
 		Pipe_Write_Byte(Buffer_GetElement(&Modem_SendBuffer));
 	}
 	
@@ -188,6 +190,7 @@ void USBManagement_SendReceivePipes(void)
 	
 	// Select the data IN pipe
 	Pipe_SelectPipe(CDC_DATAPIPE_IN);
+	Pipe_SetPipeToken(PIPE_TOKEN_IN);
 	Pipe_Unfreeze();
 
 	// Check if data is in the pipe
@@ -196,9 +199,12 @@ void USBManagement_SendReceivePipes(void)
 		// Re-freeze IN pipe after the packet has been received
 		Pipe_Freeze();
 		
-		while (Pipe_BytesInPipe())
-		  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_Byte());
-		  
+		if (Pipe_IsReadWriteAllowed())
+		{
+			while (Pipe_BytesInPipe())
+			  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_Byte());
+		}
+		
 		Pipe_ClearIN();
 	}
 	
