@@ -30,8 +30,10 @@
 
 #include "LinkManagement.h"
 
-struct timer Periodic_Timer;
+uint8_t      IPAddr1, IPAddr2, IPAddr3, IPAddr4;
+uint8_t      ConnectedState = LINKMANAGEMENT_STATE_DialConnection;
 uint8_t      DialSteps = 0;
+struct timer Periodic_Timer;
 
 const char* DialCommands[] = 
 {	
@@ -214,24 +216,4 @@ void LinkManagement_TCPIPTask(void)
 	 		}
 		}
 	}
-
-	char c;
-
-	// Read any available data from the serial port.
-	// If we see a '!' in the input stream, switch debug mode on. If we see a "@", switch debug mode off.
-	while ((c = getchar()) != EOF)
-	{
-		if (c == '!')
-		{
-			puts("\r\nDebug on\r\n");
-			DebugModeEnabled = true;
-		}
-		else if (c == '@')
-		{
-			puts("\r\nDebug off\r\n");
-			DebugModeEnabled = false;
-		}
-
-		c = getchar();
-	}	
 }

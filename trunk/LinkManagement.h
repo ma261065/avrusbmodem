@@ -62,9 +62,8 @@
 		};
 	
 	/* External Variables: */
-		extern uint16_t TIME;								// 10 millseconds counter
-		extern uint8_t  ConnectedState;
-		extern uint8_t  IPAddr1, IPAddr2, IPAddr3, IPAddr4;	// The IP address allocated to us by the remote end
+		extern uint8_t ConnectedState;
+		extern uint8_t IPAddr1, IPAddr2, IPAddr3, IPAddr4;	// The IP address allocated to us by the remote end
 	
 	/* Function Prototypes: */
 		void LinkManagement_ManageConnectionState(void);

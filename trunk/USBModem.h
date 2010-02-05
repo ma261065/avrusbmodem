@@ -78,8 +78,8 @@
 		#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
 	
 	/* External Variables: */
-		extern uint8_t WatchdogTicks;
-		extern uint8_t ConnectedState;
+		extern uint8_t  WatchdogTicks;
+		extern uint16_t TIME;
 		
 	/* Function Prototypes: */
 		void SetupHardware(void);
