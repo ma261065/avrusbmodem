@@ -31,8 +31,6 @@
 #include "USBModem.h"
 
 // Global Variables
-uint8_t  ConnectedState = 0;
-uint8_t  IPAddr1, IPAddr2, IPAddr3, IPAddr4;
 uint8_t  WatchdogTicks = 0;
 uint16_t TIME;												// 10 millseconds counter
 
@@ -128,5 +126,24 @@ int main(void)
 		USB_USBTask();
 		USBManagement_ManageUSBStateMachine();
 		LinkManagement_ManageConnectionState();
+
+		// Read any available data from the serial port.
+		// If we see a '!' in the input stream, switch debug mode on. If we see a "@", switch debug mode off.
+		char c;
+		while ((c = getchar()) > 0)
+		{
+			if (c == '!')
+			{
+				puts("\r\nDebug on\r\n");
+				DebugModeEnabled = true;
+			}
+			else if (c == '@')
+			{
+				puts("\r\nDebug off\r\n");
+				DebugModeEnabled = false;
+			}
+
+			c = getchar();
+		}
 	}
 }
