@@ -199,10 +199,10 @@ void USBManagement_SendReceivePipes(void)
 		{
 			while (Pipe_BytesInPipe())
 			  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_Byte());
-	
-			// Clear the pipe after it is read, ready for the next packet
-			Pipe_ClearIN();
 		}
+
+		// Clear the pipe after it is read, ready for the next packet
+		Pipe_ClearIN();
 	}
 	
 	// Re-freeze IN pipe after use

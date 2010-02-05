@@ -35,9 +35,17 @@
 		#include <util/crc16.h>
 		#include <stdbool.h>
 
-		#include "ConnectionManagement.h"
+		#include "LinkManagement.h"
 		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
+	
+	/* Enums: */
+		typedef enum
+		{
+			PPP_STATE_LCPNegotiation  = 0,
+			PPP_STATE_PAPNegotiation  = 1,
+			PPP_STATE_IPCPNegotiation = 2,
+		} PPP_States_t;
 
 	/* Macros: */
 		#define CALC_CRC16(crcvalue, c)    _crc_ccitt_update(crcvalue, c);
@@ -60,12 +68,12 @@
 		#define	MaxTx	512											// Maximum size of transmit buffer (was 46)
 
 	/* Function Prototypes: */
-		void PPP_ManagePPPNegotiation(void);
-		void PPP_AddToPacket(uint8_t c);
-		void PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, const uint8_t *str);
+		void    PPP_ManagePPPNegotiation(void);
+		void    PPP_AddToPacket(uint8_t c);
+		void    PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, const uint8_t *str);
 		uint8_t PPP_TestOptions(uint16_t option);
-		void PPP_ProcessReceivedPacket(void);
-		void PPP_MakeInitialPacket(void);
+		void    PPP_ProcessReceivedPacket(void);
+		void    PPP_MakeInitialPacket(void);
 
 #endif
 

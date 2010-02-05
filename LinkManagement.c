@@ -28,9 +28,8 @@
   this software.
 */
 
-#include "ConnectionManagement.h"
+#include "LinkManagement.h"
 
-struct uip_conn* ThisConn;
 struct timer     Periodic_Timer;
 uint8_t          DialSteps = 0;
 uip_ipaddr_t     RemoteIPAddress;
@@ -46,29 +45,29 @@ const char* DialCommands[] =
 	"PPP"					// PPP is a special case to transition to next state
 };
 
-void ConnectionManagement_ManageConnectionState(void)
+void LinkManagement_ManageConnectionState(void)
 {
 	switch (ConnectedState)
 	{
-		case CONNECTION_MANAGE_STATE_DialConnection:
-			ConnectionManagement_DialConnection();
+		case LINKMANAGEMENT_STATE_DialConnection:
+			LinkManagement_DialConnection();
 			break;
-		case CONNECTION_MANAGE_STATE_DoPPPNegotiation:
+		case LINKMANAGEMENT_STATE_DoPPPNegotiation:
 			PPP_ManagePPPNegotiation();
 			break;
-		case CONNECTION_MANAGE_STATE_InitializeTCPStack:
-			ConnectionManagement_InitializeTCPStack();
+		case LINKMANAGEMENT_STATE_InitializeTCPStack:
+			LinkManagement_InitializeTCPStack();
 			break;
-		case CONNECTION_MANAGE_STATE_ConnectToRemoteHost:
-			ConnectionManagement_ConnectToRemoteHost();
+		case LINKMANAGEMENT_STATE_ConnectToRemoteHost:
+			LinkManagement_ConnectToRemoteHost();
 			break;
-		case CONNECTION_MANAGE_STATE_ManageTCPConnection:
-			ConnectionManagement_TCPIPTask();
+		case LINKMANAGEMENT_STATE_ManageTCPConnection:
+			LinkManagement_TCPIPTask();
 			break;
 	}
 }
 
-void ConnectionManagement_DialConnection(void)
+void LinkManagement_DialConnection(void)
 {
 	char Command[64];
 
@@ -86,7 +85,7 @@ void ConnectionManagement_DialConnection(void)
 			{
 				Debug_Print("Starting PPP\r\n");
 				DialSteps = 0;
-				ConnectedState = CONNECTION_MANAGE_STATE_DoPPPNegotiation;
+				ConnectedState = LINKMANAGEMENT_STATE_DoPPPNegotiation;
 				return;
 			}
 
@@ -100,7 +99,7 @@ void ConnectionManagement_DialConnection(void)
 	}
 }
 
-void ConnectionManagement_InitializeTCPStack(void)
+void LinkManagement_InitializeTCPStack(void)
 {
 	Debug_Print("Initialise TCP Stack\r\n");
 
@@ -120,11 +119,11 @@ void ConnectionManagement_InitializeTCPStack(void)
 	// Set remote IP address
 	uip_ipaddr(&RemoteIPAddress, 192, 0, 32, 10);	// www.example.com
 
-	ConnectedState = CONNECTION_MANAGE_STATE_ConnectToRemoteHost;
+	ConnectedState = LINKMANAGEMENT_STATE_ConnectToRemoteHost;
 	TIME = 2000;			// Make the first CONNECT happen straight away
 }
 
-void ConnectionManagement_ConnectToRemoteHost(void)
+void LinkManagement_ConnectToRemoteHost(void)
 {
 	if (TIME > 1000)		//Try to connect every 1 second
 	{
@@ -136,7 +135,7 @@ void ConnectionManagement_ConnectToRemoteHost(void)
 		if (ThisConn != NULL)
 		{
 			Debug_Print("Connected to host\r\n");
-			ConnectedState = CONNECTION_MANAGE_STATE_ManageTCPConnection;
+			ConnectedState = LINKMANAGEMENT_STATE_ManageTCPConnection;
 			TIME = 3001;			// Make the first GET happen straight away
 		}
 		else
@@ -150,7 +149,7 @@ void ConnectionManagement_ConnectToRemoteHost(void)
 	}
 }
 
-void ConnectionManagement_TCPIPTask(void)
+void LinkManagement_TCPIPTask(void)
 {
 	int i, j;
 
@@ -160,7 +159,7 @@ void ConnectionManagement_TCPIPTask(void)
 	{
 		Debug_Print("Got non-PPP packet\r\n");
 		TIME = 0;
-		ConnectedState = CONNECTION_MANAGE_STATE_DialConnection;
+		ConnectedState = LINKMANAGEMENT_STATE_DialConnection;
 		return;
 	}
 
@@ -250,77 +249,4 @@ void ConnectionManagement_TCPIPTask(void)
 
 		c = getchar();
 	}	
-}
-
-void TCPCallback(void)
-{
-	Debug_PrintChar('*');
-
-	if (uip_newdata())
-		Debug_Print("NewData ");
-
-	if (uip_acked())
-		Debug_Print("Acked ");
-	
-	if (uip_connected())
-		Debug_Print("Connected ");
-
-	if (uip_closed())
-	{
-		Debug_Print("Closed - Reconnecting...");
-		_delay_ms(1000);
-		ConnectedState = CONNECTION_MANAGE_STATE_ConnectToRemoteHost;
-	}
-
-	if (uip_aborted())
-	{
-		Debug_Print("Aborted - Reconnecting... ");
-		_delay_ms(1000);
-		ConnectedState = CONNECTION_MANAGE_STATE_ConnectToRemoteHost;
-	}
-
-	if (uip_timedout())
-	{
-		Debug_Print("Timeout - Reconnecting...");
-		uip_abort();
-		_delay_ms(1000);
-		ConnectedState = CONNECTION_MANAGE_STATE_ConnectToRemoteHost;
-	}
-
-	if (uip_poll() && TIME > 3000)
-	{
-		TIME = 0;
-		
-		Debug_Print("\r\nSending GET\r\n");
-		SendGET();
-	}
-	
-	if (uip_rexmit())
-	{
-		Debug_Print("\r\nRetransmit GET\r\n");
-		SendGET();
-	}
-
-	if (uip_newdata())
-	{
-		device_enqueue(uip_appdata, uip_datalen());
-		
-		if (device_queue_full())
-		{
-			uip_stop();
-		}
-	}
-
-	if (uip_poll() && uip_stopped(ThisConn))
-	{
-		if (!device_queue_full())
-		{
-			uip_restart();
-		}
-	}
-}
-
-void SendGET(void)
-{
-	uip_send("GET / HTTP/1.1\r\nHost: www.example.com\r\nConnection: Keep-Alive\r\n\r\n", 65);
 }

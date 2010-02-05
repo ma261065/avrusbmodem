@@ -126,8 +126,9 @@ UIP_PATH = ./uip-Contiki
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c                                                 	\
 	  ConfigDescriptor.c                                          	\
-	  ConnectionManagement.c                                        \
+	  LinkManagement.c                                              \
 	  USBManagement.c                                               \
+	  HTTPClient.c                                                  \
       Lib/Debug.c					  								\
 	  Lib/RingBuff.c	  						  					\
 	  Lib/PPP.c					    				  				\

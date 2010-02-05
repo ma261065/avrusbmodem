@@ -30,24 +30,21 @@
 
 #include "ppp.h"
 
-uint8_t addr1, addr2, addr3, addr4;						// Assigned IP address
-uint16_t rx_ptr, tx_ptr, tx_end;							// Pointers into buffers
-uint16_t checksum1, checksum1last, checksum1secondlast, checksum2;	// Rx and Tx checksums
-uint8_t number;											// Unique packet ID
-uint8_t tx_str[MaxRx + 1];								// Transmitter buffer
-uint8_t rx_str[MaxTx + 1];								// Receiver buffer
-
-uint16_t PacketType = NONE;									// Type of the last received packet
-bool EscapeFlag;												// Flag if last character was an escape sequence
-bool LocalReady, RemoteReady;									// Flags for the ready-state of this end and the remote end
-
-enum {LCPState, PAPState, IPCPState} PPPState;					// PPP negotiation states
-
+uint8_t      addr1, addr2, addr3, addr4;						// Assigned IP address
+uint16_t     rx_ptr, tx_ptr, tx_end;							// Pointers into buffers
+uint16_t     checksum1, checksum1last, checksum1secondlast, checksum2;	// Rx and Tx checksums
+uint8_t      number;											// Unique packet ID
+uint8_t      tx_str[MaxRx + 1];									// Transmitter buffer
+uint8_t      rx_str[MaxTx + 1];									// Receiver buffer
+uint16_t     PacketType = NONE;									// Type of the last received packet
+bool         EscapeFlag;										// Flag if last character was an escape sequence
+bool         LocalReady, RemoteReady;							// Flags for the ready-state of this end and the remote end
+PPP_States_t PPPState;											// PPP negotiation states
 
 // The main loop, login script, PPP state machine
 void PPP_ManagePPPNegotiation(void)
 {
-	int16_t c;												// Received serial character
+	int16_t c;													// Received serial character
 	bool ExitFlag = 0;
 	int CharCount = 0;
 
@@ -268,7 +265,7 @@ void PPP_ProcessReceivedPacket(void)
 		}
 
 		if (LocalReady && RemoteReady)							// When both ends ready, go to PAP state
-			PPPState = PAPState;
+			PPPState = PPP_STATE_PAPNegotiation;
 	} 
 
 
@@ -287,7 +284,7 @@ void PPP_ProcessReceivedPacket(void)
 	        break;												// Ignore incoming PAP REQ
 	        case ACK:
 				Debug_Print("ACK\r\n");
-	           	PPPState = IPCPState;							// PAP ACK means that this state is done
+	           	PPPState = PPP_STATE_IPCPNegotiation;			// PAP ACK means that this state is done
 	        break;
 	        case NAK:
 				Debug_Print("NAK\r\n");
@@ -334,8 +331,8 @@ void PPP_ProcessReceivedPacket(void)
 				if (rx_str[5] == number)						// If IPCP response id matches request id
 				{
 					Debug_Print("**LINK CONNECTED**\r\n");
-					PPPState = LCPState;						// Move into initial state for when we get called next time (after link disconnect)
-					ConnectedState = CONNECTION_MANAGE_STATE_InitializeTCPStack;
+					PPPState = PPP_STATE_LCPNegotiation;		// Move into initial state for when we get called next time (after link disconnect)
+					ConnectedState = LINKMANAGEMENT_STATE_InitializeTCPStack;
            		}
 			break;
        
@@ -386,7 +383,7 @@ void PPP_MakeInitialPacket(void)
 	if (tx_end)													// Don't make a new packet if we have data in the buffer already
 		return;
 
-	if (PPPState == LCPState && TIME > 300)						// Once every 3 seconds try negotiating LCP
+	if ((PPPState == PPP_STATE_LCPNegotiation) && (TIME > 300))	// Once every 3 seconds try negotiating LCP
 	{		
 		Debug_Print("\r\nMaking LCP Packet");
 		
@@ -397,7 +394,7 @@ void PPP_MakeInitialPacket(void)
 		PPP_CreatePacket(LCP, REQ, number, (uint8_t*)"\x12\x01\x04\x05\xa0\x02\x06\x00\x0a\x00\x00\x07\x02\x08\x02");
 	}
 
-	else if (PPPState == PAPState && TIME > 100)				// Once every second try negotiating password
+	else if ((PPPState == PPP_STATE_PAPNegotiation) && (TIME > 100))	// Once every second try negotiating password
 	{	
 		Debug_Print("\r\nMaking PAP Packet");
 		
@@ -407,7 +404,7 @@ void PPP_MakeInitialPacket(void)
      	PPP_CreatePacket(PAP, REQ, number, (uint8_t*)"\x06\x00\x00"); 
   	}
 
-	else if (PPPState == IPCPState && TIME > 500)				// Once every 5 seconds try negotiating IPCP
+	else if ((PPPState == PPP_STATE_IPCPNegotiation) && (TIME > 500))	// Once every 5 seconds try negotiating IPCP
 	{
 		Debug_Print("\r\nMaking IPCP Packet");
 
