@@ -19,8 +19,10 @@ ISR(TIMER0_COMPA_vect)
 //Initialise the clock
 void clock_init()
 {
+	// 10ms tick interval
 	OCR0A  = ((F_CPU / 1024) / 100);
-	TCCR0B = ((1 << WGM01) | (1 << CS02) | (1 << CS00));
+	TCCR0A = (1 << WGM01);
+	TCCR0B = ((1 << CS02) | (1 << CS00));
 	TIMSK0 = (1 << OCIE0A);
 }
 
