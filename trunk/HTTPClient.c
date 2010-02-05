@@ -37,6 +37,7 @@ struct uip_conn* HTTPConnection;
 bool HTTPClient_Connect(void)
 {
 	// Connect to the remote machine
+	uip_ipaddr(&RemoteIPAddress, 192, 0, 32, 10);	// www.example.com
 	HTTPConnection = uip_connect(&RemoteIPAddress, HTONS(80));
 
 	Debug_Print("Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256);
