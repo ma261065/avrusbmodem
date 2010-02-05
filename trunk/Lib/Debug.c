@@ -36,7 +36,7 @@ bool DebugModeEnabled = false;
 void Debug_PrintChar(char DebugChar)
 {
 	if (DebugModeEnabled)
-	  putchar(DebugChar);
+		putchar(DebugChar);
 }
 
 void Debug_Print(char *DebugText)
@@ -44,7 +44,7 @@ void Debug_Print(char *DebugText)
 	if (DebugModeEnabled)
 	{
 		while (*DebugText)
-		  putchar(*(DebugText++));
+			putchar(*(DebugText++));
 	}
 }
 

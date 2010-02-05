@@ -13,7 +13,7 @@ unsigned int network_read(void)
 	{
 		c = Buffer_GetElement(&Modem_ReceiveBuffer);
 	
-		if (InPacket == 0 && InHeader == 0 && c == 0x7e)	// New Packet
+		if (InPacket == 0 && InHeader == 0 && c == 0x7e)				// New Packet
 		{
 			InHeader = 1;
 			len = 0;
@@ -21,34 +21,34 @@ unsigned int network_read(void)
 
 		if (InHeader == 1)
 		{
-			if (c == 0x21)									// End of Header (Header is 00 21)
+			if (c == 0x21)												// End of Header (Header is 00 21)
 			{
 				InHeader = 0;
 				InPacket = 1;
 				len = -1;
 			}
-			else if (len == 1 && c != 0x00)					// Got a non-SLIP packet, probably LCP-TERM. Need to re-establish link.
+			else if (len == 1 && c != 0x00)								// Got a non-SLIP packet, probably LCP-TERM. Need to re-establish link.
 			{
 				return -1;
 			}
 		}
 		else if (InPacket == 1)
 		{
-			if (c == 0x7d)									// Escaped character. Set flag and process next time around
+			if (c == 0x7d)												// Escaped character. Set flag and process next time around
 			{
 				Escape = 1;
 				len--;
 			}
-			else if (Escape == 1)							// Escaped character. Process now.
+			else if (Escape == 1)										// Escaped character. Process now.
 			{
 				Escape = 0;
 				*(uip_buf + len) = (c ^ 0x20);
 			}
-			else if (c == 0x7e)								// End of packet
+			else if (c == 0x7e)											// End of packet
 			{
 				InPacket = 0;
 				Debug_Print("\r\n");
-				return len - 2; 							// (-2) = Strip off checksum and framing
+				return len - 2; 										// (-2) = Strip off checksum and framing
 			}
 			else
 			{	
@@ -139,8 +139,8 @@ void network_send(void)
 
 		checksum = CALC_CRC16(checksum, *(uip_buf + i));
 	
-		if (i % 64 == 0 && i != 0)		// Periodically flush the buffer to the modem
-		  USBManagement_SendReceivePipes();
+		if (i % 64 == 0 && i != 0)										// Periodically flush the buffer to the modem
+			USBManagement_SendReceivePipes();
 	}
 
 	// Add the checksum to the end of the packet, escaping it if necessary
@@ -153,7 +153,7 @@ void network_send(void)
 	}
    	else
 	{
-		Buffer_StoreElement(&Modem_SendBuffer, checksum & 255);	// Insert checksum MSB
+		Buffer_StoreElement(&Modem_SendBuffer, checksum & 255);			// Insert checksum MSB
 	}
 	
 	if ((checksum / 256) == 0x7d || (checksum / 256) == 0x7e)
@@ -163,10 +163,10 @@ void network_send(void)
 	}
 	else
 	{
-		Buffer_StoreElement(&Modem_SendBuffer, checksum / 256);	// Insert checksum LSB
+		Buffer_StoreElement(&Modem_SendBuffer, checksum / 256);			// Insert checksum LSB
 	}
    
-	Buffer_StoreElement(&Modem_SendBuffer, 0x7e);				// Framing
+	Buffer_StoreElement(&Modem_SendBuffer, 0x7e);						// Framing
 
 
 	USBManagement_SendReceivePipes();									// Flush the rest of the buffer
