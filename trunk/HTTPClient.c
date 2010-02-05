@@ -31,19 +31,19 @@
 #include "HTTPClient.h"
 
 uip_ipaddr_t     RemoteIPAddress;
-struct uip_conn* ThisConn;
+struct uip_conn* HTTPConnection;
 
 
 bool HTTPClient_Connect(void)
 {
 	// Connect to the remote machine
-	ThisConn = uip_connect(&RemoteIPAddress, HTONS(80));
+	HTTPConnection = uip_connect(&RemoteIPAddress, HTONS(80));
 
 	Debug_Print("Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256);
 	Debug_Print("0x"); Debug_PrintHex(uip_mss() & 255); 
 	Debug_Print("\r\n");	
 
-	if (ThisConn != NULL)
+	if (HTTPConnection != NULL)
 	{
 		Debug_Print("Connected to host\r\n");
 		return true;
@@ -112,7 +112,7 @@ void HTTPClient_TCPCallback(void)
 		  uip_stop();
 	}
 
-	if (uip_poll() && uip_stopped(ThisConn))
+	if (uip_poll() && uip_stopped(HTTPConnection))
 	{
 		if (!(HTTPClient_IsDataQueueFull()))
 		  uip_restart();

@@ -42,7 +42,10 @@ void Debug_PrintChar(char DebugText)
 void Debug_Print(char *DebugText)
 {
 	if (DebugModeEnabled)
-	  puts(DebugText);
+	{
+		while (*DebugText)
+		  putchar(*(DebugText++));
+	}
 }
 
 void Debug_PrintHex(unsigned char c)
