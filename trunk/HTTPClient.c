@@ -130,13 +130,11 @@ void HTTPClient_SendGET(void)
 void HTTPClient_QueueData(char *x, int len)
 {
 	Debug_Print("\r\nData:\r\n");
-
+	WatchdogTicks = 0;							// Reset the watchdog count
+	
 	for (int i = 0; i < len; i++)
-	{
-		WatchdogTicks = 0;							// Reset the watchdog count
-		putchar(*(x + i));
-	}
-
+			putchar(*(x + i));
+	
 	Debug_Print("\r\n");
 }
 
