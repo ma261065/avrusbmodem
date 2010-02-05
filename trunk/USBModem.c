@@ -67,27 +67,22 @@ void SetupHardware(void)
 
 	// Hardware Initialization
 	LEDs_Init();
-	SerialStream_Init(UART_BAUD_RATE, false);
-	
-	// Initialize USB Subsystem
 	USB_Init();
+	SerialStream_Init(UART_BAUD_RATE, false);
 
-	// Timer 1
+	// General 10ms Timekeeping Timer Initialization
 	TCCR1B = ((1 << WGM12) | (1 << CS10) | (1 << CS12));	// CK/1024 prescale, CTC mode
 	OCR1A  = ((F_CPU / 1024) / 100);						// 10ms timer period
 	TIMSK1 = (1 << OCIE1A);									// Enable interrupt on Timer compare
 	
-	// Set up ring buffers
+	// Modem Packet Ring Buffer Initialization
 	Buffer_Initialize(&Modem_SendBuffer);
 	Buffer_Initialize(&Modem_ReceiveBuffer);
 	
-	// Set the Watchdog timer to interrupt (not reset) every 8 seconds
+	// Watchdog ISR Initialization (8 Second Period)
 	wdt_reset();
 	WDTCSR = ((1 << WDCE) | (1 << WDE));		
 	WDTCSR = ((1 << WDIE) | (1 << WDP0) | (1 << WDP3));
-
-	// Reset the 10ms timer	
-	TIME = 0;
 }
 
 // Main program entry point. This routine configures the hardware required by the application, then runs the application tasks.

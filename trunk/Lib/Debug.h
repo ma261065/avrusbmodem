@@ -42,8 +42,8 @@
 		extern bool DebugModeEnabled;
 
 	/* Function Prototypes: */
-		void Debug_PrintChar(char DebugText);
+		void Debug_PrintChar(char DebugChar);
 		void Debug_Print(char *DebugText);
-		void Debug_PrintHex(unsigned char c);
+		void Debug_PrintHex(uint8_t c);
 
 #endif
