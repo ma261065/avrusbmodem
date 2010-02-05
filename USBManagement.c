@@ -145,7 +145,9 @@ void USBManagement_ManageUSBStateMachine(void)
 
 void USBManagement_SendReceivePipes(void)
 {
-	uint8_t ErrorCode;
+	uint8_t  ErrorCode;
+	uint8_t  Buffer[BUFF_STATICSIZE];
+	uint16_t BufferLength = 0;
 
 	if (USB_HostState != HOST_STATE_Configured)
 		return;
@@ -159,7 +161,7 @@ void USBManagement_SendReceivePipes(void)
 	Pipe_SetPipeToken(PIPE_TOKEN_OUT);
 	Pipe_Unfreeze();
 
-	while (Modem_SendBuffer.Elements)
+	if (Modem_SendBuffer.Elements)
 	{
 		if (!(Pipe_IsReadWriteAllowed()))
 		{
@@ -173,12 +175,19 @@ void USBManagement_SendReceivePipes(void)
 			}
 		}
 
-		Pipe_Write_Byte(Buffer_GetElement(&Modem_SendBuffer));
+		// Copy from the circular buffer to a temporary transmission buffer		
+		BufferLength = Modem_SendBuffer.Elements;
+		
+		uint8_t* BufferPos = Buffer;
+		while (Modem_SendBuffer.Elements)
+		  *(BufferPos++) = Buffer_GetElement(&Modem_SendBuffer);
+
+		if ((ErrorCode = Pipe_Write_Stream_LE(Buffer, BufferLength)) != PIPE_RWSTREAM_NoError)
+			Debug_Print("Error writing Pipe\r\n");
+
+		// Send the data in the OUT pipe to the attached device
+		Pipe_ClearOUT();
 	}
-	
-	// Send remaining data in pipe bank
-	if (Pipe_BytesInPipe())
-	  Pipe_ClearOUT();
 
 	// Freeze pipe after use
 	Pipe_Freeze();
@@ -198,19 +207,32 @@ void USBManagement_SendReceivePipes(void)
 	{
 		// Re-freeze IN pipe after the packet has been received
 		Pipe_Freeze();
-		
+
+		// Check if data is in the pipe
 		if (Pipe_IsReadWriteAllowed())
 		{
-			while (Pipe_BytesInPipe())
-			  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_Byte());
+			// Get the length of the pipe data, and create a new temporary buffer to hold it
+			BufferLength = Pipe_BytesInPipe();
+
+			if (BufferLength >= BUFF_STATICSIZE)
+				BufferLength = BUFF_STATICSIZE - 1;
+
+			// Read in the pipe data to the temporary buffer
+			if ((ErrorCode = Pipe_Read_Stream_LE(Buffer, BufferLength)) != PIPE_RWSTREAM_NoError)
+				Debug_Print("Error reading Pipe\r\n");
+	
+			// Clear the pipe after it is read, ready for the next packet
+			Pipe_ClearIN();
+
+			// Copy the temporary buffer contents to the circular buffer
+			uint8_t* BufferPos = Buffer;
+			while (BufferLength--)
+			  Buffer_StoreElement(&Modem_ReceiveBuffer, *(BufferPos++));
 		}
-		
-		Pipe_ClearIN();
 	}
 	
-	////////////////////////////////
-	// Notification Pipe
-	////////////////////////////////
+	// Re-freeze IN pipe after use
+	Pipe_Freeze();		
 
 	// Select and unfreeze the notification pipe
 	Pipe_SelectPipe(CDC_NOTIFICATIONPIPE);
