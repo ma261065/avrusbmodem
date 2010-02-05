@@ -42,7 +42,7 @@ const char* DialCommands[] =
 	"ATQ0 V1 E1 S0=0 &C1 &D2 +FCLASS=0\r\n",
 	"AT+CGDCONT=1,\"IP\",\"3services\",,0,0\r\n",
 	"ATDT*99#\r\n",
-	"PPP"					// PPP is a special case to transition to next state
+	NULL,
 };
 
 void LinkManagement_ManageConnectionState(void)
@@ -69,8 +69,6 @@ void LinkManagement_ManageConnectionState(void)
 
 void LinkManagement_DialConnection(void)
 {
-	char Command[64];
-
 	if (USB_HostState == HOST_STATE_Configured)	
 	{
 		while (Modem_ReceiveBuffer.Elements)
@@ -79,9 +77,8 @@ void LinkManagement_DialConnection(void)
 		if (TIME > 100)
 		{
 			TIME = 0;
-			strcpy(Command, DialCommands[DialSteps++]);
 
-			if (strcmp(Command, "PPP") == 0)
+			if (!(strlen(DialCommands[DialSteps])))
 			{
 				Debug_Print("Starting PPP\r\n");
 				DialSteps = 0;
@@ -90,9 +87,9 @@ void LinkManagement_DialConnection(void)
 			}
 
 			Debug_Print("Sending command: ");
-			Debug_Print(Command);
+			Debug_Print((char*)DialCommands[DialSteps]);
 			
-			char* CommandPtr = Command;
+			const char* CommandPtr = DialCommands[DialSteps++];
 			while (*CommandPtr)
 			  Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
 		}
