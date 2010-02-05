@@ -52,49 +52,53 @@ void LinkManagement_ManageConnectionState(void)
 	{
 		case LINKMANAGEMENT_STATE_DialConnection:
 			LinkManagement_DialConnection();
-			break;
+		break;
+		
 		case LINKMANAGEMENT_STATE_DoPPPNegotiation:
 			PPP_ManagePPPNegotiation();
-			break;
+		break;
+		
 		case LINKMANAGEMENT_STATE_InitializeTCPStack:
 			LinkManagement_InitializeTCPStack();
-			break;
+		break;
+		
 		case LINKMANAGEMENT_STATE_ConnectToRemoteHost:
 			LinkManagement_ConnectToRemoteHost();
-			break;
+		break;
+		
 		case LINKMANAGEMENT_STATE_ManageTCPConnection:
 			LinkManagement_TCPIPTask();
-			break;
+		break;
 	}
 }
 
 void LinkManagement_DialConnection(void)
 {
-	if (USB_HostState == HOST_STATE_Configured)	
+	if (USB_HostState != HOST_STATE_Configured)	
+		return;
+	
+	while (Modem_ReceiveBuffer.Elements)
+		Debug_PrintChar(Buffer_GetElement(&Modem_ReceiveBuffer));
+		
+	if (TIME > 100)
 	{
-		while (Modem_ReceiveBuffer.Elements)
-		  Debug_PrintChar(Buffer_GetElement(&Modem_ReceiveBuffer));
-			
-		if (TIME > 100)
+		TIME = 0;
+
+		char* CommandPtr = (char*)DialCommands[DialSteps++];
+
+		if (CommandPtr == NULL)
 		{
-			TIME = 0;
-
-			char* CommandPtr = (char*)DialCommands[DialSteps++];
-
-			if (CommandPtr == NULL)
-			{
-				Debug_Print("Starting PPP\r\n");
-				DialSteps = 0;
-				ConnectedState = LINKMANAGEMENT_STATE_DoPPPNegotiation;
-				return;
-			}
-
-			Debug_Print("Sending command: ");
-			Debug_Print(CommandPtr);
-			
-			while (*CommandPtr)
-			  Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
+			Debug_Print("Starting PPP\r\n");
+			DialSteps = 0;
+			ConnectedState = LINKMANAGEMENT_STATE_DoPPPNegotiation;
+			return;
 		}
+
+		Debug_Print("Sending command: ");
+		Debug_Print(CommandPtr);
+		
+		while (*CommandPtr)
+			Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
 	}
 }
 
@@ -166,7 +170,7 @@ void LinkManagement_TCPIPTask(void)
 			for (uint8_t j = 0; j < 16; j++)
 			{
 				if ((i + j) >= uip_len)
-				  break;
+					break;
 
 				if (*(uip_buf + i + j) >= 0x20 && *(uip_buf + i + j) <= 0x7e)
 				{
@@ -199,7 +203,7 @@ void LinkManagement_TCPIPTask(void)
  
 	 		// If the above function invocation resulted in data that should be sent out on the network, the global variable uip_len is set to a value > 0.
 	 		if (uip_len > 0)
-	 		  network_send();
+				network_send();
 		}
 	}
 }

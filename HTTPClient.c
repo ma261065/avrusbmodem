@@ -133,7 +133,7 @@ void HTTPClient_QueueData(char *x, int len)
 	WatchdogTicks = 0;							// Reset the watchdog count
 	
 	for (int i = 0; i < len; i++)
-			putchar(*(x + i));
+		putchar(*(x + i));
 	
 	Debug_Print("\r\n");
 }

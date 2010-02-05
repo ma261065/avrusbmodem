@@ -90,20 +90,21 @@ void USBManagement_ManageUSBStateMachine(void)
 
 			// Wait until USB device disconnected
 			while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);
-			break;
+		break;
+		
 		case HOST_STATE_Addressed:
 			Debug_Print("Sending configuration command\r\n");
 
 			// Standard request to set the device configuration to configuration 1
 			// For the Huawei modem, this will cause the device to disconnect and change modes
 			USB_ControlRequest = (USB_Request_Header_t)
-				{
-					.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_STANDARD | REQREC_DEVICE),
-					.bRequest      = REQ_SetConfiguration,
-					.wValue        = 1,
-					.wIndex        = 0,
-					.wLength       = 0,
-				};
+			{
+				.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_STANDARD | REQREC_DEVICE),
+				.bRequest      = REQ_SetConfiguration,
+				.wValue        = 1,
+				.wIndex        = 0,
+				.wLength       = 0,
+			};
 
 			// Select the control pipe for the request transfer
 			Pipe_SelectPipe(PIPE_CONTROLPIPE);
@@ -121,9 +122,9 @@ void USBManagement_ManageUSBStateMachine(void)
 			if ((ErrorCode = ProcessConfigurationDescriptor()) != SuccessfulConfigRead)
 			{
 				if (ErrorCode == ControlError)
-				  Debug_Print("Control Error (Get Configuration).\r\n");
+					Debug_Print("Control Error (Get Configuration).\r\n");
 				else
-				  Debug_Print("Not a modem device\r\n");
+					Debug_Print("Not a modem device - switching modes.\r\n");
 
 				// Indicate error via status LEDs
 				LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
@@ -133,13 +134,14 @@ void USBManagement_ManageUSBStateMachine(void)
 				break;
 			}
 
-			Debug_Print("CDC Device Enumerated\r\n");
+			Debug_Print("Modem device enumerated\r\n");
 
 			USB_HostState = HOST_STATE_Configured;
-			break;
+		break;
+		
 		case HOST_STATE_Configured:
 			USBManagement_SendReceivePipes();
-			break;
+		break;
 	}
 }
 

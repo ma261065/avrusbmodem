@@ -60,38 +60,16 @@ void WDT_Init(void)
     return;
 }
 
-void SetupHardware(void)
-{
-	// Disable clock division
-	clock_prescale_set(clock_div_1);
-
-	// Hardware Initialization
-	LEDs_Init();
-	USB_Init();
-	SerialStream_Init(UART_BAUD_RATE, false);
-
-	// General 10ms Timekeeping Timer Initialization
-	TCCR1B = ((1 << WGM12) | (1 << CS10) | (1 << CS12));	// CK/1024 prescale, CTC mode
-	OCR1A  = ((F_CPU / 1024) / 100);						// 10ms timer period
-	TIMSK1 = (1 << OCIE1A);									// Enable interrupt on Timer compare
-	
-	// Modem Packet Ring Buffer Initialization
-	Buffer_Initialize(&Modem_SendBuffer);
-	Buffer_Initialize(&Modem_ReceiveBuffer);
-	
-	// Watchdog ISR Initialization (8 Second Period)
-	wdt_reset();
-	WDTCSR = ((1 << WDCE) | (1 << WDE));		
-	WDTCSR = ((1 << WDIE) | (1 << WDP0) | (1 << WDP3));
-}
-
 // Main program entry point. This routine configures the hardware required by the application, then runs the application tasks.
 int main(void)
 {	
 	SetupHardware();
 	
-	// Startup message - make sure the first 5 chars do not contain a space as terminal will echo this back
-	puts("\r\nUSB Modem - Press space bar to debug\r\n");
+	// Startup message
+	// Make sure the first 5 chars (\r and \n are each single characters) do not contain a space as terminal may echo this back and switch on debug mode by accident
+	puts("\r\nUSB Modem - Copyright (C) 2010 Mike Alexander and Dean Camera\r\n");
+	puts("Press space bar to debug\r\n");
+	
 	for (int i = 0; i <= 5; i++)
 	{
 		putchar('.');
@@ -132,4 +110,30 @@ int main(void)
 				break;
 		}
 	}
+}
+
+
+void SetupHardware(void)
+{
+	// Disable clock division
+	clock_prescale_set(clock_div_1);
+
+	// Hardware Initialization
+	LEDs_Init();
+	USB_Init();
+	SerialStream_Init(UART_BAUD_RATE, false);
+
+	// General 10ms Timekeeping Timer Initialization
+	TCCR1B = ((1 << WGM12) | (1 << CS10) | (1 << CS12));	// CK/1024 prescale, CTC mode
+	OCR1A  = ((F_CPU / 1024) / 100);						// 10ms timer period
+	TIMSK1 = (1 << OCIE1A);									// Enable interrupt on Timer compare
+	
+	// Modem Packet Ring Buffer Initialization
+	Buffer_Initialize(&Modem_SendBuffer);
+	Buffer_Initialize(&Modem_ReceiveBuffer);
+	
+	// Watchdog ISR Initialization (8 Second Period)
+	wdt_reset();
+	WDTCSR = ((1 << WDCE) | (1 << WDE));		
+	WDTCSR = ((1 << WDIE) | (1 << WDP0) | (1 << WDP3));
 }
