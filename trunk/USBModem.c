@@ -68,7 +68,7 @@ int main(void)
 	puts("\r\nUSB Modem - Copyright (C) 2010 Mike Alexander and Dean Camera\r\n");
 	puts("Press space bar to debug\r\n");
 	
-	for (int i = 0; i <= 5; i++)
+	for (uint8_t i = 0; i <= 5; i++)
 	{
 		putchar('.');
 		

@@ -45,9 +45,9 @@ PPP_States_t PPPState;											// PPP negotiation states
 // The main loop, login script, PPP state machine
 void PPP_ManagePPPNegotiation(void)
 {
-	int16_t c;													// Received serial character
-	bool ExitFlag = 0;
-	int CharCount = 0;
+	int16_t  c;													// Received serial character
+	bool     ExitFlag = 0;
+	uint16_t CharCount = 0;
 
 	// This will kick-start each phase of the PPP negotiations (LCP, PAP, IPCP)
 	PPP_MakeInitialPacket();

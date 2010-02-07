@@ -179,7 +179,7 @@ void USBManagement_SendReceivePipes(void)
 	  
 	// Send remaining data in pipe bank 
 	if (Pipe_BytesInPipe()) 
-	  Pipe_ClearOUT(); 
+		Pipe_ClearOUT(); 
  
 	// Freeze pipe after use
 	Pipe_Freeze();
