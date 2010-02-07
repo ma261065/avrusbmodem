@@ -46,8 +46,11 @@
 	/* Function Prototypes: */
 		bool HTTPClient_Connect(void);
 		void HTTPClient_TCPCallback(void);
-		void HTTPClient_SendGET(void);
-		void HTTPClient_QueueData(char *x, int len);
-		bool HTTPClient_IsDataQueueFull(void);
+		
+		#if defined(INCLUDE_FROM_HTTPCLIENT_C)
+			static void HTTPClient_SendGET(void);
+			static void HTTPClient_QueueData(const char *x, const uint16_t len);
+			static bool HTTPClient_IsDataQueueFull(void);
+		#endif
 		
 #endif

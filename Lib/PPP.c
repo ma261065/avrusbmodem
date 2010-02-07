@@ -28,7 +28,8 @@
   this software.
 */
 
-#include "ppp.h"
+#define  INCLUDE_FROM_PPP_C
+#include "PPP.h"
 
 uint8_t      addr1, addr2, addr3, addr4;						// Assigned IP address
 uint16_t     rx_ptr, tx_ptr, tx_end;							// Pointers into buffers
@@ -193,7 +194,7 @@ void PPP_ManagePPPNegotiation(void)
 }
 
 
-void PPP_ProcessReceivedPacket(void)
+static void PPP_ProcessReceivedPacket(void)
 {	
 	int16_t c;	
 
@@ -378,7 +379,7 @@ void PPP_ProcessReceivedPacket(void)
 
 
 // Make the first packet to start each phase of the PPP negotiations (LCP, PAP, IPCP)
-void PPP_MakeInitialPacket(void)
+static void PPP_MakeInitialPacket(void)
 {
 	if (tx_end)													// Don't make a new packet if we have data in the buffer already
 		return;
@@ -424,7 +425,7 @@ void PPP_MakeInitialPacket(void)
 //   packetID is the packet ID
 //   *str is the packet data to be added after the header
 // Returns the packet as a string in tx_str
-void PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, const uint8_t *str)
+static void PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, const uint8_t *str)
 {
 	uint16_t length, temp;
 
@@ -463,7 +464,7 @@ void PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, c
 //   option is the 16 bit field, where a 1 accepts the option one greater than the bit # (e.g. 0x0004 for option 5) 
 //   returns 2 for LCP NAK, 1 is only correct fields found, and zero means bad options
 //   return also modifies RX_STR to list unacceptable options if NAK or REJ required
-uint8_t PPP_TestOptions(uint16_t option)
+static uint8_t PPP_TestOptions(uint16_t option)
 {
 	uint16_t size;											// size is length of option string
 	unsigned ptr1 = 8;											// ptr1 points data insert location
@@ -521,7 +522,7 @@ uint8_t PPP_TestOptions(uint16_t option)
 }
 
 // Add character to the new packet & update the checksum
-void PPP_AddToPacket(uint8_t c)
+static void PPP_AddToPacket(uint8_t c)
 {
 	checksum2 = CALC_CRC16(checksum2, c);						// Add CRC from this char to running total
   	tx_str[tx_ptr++] = c;										// Store character in the transmit buffer

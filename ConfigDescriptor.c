@@ -35,6 +35,7 @@
  *  which the host requests upon device enumeration, to determine the device's capabilities and functions.
  */
  
+#define  INCLUDE_FROM_CONFIGDESCRIPTOR_C
 #include "ConfigDescriptor.h"
 
 /** Reads and processes an attached device's descriptors, to determine compatibility and pipe configurations. This
@@ -176,7 +177,7 @@ uint8_t ProcessConfigurationDescriptor(void)
  *
  *  \return A value from the DSEARCH_Return_ErrorCodes_t enum
  */
-uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor)
+static uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor)
 {
 	if (DESCRIPTOR_TYPE(CurrentDescriptor) == DTYPE_Interface)
 	{
@@ -200,7 +201,7 @@ uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor)
  *
  *  \return A value from the DSEARCH_Return_ErrorCodes_t enum
  */
-uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor)
+static uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor)
 {
 	if (DESCRIPTOR_TYPE(CurrentDescriptor) == DTYPE_Interface)
 	{
@@ -226,7 +227,7 @@ uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor)
  *
  *  \return A value from the DSEARCH_Return_ErrorCodes_t enum
  */
-uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor)
+static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor)
 {
 	if (DESCRIPTOR_TYPE(CurrentDescriptor) == DTYPE_Endpoint)
 	{

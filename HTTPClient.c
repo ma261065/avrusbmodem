@@ -28,6 +28,7 @@
   this software.
 */
 
+#define  INCLUDE_FROM_HTTPCLIENT_C
 #include "HTTPClient.h"
 
 uip_ipaddr_t     RemoteIPAddress;
@@ -36,8 +37,8 @@ struct uip_conn* HTTPConnection;
 
 bool HTTPClient_Connect(void)
 {
-	// Connect to the remote machine
-	uip_ipaddr(&RemoteIPAddress, 192, 0, 32, 10);	// www.example.com
+	// Connect to the remote machine (www.example.com)
+	uip_ipaddr(&RemoteIPAddress, 192, 0, 32, 10);	
 	HTTPConnection = uip_connect(&RemoteIPAddress, HTONS(80));
 
 	Debug_Print("Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256);
@@ -120,25 +121,25 @@ void HTTPClient_TCPCallback(void)
 	}
 }
 
-void HTTPClient_SendGET(void)
+static void HTTPClient_SendGET(void)
 {
 	char GETRequest[] = "GET / HTTP/1.1\r\nHost: www.example.com\r\nConnection: Keep-Alive\r\n\r\n";
 
 	uip_send(GETRequest, strlen(GETRequest));
 }
 
-void HTTPClient_QueueData(char *x, int len)
+static void HTTPClient_QueueData(const char *x, const uint16_t len)
 {
 	Debug_Print("\r\nData:\r\n");
 	WatchdogTicks = 0;							// Reset the watchdog count
 	
-	for (int i = 0; i < len; i++)
-		putchar(*(x + i));
+	for (uint16_t i = 0; i < len; i++)
+	  putchar(*(x + i));
 	
 	Debug_Print("\r\n");
 }
 
-bool HTTPClient_IsDataQueueFull(void)
+static bool HTTPClient_IsDataQueueFull(void)
 {
 	return false;
 }

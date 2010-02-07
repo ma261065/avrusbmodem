@@ -78,8 +78,10 @@
 	/* Function Prototypes: */
 		uint8_t ProcessConfigurationDescriptor(void);	
 		
-		uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor);
-		uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor);
-		uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor);
+		#if defined(INCLUDE_FROM_CONFIGDESCRIPTOR_C)
+			static uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor);
+			static uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor);
+			static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor);
+		#endif
 		
 #endif

@@ -67,9 +67,12 @@
 	
 	/* Function Prototypes: */
 		void LinkManagement_ManageConnectionState(void);
-		void LinkManagement_DialConnection(void);
-		void LinkManagement_InitializeTCPStack(void);
-		void LinkManagement_ConnectToRemoteHost(void);
-		void LinkManagement_TCPIPTask(void);
-
+		
+		#if defined(INCLUDE_FROM_LINKMANAGEMENT_C)
+			static void LinkManagement_DialConnection(void);
+			static void LinkManagement_InitializeTCPStack(void);
+			static void LinkManagement_ConnectToRemoteHost(void);
+			static void LinkManagement_TCPIPTask(void);
+		#endif
+	
 #endif

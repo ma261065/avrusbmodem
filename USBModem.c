@@ -30,12 +30,10 @@
 
 #include "USBModem.h"
 
-// Global Variables
 uint8_t  WatchdogTicks = 0;
 uint16_t TIME;												// 10 millseconds counter
 
 
-// Interrupt Handlers
 ISR(TIMER1_COMPA_vect)										// Timer 1 interrupt handler
 {
 	TIME++;

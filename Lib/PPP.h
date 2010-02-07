@@ -69,12 +69,15 @@
 
 	/* Function Prototypes: */
 		void    PPP_ManagePPPNegotiation(void);
-		void    PPP_AddToPacket(uint8_t c);
-		void    PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, const uint8_t *str);
-		uint8_t PPP_TestOptions(uint16_t option);
-		void    PPP_ProcessReceivedPacket(void);
-		void    PPP_MakeInitialPacket(void);
-
+		
+		#if defined(INCLUDE_FROM_PPP_C)
+			static void    PPP_AddToPacket(uint8_t c);
+			static void    PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, const uint8_t *str);
+			static uint8_t PPP_TestOptions(uint16_t option);
+			static void    PPP_ProcessReceivedPacket(void);
+			static void    PPP_MakeInitialPacket(void);
+		#endif
+		
 #endif
 
 
