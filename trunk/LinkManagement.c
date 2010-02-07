@@ -28,6 +28,7 @@
   this software.
 */
 
+#define  INCLUDE_FROM_LINKMANAGEMENT_C
 #include "LinkManagement.h"
 
 uint8_t      IPAddr1, IPAddr2, IPAddr3, IPAddr4;
@@ -72,7 +73,7 @@ void LinkManagement_ManageConnectionState(void)
 	}
 }
 
-void LinkManagement_DialConnection(void)
+static void LinkManagement_DialConnection(void)
 {
 	if (USB_HostState != HOST_STATE_Configured)	
 		return;
@@ -102,7 +103,7 @@ void LinkManagement_DialConnection(void)
 	}
 }
 
-void LinkManagement_InitializeTCPStack(void)
+static void LinkManagement_InitializeTCPStack(void)
 {
 	Debug_Print("Initialise TCP Stack\r\n");
 
@@ -123,7 +124,7 @@ void LinkManagement_InitializeTCPStack(void)
 	TIME = 2000;			// Make the first CONNECT happen straight away
 }
 
-void LinkManagement_ConnectToRemoteHost(void)
+static void LinkManagement_ConnectToRemoteHost(void)
 {
 	if (TIME > 1000)		// Try to connect every 1 second
 	{
@@ -137,7 +138,7 @@ void LinkManagement_ConnectToRemoteHost(void)
 	}
 }
 
-void LinkManagement_TCPIPTask(void)
+static void LinkManagement_TCPIPTask(void)
 {
 	uip_len = network_read();
 
