@@ -125,7 +125,7 @@ void network_send(void)
 	checksum = CALC_CRC16(checksum, 0x21);
 
 	// Add the data, escaping it if necessary
-	for (int i = 0; i < uip_len; i++)
+	for (uint8_t i = 0; i < uip_len; i++)
 	{
 		if (*(uip_buf + i) == 0x7d || *(uip_buf + i) == 0x7e)
 		{
@@ -139,8 +139,8 @@ void network_send(void)
 
 		checksum = CALC_CRC16(checksum, *(uip_buf + i));
 	
-		if (i % 64 == 0 && i != 0)										// Periodically flush the buffer to the modem
-			USBManagement_SendReceivePipes();
+		if (Modem_SendBuffer.Elements == BUFF_STATICSIZE)    // Periodically flush the buffer to the modem
+		  USBManagement_SendReceivePipes();
 	}
 
 	// Add the checksum to the end of the packet, escaping it if necessary
@@ -167,7 +167,6 @@ void network_send(void)
 	}
    
 	Buffer_StoreElement(&Modem_SendBuffer, 0x7e);						// Framing
-
 
 	USBManagement_SendReceivePipes();									// Flush the rest of the buffer
 }

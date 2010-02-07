@@ -123,7 +123,9 @@ void HTTPClient_TCPCallback(void)
 
 static void HTTPClient_SendGET(void)
 {
-	char GETRequest[] = "GET / HTTP/1.1\r\nHost: www.example.com\r\nConnection: Keep-Alive\r\n\r\n";
+	const char GETRequest[] = "GET / HTTP/1.1\r\n"
+	                          "Host: www.example.com\r\n"
+	                          "Connection: Keep-Alive\r\n\r\n";
 
 	uip_send(GETRequest, strlen(GETRequest));
 }
