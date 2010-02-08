@@ -63,53 +63,28 @@ int main(void)
 {	
 	SetupHardware();
 	
-	// Startup message
-	// Make sure the first 5 chars (\r and \n are each single characters) do not contain a space as terminal may echo this back and switch on debug mode by accident
-	puts("\r\nUSB Modem - Copyright (C) 2010 Mike Alexander and Dean Camera\r\n");
-	puts("Press space bar to debug\r\n");
-	
-	for (uint8_t i = 0; i <= 5; i++)
-	{
-		putchar('.');
-		
-		if (getchar() == ' ')
-		{
-			DebugModeEnabled = true;
-			puts("\r\nDebugging\r\n");
-			break;
-		}
-		
-		_delay_ms(500);
-	}
-	puts("\r\n");
-
-	// Blink the lights for a bit
-	LEDs_SetAllLEDs(LEDMASK_USB_READY);
-	_delay_ms(500);
-	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
-	_delay_ms(500);
-	LEDs_SetAllLEDs(LEDMASK_USB_READY);
+	puts("\r\nUSB Modem - Copyright (C) 2010 Mike Alexander and Dean Camera"
+	     "\r\n   *** Press '!' to enable debugging, '@' to disable ***\r\n\r\n");
 	
 	for(;;)
 	{
 		LinkManagement_ManageConnectionState();
-		USBManagement_ManageUSBStateMachine();
+		USBManagement_ManageUSBState();
 		USB_USBTask();
 
 		switch (getchar())
 		{
 			case '!':
-				puts("\r\nDebug on\r\n");
+				puts("\r\nDebug ON\r\n");
 				DebugModeEnabled = true;
 				break;
 			case '@':
-				puts("\r\nDebug off\r\n");
+				puts("\r\nDebug OFF\r\n");
 				DebugModeEnabled = false;
 				break;
 		}
 	}
 }
-
 
 void SetupHardware(void)
 {

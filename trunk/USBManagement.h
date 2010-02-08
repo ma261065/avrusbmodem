@@ -66,7 +66,7 @@
 		void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode, const uint8_t SubErrorCode);
 		void EVENT_USB_Host_DeviceEnumerationComplete(void);
 
-		void USBManagement_ManageUSBStateMachine(void);
+		void USBManagement_ManageUSBState(void);
 		void USBManagement_SendReceivePipes(void);
 #endif
 
