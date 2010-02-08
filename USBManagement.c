@@ -79,7 +79,7 @@ void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode, const uint8
 
 // Task to set the configuration of the attached device after it has been enumerated, and to read in
 // data received from the attached CDC device and print it to the serial port.
-void USBManagement_ManageUSBStateMachine(void)
+void USBManagement_ManageUSBState(void)
 {
 	uint8_t ErrorCode;
 
@@ -193,8 +193,8 @@ void USBManagement_SendReceivePipes(void)
 	Pipe_SelectPipe(CDC_DATAPIPE_IN);
 	Pipe_Unfreeze();
 
-	// Check if data is in the pipe
-	if (Pipe_IsINReceived())
+	// Check if data is in the pipe and space is available in the receive buffer
+	if (Pipe_IsINReceived() && (Modem_ReceiveBuffer.Elements < (BUFF_STATICSIZE - 64)))
 	{
 		// Check if data is in the pipe
 		if (Pipe_IsReadWriteAllowed())
