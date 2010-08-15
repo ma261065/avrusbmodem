@@ -77,7 +77,7 @@ static void LinkManagement_DialConnection(void)
 {
 	if (USB_HostState != HOST_STATE_Configured)	
 		return;
-	
+
 	while (Modem_ReceiveBuffer.Elements)
 		Debug_PrintChar(Buffer_GetElement(&Modem_ReceiveBuffer));
 		

@@ -63,7 +63,9 @@
 
 	/* Macros: */
 		/** Serial baud rate for debugging */
-		#define UART_BAUD_RATE            19200
+		// Note: If this is too low, then the time taken to display all the debug info for a packet
+		// can cause the TCP/IP timeout to expire, causing retransmits
+		#define UART_BAUD_RATE            38400
 
 		/** LED mask for the library LED driver, to indicate that the USB interface is not ready. */
 		#define LEDMASK_USB_NOTREADY      LEDS_LED1

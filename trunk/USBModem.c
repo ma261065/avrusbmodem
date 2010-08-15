@@ -64,7 +64,7 @@ int main(void)
 	SetupHardware();
 	
 	puts("\r\nUSB Modem - Copyright (C) 2010 Mike Alexander and Dean Camera"
-	     "\r\n   *** Press '!' to enable debugging, '@' to disable ***\r\n\r\n");
+	     "\r\n   *** Press '!' to enable debugging, '@' to disable ***\r\n");
 	
 	for(;;)
 	{
@@ -109,4 +109,7 @@ void SetupHardware(void)
 	wdt_reset();
 	WDTCSR = ((1 << WDCE) | (1 << WDE));		
 	WDTCSR = ((1 << WDIE) | (1 << WDP0) | (1 << WDP3));
+	
+	// Enable interrups
+	sei();
 }
