@@ -38,7 +38,7 @@ RingBuff_t Modem_ReceiveBuffer;
 // starts the library USB task to begin the enumeration and USB management process.
 void EVENT_USB_Host_DeviceAttached(void)
 {
-	Debug_Print("Device Attached\r\n");
+	Debug_Print("Device attached\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_ENUMERATING);
 }
 
@@ -46,7 +46,7 @@ void EVENT_USB_Host_DeviceAttached(void)
 //  stops the library USB task management process.
 void EVENT_USB_Host_DeviceUnattached(void)
 {
-	Debug_Print("Device Unattached\r\n");
+	Debug_Print("Device unattached\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
 	ConnectedState = 0;
 }
@@ -64,7 +64,7 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 {
 	USB_ShutDown();
 
-	Debug_Print("Host Mode Error\r\n");
+	Debug_Print("Host Mode error\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
 	for(;;);
 }
@@ -112,7 +112,7 @@ void USBManagement_ManageUSBState(void)
 			// Send the request and display any error
 			if ((ErrorCode = USB_Host_SendControlRequest(NULL)) != HOST_SENDCONTROL_Successful)
 			{
-				Debug_Print("Control Error (Set Configuration).\r\n");
+				Debug_Print("Control error (Set Configuration).\r\n");
 			}
 
 			Debug_Print("Looking for modem device...");
@@ -122,9 +122,9 @@ void USBManagement_ManageUSBState(void)
 			if ((ErrorCode = ProcessConfigurationDescriptor()) != SuccessfulConfigRead)
 			{
 				if (ErrorCode == ControlError)
-					Debug_Print("Control Error (Get Configuration).\r\n");
+					Debug_Print("Control error (Get Configuration).\r\n");
 				else
-					Debug_Print("Not a modem device - switching modes.\r\n");
+					Debug_Print("Not a modem device - switching modes\r\n");
 
 				// Indicate error via status LEDs
 				LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
