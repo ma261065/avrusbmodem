@@ -141,7 +141,7 @@ include $(LUFA_PATH)/LUFA/makefile
 
 # List C source files here. (C dependencies are automatically generated.)
 SRC = $(TARGET).c                                                 	\
-	  Modem_HuaweiE160G.c                                          	\
+	  Modem_Huawei_E160G.c                                          	\
 	  Network_AUS_3_Prepaid.c										\
 	  LinkManagement.c                                              \
 	  USBManagement.c                                               \
