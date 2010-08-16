@@ -95,26 +95,9 @@ void USBManagement_ManageUSBState(void)
 		case HOST_STATE_Addressed:
 			Debug_Print("Sending configuration command\r\n");
 
-			// Standard request to set the device configuration to configuration 1
-			// For the Huawei modem, this will cause the device to disconnect and change modes
-			USB_ControlRequest = (USB_Request_Header_t)
-			{
-				.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_STANDARD | REQREC_DEVICE),
-				.bRequest      = REQ_SetConfiguration,
-				.wValue        = 1,
-				.wIndex        = 0,
-				.wLength       = 0,
-			};
-
-			// Select the control pipe for the request transfer
-			Pipe_SelectPipe(PIPE_CONTROLPIPE);
-
-			// Send the request and display any error
-			if ((ErrorCode = USB_Host_SendControlRequest(NULL)) != HOST_SENDCONTROL_Successful)
-			{
-				Debug_Print("Control error (Set Configuration).\r\n");
-			}
-
+			// Switch the modem to the correct mode
+			SwitchModemMode();
+			
 			Debug_Print("Looking for modem device...");
 			
 			// Get and process the configuration descriptor data

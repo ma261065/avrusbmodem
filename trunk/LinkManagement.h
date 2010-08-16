@@ -54,11 +54,12 @@
 	/* Enums: */
 		enum Link_Management_States_t
 		{
-			LINKMANAGEMENT_STATE_DialConnection      = 0,
-			LINKMANAGEMENT_STATE_DoPPPNegotiation    = 1,
-			LINKMANAGEMENT_STATE_InitializeTCPStack  = 2,
-			LINKMANAGEMENT_STATE_ConnectToRemoteHost = 3,
-			LINKMANAGEMENT_STATE_ManageTCPConnection = 4,
+			LINKMANAGEMENT_STATE_DialConnectionStage1 = 0,
+			LINKMANAGEMENT_STATE_DialConnectionStage2 = 1,
+			LINKMANAGEMENT_STATE_DoPPPNegotiation     = 2,
+			LINKMANAGEMENT_STATE_InitializeTCPStack   = 3,
+			LINKMANAGEMENT_STATE_ConnectToRemoteHost  = 4,
+			LINKMANAGEMENT_STATE_ManageTCPConnection  = 5,
 		};
 	
 	/* External Variables: */
@@ -69,7 +70,8 @@
 		void LinkManagement_ManageConnectionState(void);
 		
 		#if defined(INCLUDE_FROM_LINKMANAGEMENT_C)
-			static void LinkManagement_DialConnection(void);
+			static void LinkManagement_DialConnectionStage1(void);
+			static void LinkManagement_DialConnectionStage2(void);
 			static void LinkManagement_InitializeTCPStack(void);
 			static void LinkManagement_ConnectToRemoteHost(void);
 			static void LinkManagement_TCPIPTask(void);

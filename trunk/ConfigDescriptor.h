@@ -83,5 +83,7 @@
 			static uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor);
 			static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor);
 		#endif
+
+		void SwitchModemMode(void);
 		
 #endif

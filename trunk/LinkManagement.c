@@ -32,29 +32,25 @@
 #include "LinkManagement.h"
 
 uint8_t      IPAddr1, IPAddr2, IPAddr3, IPAddr4;
-uint8_t      ConnectedState = LINKMANAGEMENT_STATE_DialConnection;
+uint8_t      ConnectedState = LINKMANAGEMENT_STATE_DialConnectionStage1;
 uint8_t      DialSteps = 0;
 struct timer Periodic_Timer;
 
-const char* DialCommands[] = 
-{	
-	"AT\r\n",
-	"AT&F\r\n",
-	"AT+CPMS=\"SM\",\"SM\",\"\"\r\n",
-	"ATQ0 V1 E1 S0=0 &C1 &D2 +FCLASS=0\r\n",
-	"AT+CGDCONT=1,\"IP\",\"3services\",,0,0\r\n",
-	"ATDT*99#\r\n",
-	NULL,
-};
+extern const char* ModemDialCommands[];
+extern const char* NetworkDialCommands[];
 
 void LinkManagement_ManageConnectionState(void)
 {
 	switch (ConnectedState)
 	{
-		case LINKMANAGEMENT_STATE_DialConnection:
-			LinkManagement_DialConnection();
+		case LINKMANAGEMENT_STATE_DialConnectionStage1:
+			LinkManagement_DialConnectionStage1();
 		break;
 		
+		case LINKMANAGEMENT_STATE_DialConnectionStage2:
+			LinkManagement_DialConnectionStage2();
+		break;
+
 		case LINKMANAGEMENT_STATE_DoPPPNegotiation:
 			PPP_ManagePPPNegotiation();
 		break;
@@ -73,7 +69,7 @@ void LinkManagement_ManageConnectionState(void)
 	}
 }
 
-static void LinkManagement_DialConnection(void)
+static void LinkManagement_DialConnectionStage1(void)
 {
 	if (USB_HostState != HOST_STATE_Configured)	
 		return;
@@ -85,7 +81,36 @@ static void LinkManagement_DialConnection(void)
 	{
 		TIME = 0;
 
-		char* CommandPtr = (char*)DialCommands[DialSteps++];
+		char* CommandPtr = (char*)ModemDialCommands[DialSteps++];
+
+		if (CommandPtr == NULL)
+		{
+			DialSteps = 0;
+			ConnectedState = LINKMANAGEMENT_STATE_DialConnectionStage2;
+			return;
+		}
+
+		Debug_Print("Sending command: ");
+		Debug_Print(CommandPtr);
+		
+		while (*CommandPtr)
+			Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
+	}
+}
+
+static void LinkManagement_DialConnectionStage2(void)
+{
+	if (USB_HostState != HOST_STATE_Configured)	
+		return;
+
+	while (Modem_ReceiveBuffer.Elements)
+		Debug_PrintChar(Buffer_GetElement(&Modem_ReceiveBuffer));
+		
+	if (TIME > 100)
+	{
+		TIME = 0;
+
+		char* CommandPtr = (char*)NetworkDialCommands[DialSteps++];
 
 		if (CommandPtr == NULL)
 		{
@@ -146,7 +171,7 @@ static void LinkManagement_TCPIPTask(void)
 	{
 		Debug_Print("Got non-PPP packet\r\n");
 		TIME = 0;
-		ConnectedState = LINKMANAGEMENT_STATE_DialConnection;
+		ConnectedState = LINKMANAGEMENT_STATE_DialConnectionStage1;
 		return;
 	}
 
