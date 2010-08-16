@@ -38,6 +38,24 @@
 #define  INCLUDE_FROM_CONFIGDESCRIPTOR_C
 #include "ConfigDescriptor.h"
 
+// Interface Class value for the CDC class
+#define CDC_CONTROL_CLASS              0xff
+
+// Interface Class value for the CDC subclass
+#define CDC_CONTROL_SUBCLASS           0xff
+
+// Interface Class value for the CDC protocol
+#define CDC_CONTROL_PROTOCOL           0xff
+
+// Interface Class value for the CDC data class
+#define CDC_DATA_CLASS                 0xff
+
+// Interface Class value for the CDC data subclass
+#define CDC_DATA_SUBCLASS              0xff
+
+// Interface Class value for the CDC data protocol
+#define CDC_DATA_PROTOCOL              0xff
+
 /** Reads and processes an attached device's descriptors, to determine compatibility and pipe configurations. This
  *  routine will read in the entire configuration descriptor, and configure the hosts pipes to correctly communicate
  *  with compatible devices.
@@ -244,6 +262,7 @@ static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor)
 
 	return DESCRIPTOR_SEARCH_NotFound;
 }
+
 
 // Each modem will have different initialisation parameters that must be sent to the modem.
 // One way to determine these parameters is to run the modem under Windows and use USBMonitor 

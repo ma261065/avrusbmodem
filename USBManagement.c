@@ -59,7 +59,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 	LEDs_SetAllLEDs(LEDMASK_USB_READY);
 }
 
-// Event handler for the USB_HostError event. This indicates that a hardware error occurred while in host mode. */
+// Event handler for the USB_HostError event. This indicates that a hardware error occurred while in host mode.
 void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 {
 	USB_ShutDown();
