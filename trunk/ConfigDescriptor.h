@@ -42,24 +42,6 @@
 		#include "USBModem.h"
 		
 	/* Macros: */
-		/** Interface Class value for the CDC class */
-		#define CDC_CONTROL_CLASS              0xff
-
-		/** Interface Class value for the CDC subclass */
-		#define CDC_CONTROL_SUBCLASS           0xff
-
-		/** Interface Class value for the CDC protocol */
-		#define CDC_CONTROL_PROTOCOL           0xff
-		
-		/** Interface Class value for the CDC data class */
-		#define CDC_DATA_CLASS                 0xff
-
-		/** Interface Class value for the CDC data subclass */
-		#define CDC_DATA_SUBCLASS              0xff
-
-		/** Interface Class value for the CDC data protocol */
-		#define CDC_DATA_PROTOCOL              0xff
-
 		/** Maximum size of a device configuration descriptor which can be processed by the host, in bytes */
 		#define MAX_CONFIG_DESCRIPTOR_SIZE     512
 	
