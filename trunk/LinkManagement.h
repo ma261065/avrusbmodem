@@ -48,18 +48,18 @@
 		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
 		#include "Lib/PPP.h"
-		
-		#include "HTTPClient.h"
+		#include "TCPIP.h"
 	
 	/* Enums: */
 		enum Link_Management_States_t
 		{
-			LINKMANAGEMENT_STATE_DialConnectionStage1 = 0,
-			LINKMANAGEMENT_STATE_DialConnectionStage2 = 1,
-			LINKMANAGEMENT_STATE_DoPPPNegotiation     = 2,
-			LINKMANAGEMENT_STATE_InitializeTCPStack   = 3,
-			LINKMANAGEMENT_STATE_ConnectToRemoteHost  = 4,
-			LINKMANAGEMENT_STATE_ManageTCPConnection  = 5,
+			LINKMANAGEMENT_STATE_Idle,
+			LINKMANAGEMENT_STATE_SendModemDialCommands,
+			LINKMANAGEMENT_STATE_SendNetworkDialCommands,
+			LINKMANAGEMENT_STATE_WaitForLink,
+			LINKMANAGEMENT_STATE_InitializeTCPStack,
+			LINKMANAGEMENT_STATE_ConnectToRemoteHost,
+			LINKMANAGEMENT_STATE_ManageTCPConnection
 		};
 	
 	/* External Variables: */
@@ -68,13 +68,9 @@
 	
 	/* Function Prototypes: */
 		void LinkManagement_ManageConnectionState(void);
-		
+				
 		#if defined(INCLUDE_FROM_LINKMANAGEMENT_C)
-			static void LinkManagement_DialConnectionStage1(void);
-			static void LinkManagement_DialConnectionStage2(void);
-			static void LinkManagement_InitializeTCPStack(void);
-			static void LinkManagement_ConnectToRemoteHost(void);
-			static void LinkManagement_TCPIPTask(void);
+			static bool LinkManagement_DialConnection(char** DialCommands);
 		#endif
 	
 #endif
