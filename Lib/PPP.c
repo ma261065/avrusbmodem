@@ -31,499 +31,1243 @@
 #define  INCLUDE_FROM_PPP_C
 #include "PPP.h"
 
-uint8_t      addr1, addr2, addr3, addr4;						// Assigned IP address
-uint16_t     rx_ptr, tx_ptr, tx_end;							// Pointers into buffers
-uint16_t     checksum1, checksum1last, checksum1secondlast, checksum2;	// Rx and Tx checksums
-uint8_t      number;											// Unique packet ID
-uint8_t      tx_str[MaxRx + 1];									// Transmitter buffer
-uint8_t      rx_str[MaxTx + 1];									// Receiver buffer
-uint16_t     PacketType = NONE;									// Type of the last received packet
-bool         EscapeFlag;										// Flag if last character was an escape sequence
-bool         LocalReady, RemoteReady;							// Flags for the ready-state of this end and the remote end
-PPP_States_t PPPState;											// PPP negotiation states
+static uint8_t  	OutgoingPacketID;								// Unique packet ID
 
-// The main loop, login script, PPP state machine
-void PPP_ManagePPPNegotiation(void)
+PPP_Phases_t 		PPP_Phase = PPP_PHASE_Dead;						// PPP negotiation phases
+
+PPP_States_t		LCP_State = PPP_STATE_Initial;					// Each phase has a number of states
+PPP_States_t		PAP_State = PPP_STATE_Initial;					// Each phase has a number of states
+PPP_States_t		IPCP_State = PPP_STATE_Initial;					// Each phase has a number of states
+
+uint8_t 			PacketBuff[64];
+PPP_Packet_t*  		OutgoingPacket = (PPP_Packet_t*)PacketBuff;		// The outgoing packet
+PPP_Packet_t*  		IncomingPacket;									// The incoming packet
+uint16_t     		CurrentProtocol = NONE;							// Type of the last received packet
+
+uint8_t 			RestartCount = MAX_RESTARTS;
+static uint16_t		LinkTimer = 0;
+bool				TimerOn = false;
+
+bool 				MarkForNAK, MarkForREJ;
+
+
+void PPP_InitPPP(void)
 {
-	int16_t  c;													// Received serial character
-	bool     ExitFlag = 0;
-	uint16_t CharCount = 0;
-
-	// This will kick-start each phase of the PPP negotiations (LCP, PAP, IPCP)
-	PPP_MakeInitialPacket();
-
-	// Stay in this loop until we have either received a full PPP packet, or until we have sent a full PPP packet, or we have nothing to do
-	do
-	{
-		// Receive a full PPP packet
-		if (Modem_ReceiveBuffer.Elements)		// Incoming character?
-		{
-			c = Buffer_GetElement(&Modem_ReceiveBuffer);		// Get the character
-	     
-		 	if (c == 0x7e)										// Start or end of a packet 
-			{	
-	        	if (rx_ptr == 0)								// Start of packet
-				{
-					Debug_Print("\r\n\r\nReceive:\r\n7e ");
-					CharCount = 1;
-				}
-				else											// End of packet
-				{
-					Debug_Print("7e\r\n");
-
-					// If CRC passes, then accept packet
-				 	if (~checksum1secondlast == (rx_str[rx_ptr - 1] * 256 + rx_str[rx_ptr - 2]))
-					{
-						Debug_Print("CRC OK\r\n");
-	           			PacketType = rx_str[2] * 256 + rx_str[3];
-
-						PPP_ProcessReceivedPacket();			// Process the packet we received
-						ExitFlag = true;
-					}
-					else
-					{
-						Debug_Print("*** BAD CRC ***\r\n");
-						ExitFlag = true;
-					}
-	        	}
-				
-				EscapeFlag = false;								// Clear escape character flag
-			   	rx_ptr = 0;										// Get ready for next packet
-	        	checksum1 = 0xffff;								// Start new checksum
-	     	}
-		  	else if (c == 0x7d)									// If escape character then set escape flag
-			{
-				EscapeFlag = true;
-	     	}
-			else												// Process the character
-			{
-	        	CharCount++;
-				
-				if (EscapeFlag)									// If escape flag set from previous character
-				{
-	           		c ^= 0x20;									// Recover next character
-	           		EscapeFlag = false;							// Clear escape flag
-	        	}
-	        
-				// Uncompress PPP framing header
-				if (rx_ptr == 0 && c != 0xff)					// If Address-and-Control-Field-Compression is switched on
-					rx_str[rx_ptr++] = 0xff;					// then the remote end is allowed to leave out the 0xff 0x03 header
-	        													// so we add it back in if its missing
-				if (rx_ptr == 1 && c != 0x03)
-					rx_str[rx_ptr++] = 0x03;
-			
-				// Uncompress PPP protocol header
-				if (rx_ptr == 2 && (c & 1))						// If Protocol-Field-Compression is switched on
-					rx_str[rx_ptr++] = 0x00;					// the remote end is allowed to leave out the initial 0x00 in the protocol field
-
-		        rx_str[rx_ptr++] = c;							// Insert character in buffer
-	        
-				if (rx_ptr > MaxRx) 
-					rx_ptr = MaxRx;								// Increment pointer. Max is end of buffer
-				
-				Debug_PrintHex(c);
-
-				if (CharCount % 16 == 0)
-					Debug_Print("\r\n");
-
-	        	checksum1secondlast = checksum1last;			// Keep a rolling count of the last 3 checksums
-				checksum1last = checksum1;						// Eventually we need to see if the checksum is valid
-				checksum1 = CALC_CRC16(checksum1, c);			// and we need the one two back (as the current one includes the checksum itself)
-	     	}
-	  	} 
-	   	
-		// Send a full PPP packet
-		else if (tx_end)										// Do we have data to send?
-		{
-	     	c = tx_str[tx_ptr];									// Get character from buffer
-
-	     	if (tx_ptr == tx_end)								// Was it the last character
-			{
-	        	tx_end = 0;										// Mark buffer empty
-	        	c = 0x7e;										// Send end-of-frame character
-				
-				Debug_Print("7e\r\n");
-				
-				ExitFlag = true;
-	     	}
-			else if (EscapeFlag)								// Sending escape sequence?
-			{
-				CharCount++;
-				Debug_PrintHex(c);
-
-				if (CharCount % 16 == 0)
-					Debug_Print("\r\n");
-
-				c ^= 0x20;										// Yes then convert character
-	        	EscapeFlag = false;								// Clear escape flag
-	        	tx_ptr++;										// Point to next character
-	     	}
-			else if (c < 0x20 || c == 0x7d || c == 0x7e) 		// If escape sequence required?
-			{
-	        	EscapeFlag = true;									// Set escape flag
-	        	c = 0x7d;										// Send escape character
-	     	}
-			else 
-			{		
-	       		if (!tx_ptr)
-				{
-					c = 0x7e;									// Send frame character if first character of packet
-					Debug_Print("\r\n\r\nSend:\r\n");
-					CharCount = 0;
-					EscapeFlag = false;
-				}
-
-	       		CharCount++;
-				Debug_PrintHex(c);
-
-				if (CharCount % 16 == 0)
-					Debug_Print("\r\n");
-
-				tx_ptr++;
-			}
-
-			Buffer_StoreElement(&Modem_SendBuffer, c);			// Put character in transmitter
-		}
-		else
-		{
-			// Nothing to Send or Receive
-			ExitFlag = true;
-		}
-	}
-	while (ExitFlag == 0);
+	PPP_Phase = PPP_PHASE_Dead;
 }
 
-
-static void PPP_ProcessReceivedPacket(void)
-{	
-	int16_t c;	
-
-	// *****************************
-	// **         LCP             **
-	// *****************************
-  	
-	if (PacketType == LCP)
-	{
-		Debug_Print("Got LCP ");
-
-		switch (rx_str[4])										// Switch on packet type
-		{
-			case REQ:
-				RemoteReady = false;							// Clear remote ready flag
-           
-		   		Debug_Print("REQ ");
-				
-				if ((c = PPP_TestOptions(0x00c7)))				// Options 1, 2, 3, 7, 8
-				{											
-	            	if (c > 1)
-				  	{
-	                	c = ACK;								// ACK packet
-                 
-						RemoteReady = true;						// Set remote ready flag
-
-						Debug_Print("- We ACK\r\n");
-	              	}
-					else
-					{
-	                	rx_str[10] = 0xc0;						// Else NAK password authentication
-	                 	c = NAK;
-						Debug_Print("- We NAK\r\n");
-	              	}
-				}
-				else											// Else REJ bad options
-				{
-					Debug_Print("- We REJ\r\n");
-			   		c = REJ;
-				}
-			
-				TIME = 0;									// Stop the timer from expiring
-	           	PPP_CreatePacket(LCP, c, rx_str[5], rx_str + 7); 	// Create LCP packet from Rx buffer
-			break;
-        
-			case ACK:
-				if (rx_str[5] == number)						// Does reply ID match the request
-			   	{
-					Debug_Print("ACK\r\n");
-					LocalReady = true;							// Set local ready flag
-				}
-				else
-					Debug_Print("Out of sync ACK\r\n");
-			break;
-        
-			case NAK:
-				Debug_Print("NAK\r\n");
-				LocalReady = false;								// Clear local ready flag
-	        break;
-        
-			case REJ:
-				Debug_Print("REJ\r\n");
-	        	LocalReady = false;								// Clear local ready flag
-	        break;
-        
-			case TERM:
-				Debug_Print("TERM\r\n");
-	        break;
-		}
-
-		if (LocalReady && RemoteReady)							// When both ends ready, go to PAP state
-			PPPState = PPP_STATE_PAPNegotiation;
-	} 
-
-
-	// *****************************
-	// **         PAP             **
-	// *****************************
-
-	else if (PacketType == PAP)
-	{
-		Debug_Print("Got PAP ");
-
-    	switch (rx_str[4])										// Switch on packet type
-		{
-	        case REQ:
-				Debug_Print("REQ\r\n");				
-	        break;												// Ignore incoming PAP REQ
-	        case ACK:
-				Debug_Print("ACK\r\n");
-	           	PPPState = PPP_STATE_IPCPNegotiation;			// PAP ACK means that this state is done
-	        break;
-	        case NAK:
-				Debug_Print("NAK\r\n");
-	        break;												// Ignore incoming PAP NAK
-		}
-  	}
-
-	// *****************************
-	// **         IPCP            **
-	// *****************************
-
-	else if (PacketType == IPCP)
-	{
-		// IPCP option 0x03 IP address
-		// IPCP option 0x81 Primary DNS Address
-		// IPCP option 0x82 Primary NBNS Address
-		// IPCP option 0x83 Secondary DNS Address
-		// IPCP option 0x84 Secondary NBNS Address
-
-		Debug_Print("Got IPCP ");
-
-    	switch (rx_str[4])										// Switch on packet type
-		{		
-        	case REQ:
-				Debug_Print("REQ ");	
-        		
-				if (PPP_TestOptions(0x0004))					// Option 3 - We got an IP address
-		   		{
-					c = ACK;									// We ACK
-					Debug_Print("- We ACK\r\n");
-           		}
-				else
-				{				
-              		c = REJ;									// Otherwise we reject bad options
-					Debug_Print("- We REJ\r\n");
-           		}
-           		
-				PPP_CreatePacket(IPCP, c, rx_str[5], rx_str + 7);	// Create IPCP packet from Rx buffer
-			break; 				
-        
-			case ACK:
-				Debug_Print("ACK\r\n");	
-				
-				if (rx_str[5] == number)						// If IPCP response id matches request id
-				{
-					Debug_Print("**LINK CONNECTED**\r\n");
-					PPPState = PPP_STATE_LCPNegotiation;		// Move into initial state for when we get called next time (after link disconnect)
-					ConnectedState = LINKMANAGEMENT_STATE_InitializeTCPStack;
-           		}
-			break;
-       
-			case NAK:   										// This is where we get our address
-				Debug_Print("NAK\r\n");	
-				IPAddr1 = addr1 = rx_str[10];
-				IPAddr2 = addr2 = rx_str[11];   				// Store address for use in IP packets 
-				IPAddr3 = addr3 = rx_str[12];
-				IPAddr4 = addr4 = rx_str[13];
-				
-				number++;										// If we get a NAK, send the next REQ packet with a new number
-				
-				PPP_CreatePacket(IPCP, REQ, number, rx_str + 7);	// Make IPCP packet from Rx buffer
-			break; 				
-
-			case REJ:
-				Debug_Print("REJ\r\n");	
-			break;												// Ignore incoming IPCP REJ
-			
-			case TERM:
-				Debug_Print("TERM\r\n");	
-			break;												// Ignore incoming IPCP TERM
-		}
-	}
-
-	else if (PacketType == IP)
-	{
-		Debug_Print("Got IP\r\n");									// Should never get this as we should have handed over to the TCP stack
-	} 
-
-	else if (PacketType == CHAP)								// Should never get this as we ask for PAP authentication
-	{
-		Debug_Print("Got CHAP\r\n");
-	}
-
-	else if (PacketType)										// Ignore any other received packet types
-	{				
-		Debug_Print("Got unknown packet\r\n");
-  	}
-
-	PacketType = NONE;											// Indicate that packet is processed
+void PPP_LinkUp()
+{
+	PPP_Phase = PPP_PHASE_Establish;
+	PPP_ManageState(PPP_EVENT_Up, &LCP_State);
 }
 
-
-// Make the first packet to start each phase of the PPP negotiations (LCP, PAP, IPCP)
-static void PPP_MakeInitialPacket(void)
+void PPP_LinkOpen()
 {
-	if (tx_end)													// Don't make a new packet if we have data in the buffer already
+	PPP_ManageState(PPP_EVENT_Open, &LCP_State);
+	PPP_ManageState(PPP_EVENT_Open, &PAP_State);
+	PPP_ManageState(PPP_EVENT_Open, &IPCP_State);
+}
+
+// Called every 10ms. Send events to the state machine every 3 seconds if currently running
+void PPP_LinkTimer(void)
+{
+	if (!TimerOn || LinkTimer++ < 300)
 		return;
 
-	if ((PPPState == PPP_STATE_LCPNegotiation) && (TIME > 300))	// Once every 3 seconds try negotiating LCP
-	{		
-		Debug_Print("\r\nMaking LCP Packet");
-		
-		TIME = 0;											// Reset timer
-		number++;												// Increment ID to make packets unique
-
-		// Request LCP options 2, 5, 7, 8, 0D, 11, 13
-		PPP_CreatePacket(LCP, REQ, number, (uint8_t*)"\x12\x01\x04\x05\xa0\x02\x06\x00\x0a\x00\x00\x07\x02\x08\x02");
-	}
-
-	else if ((PPPState == PPP_STATE_PAPNegotiation) && (TIME > 100))	// Once every second try negotiating password
-	{	
-		Debug_Print("\r\nMaking PAP Packet");
-		
-		TIME = 0;											// Reset timer
-		number++;												// Increment ID to make packets unique
-
-     	PPP_CreatePacket(PAP, REQ, number, (uint8_t*)"\x06\x00\x00"); 
-  	}
-
-	else if ((PPPState == PPP_STATE_IPCPNegotiation) && (TIME > 500))	// Once every 5 seconds try negotiating IPCP
+	if (RestartCount > 0)
 	{
-		Debug_Print("\r\nMaking IPCP Packet");
+		Debug_Print("Timer+\r\n");
 
-		TIME = 0;											// Reset timer
-		number++;												// Increment ID to make packets unique
-		
-		// Request IPCP options 3 (IP Address), 81 (Primary DNS) & 83 (Secondary DNS) with addr 0.0.0.0 for each one
-		PPP_CreatePacket(IPCP, REQ, number, (uint8_t*)"\x16\x03\x06\x00\x00\x00\x00\x81\x06\x00\x00\x00\x00\x83\x06\x00\x00\x00\x00");
-	}
-}
-
-
-// Create a packet
-// The first byte of *str is the length of passed data (including length byte) + 1 byte for the other length byte + 2 bytes for the protocol
-//   protocol is the packet protocol (e.g. LCP, PAP, IPCP)
-//   packettype is the packet type (e.g. REQ, ACK, NAK)
-//   packetID is the packet ID
-//   *str is the packet data to be added after the header
-// Returns the packet as a string in tx_str
-static void PPP_CreatePacket(uint16_t protocol, uint8_t packetType, uint8_t packetID, const uint8_t *str)
-{
-	uint16_t length, temp;
-
-	tx_ptr = 1;													// Point to 2nd char in transmit buffer. 1st char is length
-	tx_str[0] = ' ';											// Dummy first character. Will be overwritten by frame char (0x7e) when the packet is sent out
-	checksum2 = 0xffff;											// Initialise checksum
-
-	PPP_AddToPacket(0xff);										// Insert PPP header Oxff
-	PPP_AddToPacket(0x03);										// Insert PPP header 0x03
-	PPP_AddToPacket(protocol / 256);							// Insert high byte of protocol field
-	PPP_AddToPacket(protocol & 255);							// Insert low byte of protocol field
-
-	PPP_AddToPacket(packetType);								// Insert packet type (e.g. REQ, ACK, NAK)
-	PPP_AddToPacket(packetID);									// Insert packet ID number
-
-	PPP_AddToPacket(0);											// Insert MSB of length (i.e. max length = 256)
-	length = (*str) - 3;										// Calculate the length of data we actually have to copy
-
-	while (length)
-	{															// Copy the whole string into packet
-		length--;												// Decrement packet length
-	  	PPP_AddToPacket(*str);									// Add current character to packet
-		str++;													// Point to next character
-	}
-
-	temp = ~checksum2;
-	PPP_AddToPacket(temp & 255);								// Insert checksum MSB
-	PPP_AddToPacket(temp / 256);								// Insert checksum LSB
-
-	tx_end = tx_ptr;											// Set end of buffer marker to end of packet
-	tx_ptr = 0;													// Point to the beginning of the packet
-}
-
-
-// Test the option list in packet for valid options
-//   option is the 16 bit field, where a 1 accepts the option one greater than the bit # (e.g. 0x0004 for option 5) 
-//   returns 2 for LCP NAK, 1 is only correct fields found, and zero means bad options
-//   return also modifies RX_STR to list unacceptable options if NAK or REJ required
-static uint8_t PPP_TestOptions(uint16_t option)
-{
-	uint16_t size;											// size is length of option string
-	unsigned ptr1 = 8;											// ptr1 points data insert location
-    unsigned ptr2 = 8;											// ptr2 points to data origin
-	char pass = 3;												// pass is the return value
-
-	size = rx_str[7] + 4;										// size is length of packet
-   
-	if (size > MaxRx)
-		size = MaxRx;											// Truncate packet if larger than buffer
-
-	while (ptr1 < size)											// Scan options in receiver buffer
-	{
-		if (rx_str[ptr1] == 3 && rx_str[ptr1+2] == 0xc2)
-			pass &= 0xfd;										// Found a CHAP request, mark for NAK
-
-		if (!((1 << (rx_str[ptr1] - 1)) & option))
-	    	pass = 0;											// Found illegal options, mark for REJ
-
-	  ptr1 += rx_str[ptr1+1];									// Point to start of next option
-	}
-
-	if (!(pass & 2))											// If marked for NAK or REJ
-	{	
-		if (pass & 1)											// Save state for NAK
+		switch(PPP_Phase)
 		{
-			option = 0xfffb;
+			case PPP_PHASE_Establish:
+				PPP_ManageState(PPP_EVENT_TOPlus, &LCP_State);
+			break;
+
+			case PPP_PHASE_Authenticate:
+				PPP_ManageState(PPP_EVENT_TOPlus, &PAP_State);
+			break;
+
+			case PPP_PHASE_Network:
+				PPP_ManageState(PPP_EVENT_TOPlus, &IPCP_State);
+			break;
+
+			default:
+			break;
+		}
+	}
+	else
+	{
+		Debug_Print("Timer-\r\n");
+		
+		switch(PPP_Phase)
+		{
+			case PPP_PHASE_Establish:
+				PPP_ManageState(PPP_EVENT_TOMinus, &LCP_State);
+			break;
+
+			case PPP_PHASE_Authenticate:
+				PPP_ManageState(PPP_EVENT_TOMinus, &PAP_State);
+			break;
+
+			case PPP_PHASE_Network:
+				PPP_ManageState(PPP_EVENT_TOMinus, &IPCP_State);
+			break;
+
+			default:
+			break;
+		}
+	}
+
+	LinkTimer = 0;																										// Reset Timer
+}
+
+void PPP_ManageLink(void)
+{	
+	if (PPP_Phase == PPP_PHASE_Dead)
+		return;
+	
+	CurrentProtocol = network_read();
+
+	if (CurrentProtocol == 0)
+		return;
+	
+	Debug_Print("Got ");
+	IncomingPacket = (PPP_Packet_t*)uip_buf;																			// Map the incoming data to a packet
+	
+	switch (CurrentProtocol)
+	{
+		case LCP:
+			Debug_Print("LCP ");
+
+			switch(IncomingPacket->Code)
+			{
+				case REQ:
+					Debug_Print("REQ\r\n");
+
+					MarkForNAK = MarkForREJ = false;
+
+					// List of options that we can support. If any other options come in, we have to REJ them
+					uint8_t SupportedOptions[] = {LCP_OPTION_Async_Control_Character_Map,
+									  		 	  LCP_OPTION_Authentication_Protocol,
+									  		 	  LCP_OPTION_Protocol_Field_Compression,
+									  		 	  LCP_OPTION_Address_and_Control_Field_Compression};
+
+					if ((MarkForREJ = PPP_TestForREJ(SupportedOptions, sizeof(SupportedOptions))))						// Check that we can support all the options the other end wants to use
+					{
+						PPP_ManageState(PPP_EVENT_RCRMinus, &LCP_State);
+						break;
+					}
+					
+					static PPP_Option_t Option3 = {.Type  = 0x03, .Length = 4, .Data = {0xc0, 0x23}};				
+
+					if ((MarkForNAK = PPP_TestForNAK(&Option3)))														// Check that the authentication protocol = PAP (0xc023)
+					{
+						PPP_ManageState(PPP_EVENT_RCRMinus, &LCP_State);
+						break;
+					}
+
+					PPP_ManageState(PPP_EVENT_RCRPlus, &LCP_State);
+				break;
+
+				case ACK:
+					Debug_Print("ACK\r\n");
+					PPP_ManageState(PPP_EVENT_RCA, &LCP_State);
+				break;
+
+				case NAK:
+					Debug_Print("NAK\r\n");
+					ProcessNAK();
+					PPP_ManageState(PPP_EVENT_RCN, &LCP_State);
+				break;
+
+				case REJ:
+					Debug_Print("REJ\r\n");
+					ProcessREJ();
+					PPP_ManageState(PPP_EVENT_RCN, &LCP_State);
+				break;
+
+				case DISC:
+				case ECHOREQ:
+				case ECHOREPLY:
+					Debug_Print("DISC\r\n");
+					PPP_ManageState(PPP_EVENT_RXR, &LCP_State);
+				break;
+
+				case TERMREQ:
+					Debug_Print("TERM\r\n");
+					PPP_ManageState(PPP_EVENT_RTR, &LCP_State);
+				break;
+
+				case CODEREJ:
+				case PROTREJ:
+					Debug_Print("CODE/PROTREJ\r\n");
+					PPP_ManageState(PPP_EVENT_RXJMinus, &LCP_State);
+				break;
+				
+				default:
+					Debug_Print("unknown\r\n");
+					PPP_ManageState(PPP_EVENT_RUC, &LCP_State);
+				break;
+			}
+		break;
+
+		case PAP:
+			Debug_Print("PAP ");
+			
+			switch(IncomingPacket->Code)
+			{
+				case REQ:
+					Debug_Print("REQ\r\n");
+					PPP_ManageState(PPP_EVENT_RCRPlus, &PAP_State);
+				break;
+
+				case ACK:
+					Debug_Print("ACK\r\n");
+					PPP_ManageState(PPP_EVENT_RCRPlus, &PAP_State);
+					PPP_ManageState(PPP_EVENT_RCA, &PAP_State);
+				break;
+			}
+		break;
+
+		case IPCP:
+			Debug_Print("IPCP ");
+
+			switch(IncomingPacket->Code)
+			{
+				case REQ:
+					Debug_Print("REQ\r\n");
+	
+					MarkForNAK = MarkForREJ = false;
+					
+					// List of options that we can support. If any other options come in, we have to REJ them
+					uint8_t SupportedOptions[] = {IPCP_OPTION_IP_address, IPCP_OPTION_Primary_DNS, IPCP_OPTION_Secondary_DNS};
+					
+					if ((MarkForREJ = PPP_TestForREJ(SupportedOptions, sizeof(SupportedOptions))))
+					{
+						PPP_ManageState(PPP_EVENT_RCRMinus, &IPCP_State);
+						break;
+					}
+
+					PPP_ManageState(PPP_EVENT_RCRPlus, &IPCP_State);
+				break;
+
+				case ACK:
+					Debug_Print("ACK\r\n");
+					IPAddr1 = IncomingPacket->Options[0].Data[0]; 						// Store address for use in IP packets.
+					IPAddr2 = IncomingPacket->Options[0].Data[1];    				 	// Assumption is that Option 3 is the first option, which it
+					IPAddr3 = IncomingPacket->Options[0].Data[2];						// should be as the PPP spec states that implementations should
+					IPAddr4 = IncomingPacket->Options[0].Data[3];						// not reorder packets, and we sent out a REQ with option 3 first
+
+					PPP_ManageState(PPP_EVENT_RCA, &IPCP_State);
+				break;
+
+				case NAK:
+					Debug_Print("NAK\r\n");
+					ProcessNAK();
+					PPP_ManageState(PPP_EVENT_RCN, &IPCP_State);
+				break;
+
+				case REJ:
+					Debug_Print("REJ\r\n");
+					ProcessREJ();
+					PPP_ManageState(PPP_EVENT_RCN, &IPCP_State);
+				break;
+			}
+		break;
+
+		case IP:
+			TCPIP_GotNewPacket();
+		break;
+
+		default:
+			Debug_Print("unknown protocol: 0x");
+			Debug_PrintHex(CurrentProtocol / 256); Debug_PrintHex(CurrentProtocol & 255);
+			Debug_Print("\r\n");
+		break;
+	}
+}
+
+
+// Either create a new OutgoingPacket, or if we've just received a NAK or REJ we will have already changed the OutgoingPacket so just send that
+static void Send_Configure_Request()
+{
+	Debug_Print("Send Configure Request\r\n");
+	
+	switch(PPP_Phase)
+	{
+		case PPP_PHASE_Establish:
+			if (CurrentProtocol == NONE)																					// Create a new packet
+			{
+				// When we send a REQ, we want to make sure that the other end supports these options
+				static PPP_Option_t Option1 = {.Type  = LCP_OPTION_Maximum_Receive_Unit, .Length = 4, .Data = {0x5, 0xa0}};
+				static PPP_Option_t Option2 = {.Type  = LCP_OPTION_Async_Control_Character_Map, .Length = 6, .Data = {0x0, 0xa, 0x0, 0x0}};
+				static PPP_Option_t Option7 = {.Type  = LCP_OPTION_Protocol_Field_Compression, .Length = 2};
+				static PPP_Option_t Option8 = {.Type  = LCP_OPTION_Address_and_Control_Field_Compression, .Length = 2};
+				
+				CurrentProtocol = LCP;
+				OutgoingPacket->Code = REQ;
+				OutgoingPacket->Length = htons(4);
+
+				AddOption(OutgoingPacket, &Option1);
+				AddOption(OutgoingPacket, &Option2);
+				AddOption(OutgoingPacket, &Option7);
+				AddOption(OutgoingPacket, &Option8);
+			}
+		break;
+
+		case PPP_PHASE_Authenticate:
+			if (CurrentProtocol == NONE)																					// Create a new packet
+			{
+				CurrentProtocol = PAP;
+				OutgoingPacket->Code = REQ;
+				OutgoingPacket->Options[0].Type = 0x00;																		// No User Name
+				OutgoingPacket->Options[0].Length = 0x00;																	// No Password
+				OutgoingPacket->Length = htons(6);
+			}
+		break;
+
+		case PPP_PHASE_Network:
+			if (CurrentProtocol == NONE)																					// Create a new packet
+			{
+				// When we send a REQ, we want to make sure that the other end supports these options
+				static PPP_Option_t Option3 = {.Type  = IPCP_OPTION_IP_address, .Length = 6, .Data = {0, 0, 0, 0}};			// Make sure this is first
+				static PPP_Option_t Option81 = {.Type  = IPCP_OPTION_Primary_DNS, .Length = 6, .Data = {0, 0, 0, 0}};
+				static PPP_Option_t Option83 = {.Type  = IPCP_OPTION_Secondary_DNS, .Length = 6, .Data = {0, 0, 0, 0}};
+				
+				CurrentProtocol = IPCP;
+				OutgoingPacket->Code = REQ;
+				OutgoingPacket->Length = htons(4);
+
+				AddOption(OutgoingPacket, &Option3);
+				AddOption(OutgoingPacket, &Option81);
+				AddOption(OutgoingPacket, &Option83);
+			}
+		break;
+
+		default:
+		break;
+	}
+
+	OutgoingPacket->PacketID = OutgoingPacketID++;																// Every new REQ Packet going out gets a new ID
+	RestartCount--;
+	memcpy(uip_buf, OutgoingPacket, ntohs(OutgoingPacket->Length));												// Copy the outgoing packet to the buffer for sending
+	uip_len = ntohs(OutgoingPacket->Length);
+	network_send(CurrentProtocol);																				// Send either the new packet or the modified packet
+}
+
+
+// We change the incoming packet code to send an ACK to the remote end, and re-use all the data from the incoming packet
+static void Send_Configure_Ack()
+{
+	Debug_Print("Send Configure ACK\r\n");
+
+	IncomingPacket->Code = ACK;
+	network_send(CurrentProtocol);
+}
+
+// We change the incoming packet code to send a NAK or REJ to the remote end. The incoming packet has already been altered to show which options to NAK/REJ
+static void Send_Configure_Nak_Rej()
+{
+	if (MarkForNAK)
+	{
+		Debug_Print("Send Configure NAK\r\n");
+		IncomingPacket->Code = NAK;
+	}
+	else if (MarkForREJ)
+	{
+		Debug_Print("Send Configure REJ\r\n");
+		IncomingPacket->Code = REJ;
+	}
+	else return;
+
+	uip_len = ntohs(IncomingPacket->Length);
+	network_send(CurrentProtocol);
+}
+
+// Send a TERM to the remote end.
+static void Send_Terminate_Request()
+{
+	Debug_Print("Send Terminate Request\r\n");
+	
+	CurrentProtocol = LCP;
+	OutgoingPacket->Code = TERMREQ;
+	OutgoingPacket->Length = htons(4);
+	OutgoingPacket->PacketID = OutgoingPacketID++;																// Every new REQ Packet going out gets a new ID
+
+	RestartCount--;
+
+	memcpy(uip_buf, OutgoingPacket, ntohs(OutgoingPacket->Length));												// Copy the outgoing packet to the buffer for sending
+
+	uip_len = ntohs(OutgoingPacket->Length);
+	network_send(CurrentProtocol);																				// Send the packet
+}
+
+// Send a TERM ACK to the remote end.
+static void Send_Terminate_Ack()
+{
+	Debug_Print("Send Terminate ACK\r\n");
+
+	IncomingPacket->Code = TERMREPLY;
+	network_send(CurrentProtocol);
+}
+
+// Send a REJ to the remote end.
+static void Send_Code_Reject()
+{
+	Debug_Print("Send Code Reject\r\n");
+
+	IncomingPacket->Code = CODEREJ;
+	network_send(CurrentProtocol);
+}
+
+// Send an ECHO to the remote end.
+static void Send_Echo_Reply()
+{
+	Debug_Print("Send Echo Reply\r\n");
+
+	IncomingPacket->Code = ECHOREPLY;
+	network_send(CurrentProtocol);
+}
+
+// Called by the state machine when the current layer comes up. Use this to start the next layer.
+static void This_Layer_Up()
+{
+	switch(PPP_Phase)
+	{
+		case PPP_PHASE_Establish:
+			Debug_Print("**LCP Up**\r\n");
+			PPP_Phase = PPP_PHASE_Authenticate;
+			CurrentProtocol = NONE;
+			PPP_ManageState(PPP_EVENT_Up, &PAP_State);
+		break;
+
+		case PPP_PHASE_Authenticate:
+			Debug_Print("**PAP Up**\r\n");
+			PPP_Phase = PPP_PHASE_Network;
+			CurrentProtocol = NONE;
+			PPP_ManageState(PPP_EVENT_Up, &IPCP_State);
+		break;
+
+		case PPP_PHASE_Network:
+			Debug_Print("**LINK CONNECTED**\r\n");
+			CurrentProtocol = NONE;
+			ConnectedState = LINKMANAGEMENT_STATE_InitializeTCPStack;
+		break;
+
+		default:
+		break;
+	}
+}
+
+// Called by the state machine when the current layer goes down. Reset everything
+static void This_Layer_Down()
+{
+	Debug_Print("**Layer Down**\r\n");
+
+	PPP_ManageState(PPP_EVENT_Down, &LCP_State);
+	PPP_ManageState(PPP_EVENT_Down, &PAP_State);
+	PPP_ManageState(PPP_EVENT_Down, &IPCP_State);
+	PPP_Phase = PPP_PHASE_Dead;
+	ConnectedState = LINKMANAGEMENT_STATE_Idle;
+}
+
+// Called by the state machine when the current is in negotiation
+static void This_Layer_Started()
+{
+	Debug_Print("**Layer Started**\r\n");
+}
+
+// Called by the state machine when the current layer is closing
+static void This_Layer_Finished()
+{
+	Debug_Print("**Layer Finished**\r\n");
+}
+
+
+// We get a NAK if our outbound Configure Request contains valid options, but the values are wrong. So we adjust our values for when the next Configure Request is sent
+void ProcessNAK()
+{
+	PPP_Option_t* CurrentOption = NULL;
+
+	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in NAK packet
+	{
+		ChangeOption(OutgoingPacket, CurrentOption);
+	}
+}
+
+// We get a REJ if our outbound Configure Request contains any options not acceptable to the remote end. So we remove those options.
+void ProcessREJ()
+{
+	PPP_Option_t* CurrentOption = NULL;
+
+	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in REJ packet
+	{
+		RemoveOption(OutgoingPacket, CurrentOption->Type);
+	}
+}
+
+// Test to see if the incoming packet contains any options we can't support If so, take out all good options and leave the bad ones to be sent out in the REJ
+bool PPP_TestForREJ(uint8_t Options[], uint8_t NumOptions)
+{
+	PPP_Option_t* CurrentOption = NULL;
+	bool FoundBadOption = false;
+	bool ThisOptionOK;
+
+	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan incoming options
+	{
+		ThisOptionOK = false;
+
+		for (int i = 0; i < NumOptions; i++)
+		{
+			if (CurrentOption->Type == Options[i])
+			{
+				ThisOptionOK = true;
+				break;
+			}
 		}
 
-		for (ptr1 = 8; ptr1 < size;)
+		if (!ThisOptionOK)
+			FoundBadOption = true;
+	}
+	
+	if (!FoundBadOption)																// No bad options. Return, leaving the packet untouched
+		return false;
+
+	// We found some bad options, so now we need to go through the packet and remove all others, leaving the bad options to be sent out in the REJ
+	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)
+	{
+		for (int i = 0; i < NumOptions; i++)
 		{
-			if (!((1 << (rx_str[ptr1] - 1)) & option))			// If illegal option
+			if (CurrentOption->Type == Options[i])
 			{
-            	for (pass = rx_str[ptr1+1]; ptr1 < size && pass; ptr1++) // Move option
-				{ 
-					rx_str[ptr2] = rx_str[ptr1];				// Move current byte to new storage
-					ptr2++;										// Increment storage pointer
-					pass--;										// Decrement number of characters
-				}
-			}
-			else 
-			{
-				ptr1+=rx_str[ptr1+1];							// Point to next option
+				RemoveOption(IncomingPacket, CurrentOption->Type);
+				CurrentOption = NULL;													// Start again. Easier than moving back (as next option has now moved into place of current option)
+				break;
 			}
 		}
+	}
 
-		rx_str[7] = ptr2 - 4;									// Save new option string length
-		pass = 0;												// Restore state for REJ
-		
-		if (option == 0xfffb)									// Restore state for NAK
-		pass = 1;
-   }
-
-   return pass;
+	return true;
 }
 
-// Add character to the new packet & update the checksum
-static void PPP_AddToPacket(uint8_t c)
+// Test to see if the incoming packet contains an option with values that we can't accept
+bool PPP_TestForNAK(PPP_Option_t* Option)
 {
-	checksum2 = CALC_CRC16(checksum2, c);						// Add CRC from this char to running total
-  	tx_str[tx_ptr++] = c;										// Store character in the transmit buffer
+	PPP_Option_t* CurrentOption = NULL;
+	bool FoundBadOption = false;
+	
+	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in receiver buffer
+	{
+		if (CurrentOption->Type == Option->Type)
+		{	
+			for (uint8_t i = 0; i < Option->Length - 2; i++)
+			{
+				if (CurrentOption->Data[i] != Option->Data[i])
+					FoundBadOption = true;
+			}
+		}
+	}
+	
+	if (!FoundBadOption)																// No bad option. Return, leaving the packet untouched
+		return false;
+
+	// We found a bad option, so now we need to go through the packet and remove all others, leaving the bad option to be sent out in the NAK
+	// and change the bad option to have a value that we can support
+	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)
+	{
+		if (CurrentOption->Type == Option->Type)
+			ChangeOption(IncomingPacket, Option);
+		else
+		{
+			RemoveOption(IncomingPacket, CurrentOption->Type);
+			CurrentOption = NULL;														// Start again. Easier than moving back (as next option has now moved into place of current option)
+		}
+	}
+
+	return true;
+}
+
+
+/////////////////////////////
+// Packet Helper functions //
+/////////////////////////////
+
+// Try and find the option in the packet, and if it exists, change its value to that in the passed-in option
+void ChangeOption(PPP_Packet_t* ThisPacket, PPP_Option_t* Option)
+{
+	PPP_Option_t* CurrentOption = NULL;
+
+	while ((CurrentOption = GetNextOption(ThisPacket, CurrentOption)) != NULL)						// Scan options in the packet
+	{
+		if (CurrentOption->Type == Option->Type)
+		{
+			memcpy(CurrentOption->Data, Option->Data, Option->Length - 2);
+		}
+	}
+}
+
+// Add the given option to the end of the packet and adjust the size of the packet
+void AddOption(PPP_Packet_t* ThisPacket, PPP_Option_t* Option)
+{
+	memcpy((void*)ThisPacket + ntohs(ThisPacket->Length), Option, Option->Length);
+	ThisPacket->Length = htons(ntohs(ThisPacket->Length) + Option->Length);
+}
+
+// Try and find the option in the packet, and if it exists remove it and adjust the size of the packet
+void RemoveOption(PPP_Packet_t* ThisPacket, uint8_t Type)
+{
+	PPP_Option_t* CurrentOption = NULL;
+	PPP_Option_t* NextOption = NULL;
+
+	while ((CurrentOption = GetNextOption(ThisPacket, CurrentOption)) != NULL)						// Scan the options in the packet
+	{
+		if (CurrentOption->Type == Type)															// Is it the packet we want to remove?
+		{
+			NextOption = GetNextOption(ThisPacket, CurrentOption);									// Find the next option in the packet
+			uint8_t OptionLength = CurrentOption->Length;											// Save the Option Length as the memcpy will change CurrentOption->Length
+
+			if (NextOption != NULL)																	// If it's not the last option in the packet ...
+				memcpy(CurrentOption, NextOption, ntohs(ThisPacket->Length) - OptionLength - 4);	// ... move all further options forward
+
+			ThisPacket->Length = htons(ntohs(ThisPacket->Length) - OptionLength);					// Adjust the length
+		}
+	}
+}
+
+// Get the next option in the packet from the option that is passed in. Return NULL if last packet
+PPP_Option_t* GetNextOption(PPP_Packet_t* ThisPacket, PPP_Option_t* CurrentOption)
+{
+	PPP_Option_t* NextOption;
+	
+	if (CurrentOption == NULL)
+		NextOption = (PPP_Option_t*)ThisPacket->Options;
+	else
+		NextOption = (PPP_Option_t*)((uint8_t*)CurrentOption + CurrentOption->Length);
+
+	// Check that we haven't overrun the end of the packet
+	if ((void*)NextOption - (void*)ThisPacket->Options < ntohs(ThisPacket->Length) - 4)
+		return NextOption;
+	else
+		return NULL;
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// The main PPP state machine - following RFC1661 - http://tools.ietf.org/html/rfc1661 //
+/////////////////////////////////////////////////////////////////////////////////////////
+
+void PPP_ManageState(PPP_Events_t Event, PPP_States_t* State)
+{
+	switch (*State)
+	{
+		case PPP_STATE_Initial:
+
+			switch (Event)
+			{
+				case PPP_EVENT_Up:
+					*State = PPP_STATE_Closed;
+				break;
+
+				case PPP_EVENT_Open:
+					*State = PPP_STATE_Starting;
+					This_Layer_Started();
+				break;
+
+				case PPP_EVENT_Close:
+					*State = PPP_STATE_Initial;
+				break;
+
+				case PPP_EVENT_TOPlus:
+				case PPP_EVENT_TOMinus:
+				break;
+
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Starting:
+
+			switch (Event)
+			{
+				case PPP_EVENT_Up:
+					*State = PPP_STATE_Req_Sent;
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					TimerOn = true;
+					Send_Configure_Request();
+				break;
+
+				case PPP_EVENT_Open:
+					*State = PPP_STATE_Starting;
+				break;
+
+				case PPP_EVENT_Close:
+					*State = PPP_STATE_Initial;
+					This_Layer_Finished();
+				break;
+
+				case PPP_EVENT_TOPlus:
+				case PPP_EVENT_TOMinus:
+				break;
+
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Closed:
+
+			switch (Event)
+			{
+				case PPP_EVENT_Down:
+					*State = PPP_STATE_Initial;
+				break;
+
+				case PPP_EVENT_Open:
+					*State = PPP_STATE_Req_Sent;
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					TimerOn = true;
+					Send_Configure_Request();
+				break;
+
+				case PPP_EVENT_Close:
+				case PPP_EVENT_RTA:
+				case PPP_EVENT_RXJPlus:
+				case PPP_EVENT_RXR:
+					*State = PPP_STATE_Closed;
+				break;
+
+				case PPP_EVENT_RCRPlus:
+				case PPP_EVENT_RCRMinus:
+				case PPP_EVENT_RCA:
+				case PPP_EVENT_RCN:
+					*State = PPP_STATE_Closed;
+					Send_Terminate_Ack();
+				break;
+
+				case PPP_EVENT_TOPlus:
+				case PPP_EVENT_TOMinus:
+				break;
+
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Stopped:
+			
+			switch (Event)
+			{
+				case PPP_EVENT_Down:
+					*State = PPP_STATE_Starting;
+					This_Layer_Started();
+				break;
+
+				case PPP_EVENT_Open:
+					*State = PPP_STATE_Stopped;
+				break;
+
+				case PPP_EVENT_Close:
+					*State = PPP_STATE_Closed;
+				break;
+
+				case PPP_EVENT_RCRPlus:
+					*State = PPP_STATE_Ack_Sent;
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					TimerOn = true;
+					Send_Configure_Request();
+					Send_Configure_Ack();
+				break;
+
+				case PPP_EVENT_RCRMinus:
+					*State = PPP_STATE_Req_Sent;
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					TimerOn = true;
+					Send_Configure_Request();
+					Send_Configure_Nak_Rej();
+				break;
+
+				case PPP_EVENT_RCA:
+				case PPP_EVENT_RCN:
+				case PPP_EVENT_RTR:
+					*State = PPP_STATE_Stopped;
+					Send_Terminate_Ack();
+				break;
+
+				case PPP_EVENT_RTA:
+				case PPP_EVENT_RXJPlus:
+				case PPP_EVENT_RXR:
+					*State = PPP_STATE_Stopped;
+				break;
+
+				case PPP_EVENT_RUC:
+					*State = PPP_STATE_Stopped;
+					Send_Code_Reject();
+				break;
+				
+				case PPP_EVENT_RXJMinus:
+					*State = PPP_STATE_Stopped;
+					This_Layer_Finished();
+				break;
+
+				case PPP_EVENT_TOPlus:
+				case PPP_EVENT_TOMinus:
+				break;
+
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Closing:
+
+			switch (Event)
+			{
+				case PPP_EVENT_Down:
+					TimerOn = false;
+					*State = PPP_STATE_Initial;
+				break;
+
+				case PPP_EVENT_Open:
+					*State = PPP_STATE_Stopping;
+				break;
+
+				case PPP_EVENT_Close:
+					*State = PPP_STATE_Closing;
+				break;
+
+				case PPP_EVENT_TOPlus:
+					Send_Terminate_Request();
+					*State = PPP_STATE_Closing;
+				break;
+				
+				case PPP_EVENT_TOMinus:
+					*State = PPP_STATE_Closed;
+					TimerOn = false;
+					This_Layer_Finished();
+				break;
+
+				case PPP_EVENT_RCRPlus:
+				case PPP_EVENT_RCRMinus:
+				case PPP_EVENT_RCA:
+				case PPP_EVENT_RCN:
+				case PPP_EVENT_RXJPlus:
+				case PPP_EVENT_RXR:
+					*State = PPP_STATE_Closing;
+				break;
+
+				case PPP_EVENT_RTR:
+					*State = PPP_STATE_Closing;
+					Send_Terminate_Ack();
+				break;
+
+				case PPP_EVENT_RTA:
+				case PPP_EVENT_RXJMinus:
+					*State = PPP_STATE_Closed;
+					TimerOn = false;
+					This_Layer_Finished();
+				break;
+
+				case PPP_EVENT_RUC:
+					*State = PPP_STATE_Closing;
+					Send_Code_Reject();
+				break;
+
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Stopping:
+			
+			switch (Event)
+			{
+				case PPP_EVENT_Down:
+					*State = PPP_STATE_Starting;
+					TimerOn = false;
+				break;
+
+				case PPP_EVENT_Open:
+					*State = PPP_STATE_Stopping;
+				break;
+
+				case PPP_EVENT_Close:
+					*State = PPP_STATE_Closing;
+				break;
+
+				case PPP_EVENT_TOPlus:
+					Send_Terminate_Request();
+					*State = PPP_STATE_Stopping;
+				break;
+				
+				case PPP_EVENT_TOMinus:
+					This_Layer_Finished();
+					TimerOn = false;
+					*State = PPP_STATE_Stopped;
+				break;
+
+				case PPP_EVENT_RCRPlus:
+				case PPP_EVENT_RCRMinus:
+				case PPP_EVENT_RCA:
+				case PPP_EVENT_RCN:
+				case PPP_EVENT_RXJPlus:
+				case PPP_EVENT_RXR:
+					*State = PPP_STATE_Stopping;
+				break;
+
+				case PPP_EVENT_RTR:
+					Send_Terminate_Ack();
+					*State = PPP_STATE_Stopping;
+				break;
+
+				case PPP_EVENT_RTA:
+				case PPP_EVENT_RXJMinus:
+					This_Layer_Finished();
+					TimerOn = false;
+					*State = PPP_STATE_Stopped;
+				break;
+
+				case PPP_EVENT_RUC:
+					Send_Code_Reject();
+					*State = PPP_STATE_Stopping;
+				break;
+
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Req_Sent:
+			
+			switch (Event)
+			{
+				case PPP_EVENT_Down:
+					*State = PPP_STATE_Starting;
+					TimerOn = false;
+				break;
+
+				case PPP_EVENT_Open:
+				case PPP_EVENT_RTA:
+				case PPP_EVENT_RXJPlus:
+				case PPP_EVENT_RXR:
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_Close:
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					Send_Terminate_Request();
+					*State = PPP_STATE_Closing;
+				break;
+
+				case PPP_EVENT_TOPlus:
+					Send_Configure_Request();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_TOMinus:
+					This_Layer_Finished();
+					TimerOn = false;
+					*State = PPP_STATE_Stopped;
+				break;
+
+				case PPP_EVENT_RCRPlus:
+					Send_Configure_Ack();
+					*State = PPP_STATE_Ack_Sent;
+				break;
+
+				case PPP_EVENT_RCRMinus:
+					Send_Configure_Nak_Rej();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RCA:
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					*State = PPP_STATE_Ack_Rcvd;
+				break;
+
+				case PPP_EVENT_RCN:
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					Send_Configure_Request();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RTR:
+					Send_Terminate_Ack();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RUC:
+					Send_Code_Reject();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RXJMinus:
+					This_Layer_Finished();
+					TimerOn = false;
+					*State = PPP_STATE_Stopped;
+				break;
+				
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Ack_Rcvd:
+
+			switch (Event)
+			{
+				case PPP_EVENT_Down:
+					*State = PPP_STATE_Starting;
+					TimerOn = false;
+				break;
+
+				case PPP_EVENT_Open:
+				case PPP_EVENT_RXR:
+					*State = PPP_STATE_Ack_Rcvd;
+				break;
+
+				case PPP_EVENT_Close:
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					Send_Terminate_Request();
+					*State = PPP_STATE_Closing;
+				break;
+
+				case PPP_EVENT_TOPlus:
+				case PPP_EVENT_RCA:
+				case PPP_EVENT_RCN:
+					Send_Configure_Request();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_TOMinus:
+					This_Layer_Finished();
+					TimerOn = false;
+					*State = PPP_STATE_Stopped;
+				break;
+
+				case PPP_EVENT_RCRPlus:
+					Send_Configure_Ack();
+					This_Layer_Up();
+					TimerOn = false;
+					*State = PPP_STATE_Opened;
+				break;
+
+				case PPP_EVENT_RCRMinus:
+					Send_Configure_Nak_Rej();
+					*State = PPP_STATE_Ack_Rcvd;
+				break;
+
+				case PPP_EVENT_RTR:
+					Send_Terminate_Ack();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RTA:
+				case PPP_EVENT_RXJPlus:
+					Send_Terminate_Ack();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RUC:
+					Send_Code_Reject();
+					*State = PPP_STATE_Ack_Rcvd;
+				break;
+
+				case PPP_EVENT_RXJMinus:
+					This_Layer_Finished();
+					TimerOn = false;
+					*State = PPP_STATE_Stopped;
+				break;
+				
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Ack_Sent:
+			
+			switch (Event)
+			{
+				case PPP_EVENT_Down:
+					*State = PPP_STATE_Starting;
+					TimerOn = false;
+				break;
+
+				case PPP_EVENT_Open:
+				case PPP_EVENT_RTA:
+				case PPP_EVENT_RXJPlus:
+				case PPP_EVENT_RXR:
+					*State = PPP_STATE_Ack_Sent;
+				break;
+
+				case PPP_EVENT_Close:
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					Send_Terminate_Request();
+					*State = PPP_STATE_Closing;
+				break;
+
+				case PPP_EVENT_TOPlus:
+					Send_Configure_Request();
+					*State = PPP_STATE_Ack_Sent;
+				break;
+
+				case PPP_EVENT_TOMinus:
+					This_Layer_Finished();
+					TimerOn = false;
+					*State = PPP_STATE_Stopped;
+				break;
+
+				case PPP_EVENT_RCRPlus:
+					Send_Configure_Ack();
+					*State = PPP_STATE_Ack_Sent;
+				break;
+
+				case PPP_EVENT_RCRMinus:
+					Send_Configure_Nak_Rej();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RCA:
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					TimerOn = false;
+					This_Layer_Up();
+					*State = PPP_STATE_Opened;
+				break;
+
+				case PPP_EVENT_RCN:
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					Send_Configure_Request();
+					*State = PPP_STATE_Ack_Sent;
+				break;
+
+				case PPP_EVENT_RTR:
+					Send_Terminate_Ack();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RUC:
+					Send_Code_Reject();
+					*State = PPP_STATE_Ack_Sent;
+				break;
+
+				case PPP_EVENT_RXJMinus:
+					This_Layer_Finished();
+					TimerOn = false;
+					*State = PPP_STATE_Stopped;
+				break;
+				
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		case PPP_STATE_Opened:
+
+			switch (Event)
+			{
+				case PPP_EVENT_Down:
+					This_Layer_Down();
+					*State = PPP_STATE_Starting;
+				break;
+
+				case PPP_EVENT_Open:
+				case PPP_EVENT_RXJPlus:
+					*State = PPP_STATE_Opened;
+				break;
+
+				case PPP_EVENT_Close:
+					This_Layer_Down();
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					TimerOn = true;
+					Send_Terminate_Request();
+					*State = PPP_STATE_Closing;
+				break;
+
+				case PPP_EVENT_RCRPlus:
+					This_Layer_Down();
+					TimerOn = true;
+					Send_Configure_Request();
+					Send_Configure_Ack();
+					*State = PPP_STATE_Ack_Sent;
+				break;
+
+				case PPP_EVENT_RCRMinus:
+					This_Layer_Down();
+					TimerOn = true;
+					Send_Configure_Request();
+					Send_Configure_Nak_Rej();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RCA:
+				case PPP_EVENT_RCN:
+				case PPP_EVENT_RTA:
+					This_Layer_Down();
+					TimerOn = true;
+					Send_Configure_Request();
+					*State = PPP_STATE_Req_Sent;
+				break;
+
+				case PPP_EVENT_RTR:
+					This_Layer_Down();
+					RestartCount = 0;
+					LinkTimer = 0;
+					TimerOn = true;
+					Send_Terminate_Ack();
+					*State = PPP_STATE_Stopping;
+				break;
+
+				case PPP_EVENT_RUC:
+					Send_Code_Reject();
+					*State = PPP_STATE_Opened;
+				break;
+
+				case PPP_EVENT_RXJMinus:
+					This_Layer_Down();
+					RestartCount = MAX_RESTARTS;
+					LinkTimer = 0;
+					TimerOn = true;
+					Send_Terminate_Request();
+					*State = PPP_STATE_Stopping;
+				break;
+				
+				case PPP_EVENT_RXR:
+					Send_Echo_Reply();
+					*State = PPP_STATE_Opened;
+				break;
+				
+				default:
+					Debug_Print("Illegal Event\r\n");
+				break;
+			}
+		break;
+
+		default:
+		break;
+	}
+
 }

@@ -32,9 +32,8 @@
 #include "LinkManagement.h"
 
 uint8_t      IPAddr1, IPAddr2, IPAddr3, IPAddr4;
-uint8_t      ConnectedState = LINKMANAGEMENT_STATE_DialConnectionStage1;
+uint8_t      ConnectedState = LINKMANAGEMENT_STATE_Idle;
 uint8_t      DialSteps = 0;
-struct timer Periodic_Timer;
 
 extern const char* ModemDialCommands[];
 extern const char* NetworkDialCommands[];
@@ -43,193 +42,94 @@ void LinkManagement_ManageConnectionState(void)
 {
 	switch (ConnectedState)
 	{
-		case LINKMANAGEMENT_STATE_DialConnectionStage1:
-			LinkManagement_DialConnectionStage1();
-		break;
-		
-		case LINKMANAGEMENT_STATE_DialConnectionStage2:
-			LinkManagement_DialConnectionStage2();
+		case LINKMANAGEMENT_STATE_Idle:
+			TIME = 0;
+			PPP_InitPPP();
+			ConnectedState = LINKMANAGEMENT_STATE_SendModemDialCommands;
 		break;
 
-		case LINKMANAGEMENT_STATE_DoPPPNegotiation:
-			PPP_ManagePPPNegotiation();
+		case LINKMANAGEMENT_STATE_SendModemDialCommands:
+			if (LinkManagement_DialConnection((char**)ModemDialCommands))
+				ConnectedState = LINKMANAGEMENT_STATE_SendNetworkDialCommands;
+		break;
+		
+		case LINKMANAGEMENT_STATE_SendNetworkDialCommands:
+			if (LinkManagement_DialConnection((char**)NetworkDialCommands))
+			{
+				Debug_Print("Starting PPP\r\n");
+				PPP_LinkOpen();
+				PPP_LinkUp();
+				ConnectedState = LINKMANAGEMENT_STATE_WaitForLink;
+			}	
+		break;
+
+		case LINKMANAGEMENT_STATE_WaitForLink:
+			PPP_ManageLink();
 		break;
 		
 		case LINKMANAGEMENT_STATE_InitializeTCPStack:
-			LinkManagement_InitializeTCPStack();
+			PPP_ManageLink();
+			TCPIP_InitializeTCPStack();
 		break;
 		
 		case LINKMANAGEMENT_STATE_ConnectToRemoteHost:
-			LinkManagement_ConnectToRemoteHost();
+			PPP_ManageLink();
+			TCPIP_ConnectToRemoteHost();
 		break;
 		
 		case LINKMANAGEMENT_STATE_ManageTCPConnection:
-			LinkManagement_TCPIPTask();
+			PPP_ManageLink();
+			TCPIP_TCPIPTask();
 		break;
 	}
 }
 
-static void LinkManagement_DialConnectionStage1(void)
+static bool LinkManagement_DialConnection(char** DialCommands)
 {
-	if (USB_HostState != HOST_STATE_Configured)	
-		return;
+	static char* ResponsePtr = NULL;
+	char* CommandPtr = NULL;
+	static uint8_t CharsMatched = 0;
+	char c;
 
-	while (Modem_ReceiveBuffer.Elements)
-		Debug_PrintChar(Buffer_GetElement(&Modem_ReceiveBuffer));
+	if (USB_HostState != HOST_STATE_Configured)	
+		return false;
+
+	while (Modem_ReceiveBuffer.Elements)										// Read back the response
+	{	
+		c = Buffer_GetElement(&Modem_ReceiveBuffer);
+		Debug_PrintChar(c);
+		
+		if (c == *(ResponsePtr + CharsMatched))									// Match the response character by character with the expected response						
+			CharsMatched++;
+		else
+			CharsMatched = 0;
+			
+		if (CharsMatched != 0 && CharsMatched == strlen(ResponsePtr))			// Look for the expected response
+		{
+			DialSteps += 2;														// Move on to the next dial command
+			CharsMatched = 0;
+		}
+	}	
 		
 	if (TIME > 100)
 	{
 		TIME = 0;
 
-		char* CommandPtr = (char*)ModemDialCommands[DialSteps++];
+		CommandPtr = (char*)DialCommands[DialSteps];
+		ResponsePtr = (char*)DialCommands[DialSteps + 1];
 
-		if (CommandPtr == NULL)
+		if (CommandPtr == NULL || ResponsePtr == NULL)							// No more dial commands
 		{
 			DialSteps = 0;
-			ConnectedState = LINKMANAGEMENT_STATE_DialConnectionStage2;
-			return;
+			return true;														// Finished dialling
 		}
 
-		Debug_Print("Sending command: ");
-		Debug_Print(CommandPtr);
-		
-		while (*CommandPtr)
-			Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
-	}
-}
-
-static void LinkManagement_DialConnectionStage2(void)
-{
-	if (USB_HostState != HOST_STATE_Configured)	
-		return;
-
-	while (Modem_ReceiveBuffer.Elements)
-		Debug_PrintChar(Buffer_GetElement(&Modem_ReceiveBuffer));
-		
-	if (TIME > 100)
-	{
-		TIME = 0;
-
-		char* CommandPtr = (char*)NetworkDialCommands[DialSteps++];
-
-		if (CommandPtr == NULL)
-		{
-			Debug_Print("Starting PPP\r\n");
-			DialSteps = 0;
-			ConnectedState = LINKMANAGEMENT_STATE_DoPPPNegotiation;
-			return;
-		}
-
-		Debug_Print("Sending command: ");
-		Debug_Print(CommandPtr);
-		
-		while (*CommandPtr)
-			Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));
-	}
-}
-
-static void LinkManagement_InitializeTCPStack(void)
-{
-	Debug_Print("Initialise TCP Stack\r\n");
-
-	// uIP Initialization
-	network_init();
-	clock_init();
-	uip_init();
-
-	// Periodic Connection Timer Initialization
-	timer_set(&Periodic_Timer, CLOCK_SECOND / 2);
-
-	// Set this machine's IP address
-	uip_ipaddr_t LocalIPAddress;
-	uip_ipaddr(&LocalIPAddress, IPAddr1, IPAddr2, IPAddr3, IPAddr4);
-	uip_sethostaddr(&LocalIPAddress);
-
-	ConnectedState = LINKMANAGEMENT_STATE_ConnectToRemoteHost;
-	TIME = 2000;			// Make the first CONNECT happen straight away
-}
-
-static void LinkManagement_ConnectToRemoteHost(void)
-{
-	if (TIME > 1000)		// Try to connect every 1 second
-	{
-		TIME = 0;
-		
-		if (HTTPClient_Connect())
-		{
-			TIME = 3001;	// Make the first GET happen straight away
-			ConnectedState = LINKMANAGEMENT_STATE_ManageTCPConnection;
-		}
-	}
-}
-
-static void LinkManagement_TCPIPTask(void)
-{
-	uip_len = network_read();
-
-	if (uip_len == -1)								// Got a non-SLIP packet. Probably a LCP-TERM Re-establish link.
-	{
-		Debug_Print("Got non-PPP packet\r\n");
-		TIME = 0;
-		ConnectedState = LINKMANAGEMENT_STATE_DialConnectionStage1;
-		return;
+		Debug_Print("Send: "); Debug_Print(CommandPtr);
+		Debug_Print("(Expect: "); Debug_Print(ResponsePtr); Debug_Print(")\r\n");
+				
+		while (*CommandPtr)														
+			Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));			// Send the command	to the modem
 	}
 
-	if (uip_len > 0)								// We have some data to process
-	{
-		Debug_Print("\r\nReceive:\r\n");
-
-		for (uint16_t i = 0; i < uip_len; i += 16)
-		{	
-			// Print the hex
-			for (uint8_t j = 0; j < 16; j++)
-			{
-				if ((i + j) >= uip_len)
-				  break;
-
-				Debug_PrintHex(*(uip_buf + i + j));
-			}
-			
-			Debug_Print("\r\n");	
-			
-			// Print the ASCII
-			for (uint8_t j = 0; j < 16; j++)
-			{
-				if ((i + j) >= uip_len)
-					break;
-
-				if (*(uip_buf + i + j) >= 0x20 && *(uip_buf + i + j) <= 0x7e)
-				{
-					Debug_PrintChar(' ');
-					Debug_PrintChar(*(uip_buf + i + j));
-					Debug_PrintChar(' ');
-				}
-				else
-				{
-					Debug_Print(" . ");
-				}
-			}
-
-			Debug_Print("\r\n");
-		}
-
-		uip_input();
- 
-	 	// If the above function invocation resulted in data that should be sent out on the network, the global variable uip_len is set to a value > 0.
-	 	if (uip_len > 0)
-	 	  network_send();
-	}
-	else if (timer_expired(&Periodic_Timer))
-	{
-		timer_reset(&Periodic_Timer);
-
-		for (uint8_t i = 0; i < UIP_CONNS; i++)
-		{
-	 		uip_periodic(i);
- 
-	 		// If the above function invocation resulted in data that should be sent out on the network, the global variable uip_len is set to a value > 0.
-	 		if (uip_len > 0)
-				network_send();
-		}
-	}
+	return false;																// Haven't finished dialling
 }

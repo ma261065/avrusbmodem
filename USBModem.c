@@ -37,6 +37,7 @@ uint16_t TIME;												// 10 millseconds counter
 ISR(TIMER1_COMPA_vect)										// Timer 1 interrupt handler
 {
 	TIME++;
+	PPP_LinkTimer();
 }
 
 ISR(WDT_vect)												// Watchdog Timer interrupt handler

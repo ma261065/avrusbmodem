@@ -65,6 +65,7 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 	USB_ShutDown();
 
 	Debug_Print("Host Mode error\r\n");
+    Debug_PrintHex(ErrorCode);
 	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
 	for(;;);
 }
@@ -74,6 +75,8 @@ void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode, const uint8_t SubErrorCode)
 {
 	Debug_Print("Enumeration failed\r\n");
+	Debug_PrintHex(ErrorCode);
+    Debug_PrintHex(SubErrorCode);
 	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
 }
 
@@ -86,18 +89,17 @@ void USBManagement_ManageUSBState(void)
 	switch (USB_HostState)
 	{
 		case HOST_STATE_WaitForDeviceRemoval:
-			Debug_Print("Waiting for device removal\r\n");
+			Debug_Print("Wait for device removal\r\n");
 
 			// Wait until USB device disconnected
 			while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);
 		break;
 		
 		case HOST_STATE_Addressed:
-			Debug_Print("Sending configuration command\r\n");
-
-			// Switch the modem to the correct mode
-			SwitchModemMode();
+			Debug_Print("Send configuration command\r\n");
 			
+			SwitchModemMode();
+					
 			Debug_Print("Looking for modem device...");
 			
 			// Get and process the configuration descriptor data
@@ -105,9 +107,15 @@ void USBManagement_ManageUSBState(void)
 			if ((ErrorCode = ProcessConfigurationDescriptor()) != SuccessfulConfigRead)
 			{
 				if (ErrorCode == ControlError)
+				{
 					Debug_Print("Control error (Get Configuration).\r\n");
+					Debug_PrintHex(ErrorCode);
+				}
 				else
+				{
 					Debug_Print("Not a modem device - switching modes\r\n");
+					SwitchModemMode();
+				}
 
 				// Indicate error via status LEDs
 				LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
@@ -177,18 +185,24 @@ void USBManagement_SendReceivePipes(void)
 	Pipe_Unfreeze();
 
 	// Check if data is in the pipe and space is available in the receive buffer
-	if (Pipe_IsINReceived() && (Modem_ReceiveBuffer.Elements < (BUFF_STATICSIZE - 64)))
+	if (Pipe_IsINReceived())
 	{
-		// Check if data is in the pipe
-		if (Pipe_IsReadWriteAllowed())
+		if ((Modem_ReceiveBuffer.Elements < (BUFF_STATICSIZE - 64)))
 		{
-			while (Pipe_BytesInPipe())
-			  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_Byte());
-		}
+			// Check if data is in the pipe
+			if (Pipe_IsReadWriteAllowed())
+			{
+				while (Pipe_BytesInPipe())
+				  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_Byte());
+			}
 
-		// Clear the pipe after it is read, ready for the next packet
-		Pipe_ClearIN();
+			// Clear the pipe after it is read, ready for the next packet
+			Pipe_ClearIN();
+		}
+		else
+			Debug_Print("Overflow");
 	}
+
 	
 	// Re-freeze IN pipe after use
 	Pipe_Freeze();		

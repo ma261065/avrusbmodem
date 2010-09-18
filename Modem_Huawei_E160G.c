@@ -270,15 +270,15 @@ static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor)
 // These dial commands are concatenated with the ones in Network_xxx.c, and will be sent before the
 // dial commands defined in Network_xxx.c
 // Do not put ATDT*99# in this list (put it in Network_xxx.c). 
-// The list must be NULL terminated.
+// The list must be double-NULL terminated.
 
 const char* ModemDialCommands[] = 
 {	
-	"AT\r\n",
-	"AT&F\r\n",
-	"AT+CPMS=\"SM\",\"SM\",\"\"\r\n",
-	"ATQ0 V1 E1 S0=0 &C1 &D2 +FCLASS=0\r\n",
-	NULL,
+	"AT\r\n","OK",
+	"AT&F\r\n","OK",
+	"AT+CPMS=\"SM\",\"SM\",\"\"\r\n","OK",
+	"ATQ0 V1 E1 S0=0 &C1 &D2 +FCLASS=0\r\n","OK",
+	NULL, NULL
 };
 
 
@@ -305,9 +305,12 @@ void SwitchModemMode(void)
 	// Select the control pipe for the request transfer
 	Pipe_SelectPipe(PIPE_CONTROLPIPE);
 
+	Debug_Print("Switching...\r\n");
+	
 	// Send the request and display any error
 	if ((ErrorCode = USB_Host_SendControlRequest(NULL)) != HOST_SENDCONTROL_Successful)
 	{
-		Debug_Print("Control error (Set Configuration).\r\n");
+		Debug_Print("Control error (Switch mode).\r\n");
+		Debug_PrintHex(ErrorCode);
 	}
 }

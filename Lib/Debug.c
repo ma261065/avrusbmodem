@@ -59,6 +59,4 @@ void Debug_PrintHex(const uint8_t c)
 		Debug_PrintChar((c & 0x0f) + 'a' - 10);
 	else
 		Debug_PrintChar((c & 0x0f) + '0');
-
-	Debug_PrintChar(' ');
 }
