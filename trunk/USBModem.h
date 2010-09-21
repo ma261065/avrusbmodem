@@ -81,7 +81,7 @@
 	
 	/* External Variables: */
 		extern uint8_t  WatchdogTicks;
-		extern uint16_t TIME;
+		extern uint16_t SystemTicks;
 		
 	/* Function Prototypes: */
 		void SetupHardware(void);

@@ -40,7 +40,8 @@ void Buffer_Initialize(RingBuff_t* const Buffer)
 	}
 }
 
-void Buffer_StoreElement(RingBuff_t* const Buffer, RingBuff_Data_t Data)
+void Buffer_StoreElement(RingBuff_t* const Buffer,
+                         RingBuff_Data_t Data)
 {
 	BUFF_ATOMIC_BLOCK
 	{

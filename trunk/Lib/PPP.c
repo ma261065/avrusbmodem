@@ -33,22 +33,23 @@
 
 static uint8_t  	OutgoingPacketID;								// Unique packet ID
 
-PPP_Phases_t 		PPP_Phase = PPP_PHASE_Dead;						// PPP negotiation phases
+PPP_Phases_t 		PPP_Phase  = PPP_PHASE_Dead;					// PPP negotiation phases
 
-PPP_States_t		LCP_State = PPP_STATE_Initial;					// Each phase has a number of states
-PPP_States_t		PAP_State = PPP_STATE_Initial;					// Each phase has a number of states
+PPP_States_t		LCP_State  = PPP_STATE_Initial;					// Each phase has a number of states
+PPP_States_t		PAP_State  = PPP_STATE_Initial;					// Each phase has a number of states
 PPP_States_t		IPCP_State = PPP_STATE_Initial;					// Each phase has a number of states
 
 uint8_t 			PacketBuff[64];
-PPP_Packet_t*  		OutgoingPacket = (PPP_Packet_t*)PacketBuff;		// The outgoing packet
+PPP_Packet_t*  		OutgoingPacket  = (PPP_Packet_t*)PacketBuff;	// The outgoing packet
 PPP_Packet_t*  		IncomingPacket;									// The incoming packet
 uint16_t     		CurrentProtocol = NONE;							// Type of the last received packet
 
 uint8_t 			RestartCount = MAX_RESTARTS;
-static uint16_t		LinkTimer = 0;
-bool				TimerOn = false;
+static uint16_t		LinkTimer    = 0;
+bool				TimerOn      = false;
 
-bool 				MarkForNAK, MarkForREJ;
+bool 				MarkForNAK;
+bool                MarkForREJ;
 
 
 void PPP_InitPPP(void)
@@ -56,13 +57,13 @@ void PPP_InitPPP(void)
 	PPP_Phase = PPP_PHASE_Dead;
 }
 
-void PPP_LinkUp()
+void PPP_LinkUp(void)
 {
 	PPP_Phase = PPP_PHASE_Establish;
 	PPP_ManageState(PPP_EVENT_Up, &LCP_State);
 }
 
-void PPP_LinkOpen()
+void PPP_LinkOpen(void)
 {
 	PPP_ManageState(PPP_EVENT_Open, &LCP_State);
 	PPP_ManageState(PPP_EVENT_Open, &PAP_State);
@@ -149,10 +150,10 @@ void PPP_ManageLink(void)
 					MarkForNAK = MarkForREJ = false;
 
 					// List of options that we can support. If any other options come in, we have to REJ them
-					uint8_t SupportedOptions[] = {LCP_OPTION_Async_Control_Character_Map,
-									  		 	  LCP_OPTION_Authentication_Protocol,
-									  		 	  LCP_OPTION_Protocol_Field_Compression,
-									  		 	  LCP_OPTION_Address_and_Control_Field_Compression};
+					const uint8_t SupportedOptions[] = {LCP_OPTION_Async_Control_Character_Map,
+					                                    LCP_OPTION_Authentication_Protocol,
+					                                    LCP_OPTION_Protocol_Field_Compression,
+					                                    LCP_OPTION_Address_and_Control_Field_Compression};
 
 					if ((MarkForREJ = PPP_TestForREJ(SupportedOptions, sizeof(SupportedOptions))))						// Check that we can support all the options the other end wants to use
 					{
@@ -178,13 +179,13 @@ void PPP_ManageLink(void)
 
 				case NAK:
 					Debug_Print("NAK\r\n");
-					ProcessNAK();
+					PPP_ProcessNAK();
 					PPP_ManageState(PPP_EVENT_RCN, &LCP_State);
 				break;
 
 				case REJ:
 					Debug_Print("REJ\r\n");
-					ProcessREJ();
+					PPP_ProcessREJ();
 					PPP_ManageState(PPP_EVENT_RCN, &LCP_State);
 				break;
 
@@ -239,7 +240,8 @@ void PPP_ManageLink(void)
 				case REQ:
 					Debug_Print("REQ\r\n");
 	
-					MarkForNAK = MarkForREJ = false;
+					MarkForNAK = false;
+					MarkForREJ = false;
 					
 					// List of options that we can support. If any other options come in, we have to REJ them
 					uint8_t SupportedOptions[] = {IPCP_OPTION_IP_address, IPCP_OPTION_Primary_DNS, IPCP_OPTION_Secondary_DNS};
@@ -265,13 +267,13 @@ void PPP_ManageLink(void)
 
 				case NAK:
 					Debug_Print("NAK\r\n");
-					ProcessNAK();
+					PPP_ProcessNAK();
 					PPP_ManageState(PPP_EVENT_RCN, &IPCP_State);
 				break;
 
 				case REJ:
 					Debug_Print("REJ\r\n");
-					ProcessREJ();
+					PPP_ProcessREJ();
 					PPP_ManageState(PPP_EVENT_RCN, &IPCP_State);
 				break;
 			}
@@ -291,7 +293,7 @@ void PPP_ManageLink(void)
 
 
 // Either create a new OutgoingPacket, or if we've just received a NAK or REJ we will have already changed the OutgoingPacket so just send that
-static void Send_Configure_Request()
+static void Send_Configure_Request(void)
 {
 	Debug_Print("Send Configure Request\r\n");
 	
@@ -301,19 +303,19 @@ static void Send_Configure_Request()
 			if (CurrentProtocol == NONE)																					// Create a new packet
 			{
 				// When we send a REQ, we want to make sure that the other end supports these options
-				static PPP_Option_t Option1 = {.Type  = LCP_OPTION_Maximum_Receive_Unit, .Length = 4, .Data = {0x5, 0xa0}};
-				static PPP_Option_t Option2 = {.Type  = LCP_OPTION_Async_Control_Character_Map, .Length = 6, .Data = {0x0, 0xa, 0x0, 0x0}};
-				static PPP_Option_t Option7 = {.Type  = LCP_OPTION_Protocol_Field_Compression, .Length = 2};
-				static PPP_Option_t Option8 = {.Type  = LCP_OPTION_Address_and_Control_Field_Compression, .Length = 2};
+				static PPP_Option_t Option1 = {.Type = LCP_OPTION_Maximum_Receive_Unit,        .Length = 4, .Data = {0x5, 0xa0}};
+				static PPP_Option_t Option2 = {.Type = LCP_OPTION_Async_Control_Character_Map, .Length = 6, .Data = {0x0, 0xa, 0x0, 0x0}};
+				static PPP_Option_t Option7 = {.Type = LCP_OPTION_Protocol_Field_Compression,  .Length = 2};
+				static PPP_Option_t Option8 = {.Type = LCP_OPTION_Address_and_Control_Field_Compression, .Length = 2};
 				
 				CurrentProtocol = LCP;
 				OutgoingPacket->Code = REQ;
 				OutgoingPacket->Length = htons(4);
 
-				AddOption(OutgoingPacket, &Option1);
-				AddOption(OutgoingPacket, &Option2);
-				AddOption(OutgoingPacket, &Option7);
-				AddOption(OutgoingPacket, &Option8);
+				PPP_AddOption(OutgoingPacket, &Option1);
+				PPP_AddOption(OutgoingPacket, &Option2);
+				PPP_AddOption(OutgoingPacket, &Option7);
+				PPP_AddOption(OutgoingPacket, &Option8);
 			}
 		break;
 
@@ -332,17 +334,17 @@ static void Send_Configure_Request()
 			if (CurrentProtocol == NONE)																					// Create a new packet
 			{
 				// When we send a REQ, we want to make sure that the other end supports these options
-				static PPP_Option_t Option3 = {.Type  = IPCP_OPTION_IP_address, .Length = 6, .Data = {0, 0, 0, 0}};			// Make sure this is first
-				static PPP_Option_t Option81 = {.Type  = IPCP_OPTION_Primary_DNS, .Length = 6, .Data = {0, 0, 0, 0}};
-				static PPP_Option_t Option83 = {.Type  = IPCP_OPTION_Secondary_DNS, .Length = 6, .Data = {0, 0, 0, 0}};
+				static PPP_Option_t Option3  = {.Type = IPCP_OPTION_IP_address,    .Length = 6, .Data = {0, 0, 0, 0}};		// Make sure this is first
+				static PPP_Option_t Option81 = {.Type = IPCP_OPTION_Primary_DNS,   .Length = 6, .Data = {0, 0, 0, 0}};
+				static PPP_Option_t Option83 = {.Type = IPCP_OPTION_Secondary_DNS, .Length = 6, .Data = {0, 0, 0, 0}};
 				
 				CurrentProtocol = IPCP;
 				OutgoingPacket->Code = REQ;
 				OutgoingPacket->Length = htons(4);
 
-				AddOption(OutgoingPacket, &Option3);
-				AddOption(OutgoingPacket, &Option81);
-				AddOption(OutgoingPacket, &Option83);
+				PPP_AddOption(OutgoingPacket, &Option3);
+				PPP_AddOption(OutgoingPacket, &Option81);
+				PPP_AddOption(OutgoingPacket, &Option83);
 			}
 		break;
 
@@ -359,7 +361,7 @@ static void Send_Configure_Request()
 
 
 // We change the incoming packet code to send an ACK to the remote end, and re-use all the data from the incoming packet
-static void Send_Configure_Ack()
+static void Send_Configure_Ack(void)
 {
 	Debug_Print("Send Configure ACK\r\n");
 
@@ -368,7 +370,7 @@ static void Send_Configure_Ack()
 }
 
 // We change the incoming packet code to send a NAK or REJ to the remote end. The incoming packet has already been altered to show which options to NAK/REJ
-static void Send_Configure_Nak_Rej()
+static void Send_Configure_Nak_Rej(void)
 {
 	if (MarkForNAK)
 	{
@@ -380,14 +382,17 @@ static void Send_Configure_Nak_Rej()
 		Debug_Print("Send Configure REJ\r\n");
 		IncomingPacket->Code = REJ;
 	}
-	else return;
+	else
+	{
+		return;
+	}
 
 	uip_len = ntohs(IncomingPacket->Length);
 	network_send(CurrentProtocol);
 }
 
 // Send a TERM to the remote end.
-static void Send_Terminate_Request()
+static void Send_Terminate_Request(void)
 {
 	Debug_Print("Send Terminate Request\r\n");
 	
@@ -405,7 +410,7 @@ static void Send_Terminate_Request()
 }
 
 // Send a TERM ACK to the remote end.
-static void Send_Terminate_Ack()
+static void Send_Terminate_Ack(void)
 {
 	Debug_Print("Send Terminate ACK\r\n");
 
@@ -414,7 +419,7 @@ static void Send_Terminate_Ack()
 }
 
 // Send a REJ to the remote end.
-static void Send_Code_Reject()
+static void Send_Code_Reject(void)
 {
 	Debug_Print("Send Code Reject\r\n");
 
@@ -423,7 +428,7 @@ static void Send_Code_Reject()
 }
 
 // Send an ECHO to the remote end.
-static void Send_Echo_Reply()
+static void Send_Echo_Reply(void)
 {
 	Debug_Print("Send Echo Reply\r\n");
 
@@ -432,7 +437,7 @@ static void Send_Echo_Reply()
 }
 
 // Called by the state machine when the current layer comes up. Use this to start the next layer.
-static void This_Layer_Up()
+static void This_Layer_Up(void)
 {
 	switch(PPP_Phase)
 	{
@@ -462,64 +467,62 @@ static void This_Layer_Up()
 }
 
 // Called by the state machine when the current layer goes down. Reset everything
-static void This_Layer_Down()
+static void This_Layer_Down(void)
 {
 	Debug_Print("**Layer Down**\r\n");
 
 	PPP_ManageState(PPP_EVENT_Down, &LCP_State);
 	PPP_ManageState(PPP_EVENT_Down, &PAP_State);
 	PPP_ManageState(PPP_EVENT_Down, &IPCP_State);
+
 	PPP_Phase = PPP_PHASE_Dead;
 	ConnectedState = LINKMANAGEMENT_STATE_Idle;
 }
 
-// Called by the state machine when the current is in negotiation
-static void This_Layer_Started()
+// Called by the state machine when the current layer is in negotiation
+static void This_Layer_Started(void)
 {
 	Debug_Print("**Layer Started**\r\n");
 }
 
 // Called by the state machine when the current layer is closing
-static void This_Layer_Finished()
+static void This_Layer_Finished(void)
 {
 	Debug_Print("**Layer Finished**\r\n");
 }
 
 
 // We get a NAK if our outbound Configure Request contains valid options, but the values are wrong. So we adjust our values for when the next Configure Request is sent
-void ProcessNAK()
+static void PPP_ProcessNAK(void)
 {
 	PPP_Option_t* CurrentOption = NULL;
 
-	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in NAK packet
-	{
-		ChangeOption(OutgoingPacket, CurrentOption);
-	}
+	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in NAK packet
+	  PPP_ChangeOption(OutgoingPacket, CurrentOption);
 }
 
 // We get a REJ if our outbound Configure Request contains any options not acceptable to the remote end. So we remove those options.
-void ProcessREJ()
+static void PPP_ProcessREJ(void)
 {
 	PPP_Option_t* CurrentOption = NULL;
 
-	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in REJ packet
-	{
-		RemoveOption(OutgoingPacket, CurrentOption->Type);
-	}
+	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in REJ packet
+	  PPP_RemoveOption(OutgoingPacket, CurrentOption->Type);
 }
 
 // Test to see if the incoming packet contains any options we can't support If so, take out all good options and leave the bad ones to be sent out in the REJ
-bool PPP_TestForREJ(uint8_t Options[], uint8_t NumOptions)
+static bool PPP_TestForREJ(const uint8_t Options[],
+                           const uint8_t NumOptions)
 {
 	PPP_Option_t* CurrentOption = NULL;
 	bool FoundBadOption = false;
 	bool ThisOptionOK;
 
-	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan incoming options
+	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan incoming options
 	{
 		ThisOptionOK = false;
 
-		for (int i = 0; i < NumOptions; i++)
+		for (uint8_t i = 0; i < NumOptions; i++)
 		{
 			if (CurrentOption->Type == Options[i])
 			{
@@ -529,20 +532,20 @@ bool PPP_TestForREJ(uint8_t Options[], uint8_t NumOptions)
 		}
 
 		if (!ThisOptionOK)
-			FoundBadOption = true;
+		  FoundBadOption = true;
 	}
 	
 	if (!FoundBadOption)																// No bad options. Return, leaving the packet untouched
-		return false;
+	  return false;
 
 	// We found some bad options, so now we need to go through the packet and remove all others, leaving the bad options to be sent out in the REJ
-	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)
+	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)
 	{
-		for (int i = 0; i < NumOptions; i++)
+		for (uint8_t i = 0; i < NumOptions; i++)
 		{
 			if (CurrentOption->Type == Options[i])
 			{
-				RemoveOption(IncomingPacket, CurrentOption->Type);
+				PPP_RemoveOption(IncomingPacket, CurrentOption->Type);
 				CurrentOption = NULL;													// Start again. Easier than moving back (as next option has now moved into place of current option)
 				break;
 			}
@@ -553,35 +556,37 @@ bool PPP_TestForREJ(uint8_t Options[], uint8_t NumOptions)
 }
 
 // Test to see if the incoming packet contains an option with values that we can't accept
-bool PPP_TestForNAK(PPP_Option_t* Option)
+static bool PPP_TestForNAK(const PPP_Option_t* const Option)
 {
 	PPP_Option_t* CurrentOption = NULL;
 	bool FoundBadOption = false;
 	
-	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in receiver buffer
+	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in receiver buffer
 	{
 		if (CurrentOption->Type == Option->Type)
 		{	
 			for (uint8_t i = 0; i < Option->Length - 2; i++)
 			{
 				if (CurrentOption->Data[i] != Option->Data[i])
-					FoundBadOption = true;
+				  FoundBadOption = true;
 			}
 		}
 	}
 	
 	if (!FoundBadOption)																// No bad option. Return, leaving the packet untouched
-		return false;
+	  return false;
 
 	// We found a bad option, so now we need to go through the packet and remove all others, leaving the bad option to be sent out in the NAK
 	// and change the bad option to have a value that we can support
-	while ((CurrentOption = GetNextOption(IncomingPacket, CurrentOption)) != NULL)
+	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)
 	{
 		if (CurrentOption->Type == Option->Type)
-			ChangeOption(IncomingPacket, Option);
+		{
+			PPP_ChangeOption(IncomingPacket, Option);
+		}
 		else
 		{
-			RemoveOption(IncomingPacket, CurrentOption->Type);
+			PPP_RemoveOption(IncomingPacket, CurrentOption->Type);
 			CurrentOption = NULL;														// Start again. Easier than moving back (as next option has now moved into place of current option)
 		}
 	}
@@ -595,41 +600,42 @@ bool PPP_TestForNAK(PPP_Option_t* Option)
 /////////////////////////////
 
 // Try and find the option in the packet, and if it exists, change its value to that in the passed-in option
-void ChangeOption(PPP_Packet_t* ThisPacket, PPP_Option_t* Option)
+static void PPP_ChangeOption(PPP_Packet_t* const ThisPacket,
+                             const PPP_Option_t* const Option)
 {
 	PPP_Option_t* CurrentOption = NULL;
 
-	while ((CurrentOption = GetNextOption(ThisPacket, CurrentOption)) != NULL)						// Scan options in the packet
+	while ((CurrentOption = PPP_GetNextOption(ThisPacket, CurrentOption)) != NULL)						// Scan options in the packet
 	{
 		if (CurrentOption->Type == Option->Type)
-		{
-			memcpy(CurrentOption->Data, Option->Data, Option->Length - 2);
-		}
+		  memcpy(CurrentOption->Data, Option->Data, Option->Length - 2);
 	}
 }
 
 // Add the given option to the end of the packet and adjust the size of the packet
-void AddOption(PPP_Packet_t* ThisPacket, PPP_Option_t* Option)
+static void PPP_AddOption(PPP_Packet_t* const ThisPacket,
+                          const PPP_Option_t* const Option)
 {
 	memcpy((void*)ThisPacket + ntohs(ThisPacket->Length), Option, Option->Length);
 	ThisPacket->Length = htons(ntohs(ThisPacket->Length) + Option->Length);
 }
 
 // Try and find the option in the packet, and if it exists remove it and adjust the size of the packet
-void RemoveOption(PPP_Packet_t* ThisPacket, uint8_t Type)
+static void PPP_RemoveOption(PPP_Packet_t* const ThisPacket,
+                             const uint8_t Type)
 {
 	PPP_Option_t* CurrentOption = NULL;
 	PPP_Option_t* NextOption = NULL;
 
-	while ((CurrentOption = GetNextOption(ThisPacket, CurrentOption)) != NULL)						// Scan the options in the packet
+	while ((CurrentOption = PPP_GetNextOption(ThisPacket, CurrentOption)) != NULL)					// Scan the options in the packet
 	{
 		if (CurrentOption->Type == Type)															// Is it the packet we want to remove?
 		{
-			NextOption = GetNextOption(ThisPacket, CurrentOption);									// Find the next option in the packet
+			NextOption = PPP_GetNextOption(ThisPacket, CurrentOption);								// Find the next option in the packet
 			uint8_t OptionLength = CurrentOption->Length;											// Save the Option Length as the memcpy will change CurrentOption->Length
 
 			if (NextOption != NULL)																	// If it's not the last option in the packet ...
-				memcpy(CurrentOption, NextOption, ntohs(ThisPacket->Length) - OptionLength - 4);	// ... move all further options forward
+			  memcpy(CurrentOption, NextOption, ntohs(ThisPacket->Length) - OptionLength - 4);		// ... move all further options forward
 
 			ThisPacket->Length = htons(ntohs(ThisPacket->Length) - OptionLength);					// Adjust the length
 		}
@@ -637,20 +643,21 @@ void RemoveOption(PPP_Packet_t* ThisPacket, uint8_t Type)
 }
 
 // Get the next option in the packet from the option that is passed in. Return NULL if last packet
-PPP_Option_t* GetNextOption(PPP_Packet_t* ThisPacket, PPP_Option_t* CurrentOption)
+static PPP_Option_t* PPP_GetNextOption(const PPP_Packet_t* const ThisPacket,
+                                       const PPP_Option_t* const CurrentOption)
 {
 	PPP_Option_t* NextOption;
 	
 	if (CurrentOption == NULL)
-		NextOption = (PPP_Option_t*)ThisPacket->Options;
+	  NextOption = (PPP_Option_t*)ThisPacket->Options;
 	else
-		NextOption = (PPP_Option_t*)((uint8_t*)CurrentOption + CurrentOption->Length);
+	  NextOption = (PPP_Option_t*)((uint8_t*)CurrentOption + CurrentOption->Length);
 
 	// Check that we haven't overrun the end of the packet
-	if ((void*)NextOption - (void*)ThisPacket->Options < ntohs(ThisPacket->Length) - 4)
-		return NextOption;
+	if (((void*)NextOption - (void*)ThisPacket->Options) < (ntohs(ThisPacket->Length) - 4))
+	  return NextOption;
 	else
-		return NULL;
+	  return NULL;
 }
 
 
@@ -659,7 +666,8 @@ PPP_Option_t* GetNextOption(PPP_Packet_t* ThisPacket, PPP_Option_t* CurrentOptio
 // The main PPP state machine - following RFC1661 - http://tools.ietf.org/html/rfc1661 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void PPP_ManageState(PPP_Events_t Event, PPP_States_t* State)
+void PPP_ManageState(const PPP_Events_t Event,
+                     PPP_States_t* const State)
 {
 	switch (*State)
 	{

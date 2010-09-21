@@ -53,7 +53,8 @@
 
 		#if defined(INCLUDE_FROM_TCPIP_C)
 			static void TCPIP_SendGET(void);
-			static void TCPIP_QueueData(const char *x, const uint16_t len);
+			static void TCPIP_QueueData(const char* Data,
+			                            const uint16_t Length);
 			static bool TCPIP_IsDataQueueFull(void);
 		#endif
 		

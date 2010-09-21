@@ -36,27 +36,27 @@ bool DebugModeEnabled = false;
 void Debug_PrintChar(const char DebugChar)
 {
 	if (DebugModeEnabled)
-		putchar(DebugChar);
+	  putchar(DebugChar);
 }
 
-void Debug_Print(const char *DebugText)
+void Debug_Print(const char* DebugText)
 {
 	if (DebugModeEnabled)
 	{
 		while (*DebugText)
-			putchar(*(DebugText++));
+		  putchar(*(DebugText++));
 	}
 }
 
-void Debug_PrintHex(const uint8_t c)
+void Debug_PrintHex(const uint8_t DebugChar)
 {
-	if ((c >> 4) > 9)
-		Debug_PrintChar((c >> 4) + 'a' - 10);
+	if ((DebugChar >> 4) > 9)
+	  Debug_PrintChar((DebugChar >> 4) + 'a' - 10);
 	else
-		Debug_PrintChar((c >> 4) + '0');
+	  Debug_PrintChar((DebugChar >> 4) + '0');
 
-	if ((c & 0x0f) > 9)
-		Debug_PrintChar((c & 0x0f) + 'a' - 10);
+	if ((DebugChar & 0x0f) > 9)
+		Debug_PrintChar((DebugChar & 0x0f) + 'a' - 10);
 	else
-		Debug_PrintChar((c & 0x0f) + '0');
+		Debug_PrintChar((DebugChar & 0x0f) + '0');
 }

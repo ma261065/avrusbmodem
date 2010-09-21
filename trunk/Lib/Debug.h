@@ -43,7 +43,7 @@
 
 	/* Function Prototypes: */
 		void Debug_PrintChar(const char DebugChar);
-		void Debug_Print(const char *DebugText);
-		void Debug_PrintHex(const uint8_t c);
+		void Debug_Print(const char* DebugText);
+		void Debug_PrintHex(const uint8_t DebugChar);
 
 #endif

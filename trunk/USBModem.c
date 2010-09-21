@@ -31,12 +31,12 @@
 #include "USBModem.h"
 
 uint8_t  WatchdogTicks = 0;
-uint16_t TIME;												// 10 millseconds counter
+uint16_t SystemTicks   = 0;									// 10 millseconds counter
 
 
 ISR(TIMER1_COMPA_vect)										// Timer 1 interrupt handler
 {
-	TIME++;
+	SystemTicks++;
 	PPP_LinkTimer();
 }
 

@@ -65,12 +65,15 @@
 	/* External Variables: */
 		extern uint8_t ConnectedState;
 		extern uint8_t IPAddr1, IPAddr2, IPAddr3, IPAddr4;	// The IP address allocated to us by the remote end
-	
+
+		extern const char* ModemDialCommands[];
+		extern const char* NetworkDialCommands[];
+
 	/* Function Prototypes: */
 		void LinkManagement_ManageConnectionState(void);
 				
 		#if defined(INCLUDE_FROM_LINKMANAGEMENT_C)
-			static bool LinkManagement_DialConnection(char** DialCommands);
+			static bool LinkManagement_DialConnection(const char** DialCommands);
 		#endif
 	
 #endif

@@ -33,7 +33,7 @@
 
 uip_ipaddr_t     RemoteIPAddress;
 struct uip_conn* TCPConnection;
-struct timer Periodic_Timer;
+struct timer     Periodic_Timer;
 
 bool TCPIP_Connect(void)
 {
@@ -89,9 +89,9 @@ void TCPIP_TCPCallback(void)
 		ConnectedState = LINKMANAGEMENT_STATE_ConnectToRemoteHost;
 	}
 
-	if (uip_poll() && (TIME > 3000))
+	if (uip_poll() && (SystemTicks > 3000))
 	{
-		TIME = 0;
+		SystemTicks = 0;
 		
 		Debug_Print("\r\nSending GET\r\n");
 		TCPIP_SendGET();
@@ -127,13 +127,14 @@ static void TCPIP_SendGET(void)
 	uip_send(GETRequest, strlen(GETRequest));
 }
 
-static void TCPIP_QueueData(const char *x, const uint16_t len)
+static void TCPIP_QueueData(const char* Data,
+                            const uint16_t Length)
 {
 	Debug_Print("\r\nData:\r\n");
 	WatchdogTicks = 0;							// Reset the watchdog count
 	
-	for (uint16_t i = 0; i < len; i++)
-	  putchar(*(x + i));
+	for (uint16_t i = 0; i < Length; i++)
+	  putchar(Data[i]);
 	
 	Debug_Print("\r\n");
 }
@@ -142,7 +143,6 @@ static bool TCPIP_IsDataQueueFull(void)
 {
 	return false;
 }
-
 
 void TCPIP_InitializeTCPStack(void)
 {
@@ -162,18 +162,18 @@ void TCPIP_InitializeTCPStack(void)
 	uip_sethostaddr(&LocalIPAddress);
 
 	ConnectedState = LINKMANAGEMENT_STATE_ConnectToRemoteHost;
-	TIME = 2000;			// Make the first CONNECT happen straight away
+	SystemTicks = 2000;			// Make the first CONNECT happen straight away
 }
 
 void TCPIP_ConnectToRemoteHost(void)
 {
-	if (TIME > 1000)		// Try to connect every 1 second
+	if (SystemTicks > 1000)		// Try to connect every 1 second
 	{
-		TIME = 0;
+		SystemTicks = 0;
 		
 		if (TCPIP_Connect())
 		{
-			TIME = 3001;	// Make the first GET happen straight away
+			SystemTicks = 3001;	// Make the first GET happen straight away
 			uip_len = 0;
 			ConnectedState = LINKMANAGEMENT_STATE_ManageTCPConnection;
 		}
@@ -185,7 +185,7 @@ void TCPIP_GotNewPacket(void)
 	uip_input();																// Call the TCP/IP stack with the new packet
 																					
 	if (uip_len > 0)															// If the above function invocation resulted in data that should be sent out
-		network_send(IP);														// on the network, the global variable uip_len is set to a value > 0.
+	  network_send(IP);														// on the network, the global variable uip_len is set to a value > 0.
 }
 
 void TCPIP_TCPIPTask(void)
@@ -201,7 +201,7 @@ void TCPIP_TCPIPTask(void)
 	 		uip_periodic(i);
 	 		 
 	 		if (uip_len > 0)													// If the above function invocation resulted in data that should be sent out on the network,
-				network_send(IP);												//the global variable uip_len is set to a value > 0.
+			  network_send(IP);												//the global variable uip_len is set to a value > 0.
 		}
 	}
 }
