@@ -34,52 +34,13 @@
 	/* Includes: */
 		#include <util/crc16.h>
 		#include <stdbool.h>
+		#include <stdint.h>
 
 		#include "LinkManagement.h"
 		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
 	
 	/* Enums: */
-
-		typedef struct
-		{
-			uint8_t Type;
-			uint8_t Length;
-			uint8_t Data[];
-		} PPP_Option_t;		
-
-		typedef struct
-		{
-			uint8_t Code;
-			uint8_t PacketID;
-			uint16_t Length;
-			PPP_Option_t Options[];
-		} PPP_Packet_t;
-
-	/* Macros: */
-		#define CALC_CRC16(crcvalue, c)    _crc_ccitt_update(crcvalue, c);
-
-		// Defines for LCP Negotiation Codes
-		#define	REQ						1							// Request options list for PPP negotiations
-		#define	ACK						2							// Acknowledge options list for PPP negotiations
-		#define	NAK						3							// Not acknowledged options list for PPP negotiations
-		#define	REJ						4							// Reject options list for PPP negotiations
-		#define	TERMREQ					5							// Termination request for LCP to close connection
-		#define	TERMREPLY				6							// Termination reply
-		#define CODEREJ					7							// Code reject
-		#define PROTREJ					8							// Protocol reject
-		#define ECHOREQ					9							// Echo Request
-		#define ECHOREPLY				10							// Echo Reply
-		#define DISC 					11							// Discard request
-
-		// Packet Types (Protocols)
-		#define	IP 						0x0021						// Internet Protocol packet
-		#define	IPCP 					0x8021						// Internet Protocol Configure Protocol packet
-		#define	LCP						0xC021						// Link Configure Protocol packet
-		#define	PAP						0xC023						// Password Authentication Protocol packet
-		#define CHAP 					0xC223						// Challenge Handshake Authentication Protocol packet
-		#define NONE 					0x0000
-
 		typedef enum
 		{
 			PPP_PHASE_Dead,
@@ -123,6 +84,46 @@
 			PPP_EVENT_RXR
 		} PPP_Events_t;
 
+	/* Type Defines: */
+		typedef struct
+		{
+			uint8_t Type;
+			uint8_t Length;
+			uint8_t Data[];
+		} PPP_Option_t;		
+
+		typedef struct
+		{
+			uint8_t Code;
+			uint8_t PacketID;
+			uint16_t Length;
+			PPP_Option_t Options[];
+		} PPP_Packet_t;
+
+	/* Macros: */
+		#define CALC_CRC16(crcvalue, c)    _crc_ccitt_update(crcvalue, c);
+
+		// Defines for LCP Negotiation Codes
+		#define	REQ						1							// Request options list for PPP negotiations
+		#define	ACK						2							// Acknowledge options list for PPP negotiations
+		#define	NAK						3							// Not acknowledged options list for PPP negotiations
+		#define	REJ						4							// Reject options list for PPP negotiations
+		#define	TERMREQ					5							// Termination request for LCP to close connection
+		#define	TERMREPLY				6							// Termination reply
+		#define CODEREJ					7							// Code reject
+		#define PROTREJ					8							// Protocol reject
+		#define ECHOREQ					9							// Echo Request
+		#define ECHOREPLY				10							// Echo Reply
+		#define DISC 					11							// Discard request
+
+		// Packet Types (Protocols)
+		#define	IP 						0x0021						// Internet Protocol packet
+		#define	IPCP 					0x8021						// Internet Protocol Configure Protocol packet
+		#define	LCP						0xC021						// Link Configure Protocol packet
+		#define	PAP						0xC023						// Password Authentication Protocol packet
+		#define CHAP 					0xC223						// Challenge Handshake Authentication Protocol packet
+		#define NONE 					0x0000
+
 		#define LCP_OPTION_Maximum_Receive_Unit 					0x1		// LCP Option 1
 		#define LCP_OPTION_Async_Control_Character_Map 				0x2		// LCP Option 2
 		#define LCP_OPTION_Authentication_Protocol 					0x3		// LCP Option 3
@@ -141,32 +142,39 @@
 
 	/* Function Prototypes: */
 		void PPP_ManageLink(void);
-		void PPP_ManageState(PPP_Events_t Event, PPP_States_t* State);
+		void PPP_ManageState(const PPP_Events_t Event,
+		                     PPP_States_t* const State);
 		void PPP_InitPPP(void);
 		void PPP_LinkTimer(void);
 		void PPP_LinkUp(void);
 		void PPP_LinkOpen(void);
 
 		#if defined(INCLUDE_FROM_PPP_C)
-			static void 	Send_Configure_Request(void);
-			static void 	Send_Configure_Ack(void);
-			static void 	Send_Configure_Nak_Rej(void);
-			static void 	Send_Terminate_Request(void);
-			static void 	Send_Terminate_Ack(void);
-			static void 	Send_Code_Reject(void);
-			static void 	Send_Echo_Reply(void);
+			static PPP_Option_t* PPP_GetNextOption(const PPP_Packet_t* const ThisPacket,
+			                                       const PPP_Option_t* const CurrentOption);
+			static void PPP_RemoveOption(PPP_Packet_t* const ThisPacket,
+			                             const uint8_t Type);
+			static void PPP_AddOption(PPP_Packet_t* const ThisPacket,
+			                          const PPP_Option_t* const Option);
+			static void PPP_ChangeOption(PPP_Packet_t* const ThisPacket,
+			                             const PPP_Option_t* const Option);
+			static void PPP_ProcessNAK(void);
+			static void PPP_ProcessREJ(void);
+			static bool PPP_TestForNAK(const PPP_Option_t* const Option);
+			static bool PPP_TestForREJ(const uint8_t Options[],
+			                           const uint8_t NumOptions);
+
+			static void Send_Configure_Request(void);
+			static void Send_Configure_Ack(void);
+			static void Send_Configure_Nak_Rej(void);
+			static void Send_Terminate_Request(void);
+			static void Send_Terminate_Ack(void);
+			static void Send_Code_Reject(void);
+			static void Send_Echo_Reply(void);
 			static void This_Layer_Up(void);
 			static void This_Layer_Down(void);
 			static void This_Layer_Started(void);
 			static void This_Layer_Finished(void);
-			PPP_Option_t* GetNextOption(PPP_Packet_t* ThisPacket, PPP_Option_t* CurrentOption);
-			void RemoveOption(PPP_Packet_t* ThisPacket, uint8_t Type);
-			void AddOption(PPP_Packet_t* ThisPacket, PPP_Option_t* Option);
-			void ChangeOption(PPP_Packet_t* ThisPacket, PPP_Option_t* Option);
-			void ProcessNAK(void);
-			void ProcessREJ(void);
-			bool PPP_TestForNAK(PPP_Option_t* Option);
-			bool PPP_TestForREJ(uint8_t Options[], uint8_t NumOptions);
 		#endif
 		
 #endif

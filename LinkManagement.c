@@ -35,26 +35,23 @@ uint8_t      IPAddr1, IPAddr2, IPAddr3, IPAddr4;
 uint8_t      ConnectedState = LINKMANAGEMENT_STATE_Idle;
 uint8_t      DialSteps = 0;
 
-extern const char* ModemDialCommands[];
-extern const char* NetworkDialCommands[];
-
 void LinkManagement_ManageConnectionState(void)
 {
 	switch (ConnectedState)
 	{
 		case LINKMANAGEMENT_STATE_Idle:
-			TIME = 0;
+			SystemTicks = 0;
 			PPP_InitPPP();
 			ConnectedState = LINKMANAGEMENT_STATE_SendModemDialCommands;
 		break;
 
 		case LINKMANAGEMENT_STATE_SendModemDialCommands:
-			if (LinkManagement_DialConnection((char**)ModemDialCommands))
+			if (LinkManagement_DialConnection(ModemDialCommands))
 				ConnectedState = LINKMANAGEMENT_STATE_SendNetworkDialCommands;
 		break;
 		
 		case LINKMANAGEMENT_STATE_SendNetworkDialCommands:
-			if (LinkManagement_DialConnection((char**)NetworkDialCommands))
+			if (LinkManagement_DialConnection(NetworkDialCommands))
 			{
 				Debug_Print("Starting PPP\r\n");
 				PPP_LinkOpen();
@@ -84,7 +81,7 @@ void LinkManagement_ManageConnectionState(void)
 	}
 }
 
-static bool LinkManagement_DialConnection(char** DialCommands)
+static bool LinkManagement_DialConnection(const char** DialCommands)
 {
 	static char* ResponsePtr = NULL;
 	char* CommandPtr = NULL;
@@ -111,9 +108,9 @@ static bool LinkManagement_DialConnection(char** DialCommands)
 		}
 	}	
 		
-	if (TIME > 100)
+	if (SystemTicks > 100)
 	{
-		TIME = 0;
+		SystemTicks = 0;
 
 		CommandPtr = (char*)DialCommands[DialSteps];
 		ResponsePtr = (char*)DialCommands[DialSteps + 1];
