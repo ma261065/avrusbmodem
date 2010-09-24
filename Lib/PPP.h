@@ -142,8 +142,6 @@
 
 	/* Function Prototypes: */
 		void PPP_ManageLink(void);
-		void PPP_ManageState(const PPP_Events_t Event,
-		                     PPP_States_t* const State);
 		void PPP_InitPPP(void);
 		void PPP_LinkTimer(void);
 		void PPP_LinkUp(void);
@@ -163,7 +161,8 @@
 			static bool PPP_TestForNAK(const PPP_Option_t* const Option);
 			static bool PPP_TestForREJ(const uint8_t Options[],
 			                           const uint8_t NumOptions);
-
+			static void PPP_ManageState(const PPP_Events_t Event,
+										PPP_States_t* const State);
 			static void Send_Configure_Request(void);
 			static void Send_Configure_Ack(void);
 			static void Send_Configure_Nak_Rej(void);
@@ -175,6 +174,7 @@
 			static void This_Layer_Down(void);
 			static void This_Layer_Started(void);
 			static void This_Layer_Finished(void);
+			static void FreePacketMemory(void);
 		#endif
 		
 #endif
