@@ -47,7 +47,7 @@
 
 		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
-		#include "Lib/PPP.h"
+		#include "PPP.h"
 		#include "TCPIP.h"
 	
 	/* Enums: */
