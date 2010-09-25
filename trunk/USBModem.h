@@ -55,8 +55,8 @@
 
 		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
-		#include "Lib/PPP.h"
 
+		#include "PPP.h"
 		#include "ConfigDescriptor.h"
 		#include "USBManagement.h"
 		#include "LinkManagement.h"
@@ -86,9 +86,10 @@
 		extern RingBuff_t Modem_ReceiveBuffer;
 		
 	/* Function Prototypes: */
+		void WDT_Init(void) ATTR_NAKED ATTR_INIT_SECTION(3);
+
 		#if defined(INCLUDE_FROM_USBMODEM_C)
 			static void SetupHardware(void);
-			static void WDT_Init(void) ATTR_NAKED ATTR_INIT_SECTION(3);
 		#endif
 
 #endif

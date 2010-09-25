@@ -145,10 +145,10 @@ SRC = $(TARGET).c                                                 	\
 	  Network_AUS_3_Prepaid.c										\
 	  LinkManagement.c                                              \
 	  USBManagement.c                                               \
-	  TCPIP.c                                                  \
+	  TCPIP.c		                                                \
+	  PPP.c						    				  				\
       Lib/Debug.c					  								\
 	  Lib/RingBuff.c	  						  					\
-	  Lib/PPP.c					    				  				\
 	  $(UIP_PATH)/uip-Contiki/timer.c                               \
 	  $(UIP_PATH)/uip-Contiki/uip.c                                 \
 	  $(UIP_PATH)/uip-Contiki/clock.c                               \
