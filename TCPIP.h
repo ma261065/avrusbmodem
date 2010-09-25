@@ -38,24 +38,27 @@
 
 	/* Includes: */
 		#include <stdbool.h>
-	
 		#include <uIP-Contiki/uip.h>
-
 		#include "Lib/Debug.h"
 	
+	/* External Variables: */
+		extern uint8_t ConnectedState;
+		extern uint8_t  WatchdogTicks;
+		extern uint16_t SystemTicks;
+
 	/* Function Prototypes: */
-		bool TCPIP_Connect(void);
-		void TCPIP_TCPCallback(void);
+		void TCPIP_TCPIPTask(void);
 		void TCPIP_InitializeTCPStack(void);
 		void TCPIP_ConnectToRemoteHost(void);
 		void TCPIP_GotNewPacket(void);
-		void TCPIP_TCPIPTask(void);
+		void TCPIP_TCPCallback(void);
 
 		#if defined(INCLUDE_FROM_TCPIP_C)
 			static void TCPIP_SendGET(void);
 			static void TCPIP_QueueData(const char* Data,
 			                            const uint16_t Length);
 			static bool TCPIP_IsDataQueueFull(void);
+			static bool TCPIP_Connect(void);
 		#endif
 		
 #endif

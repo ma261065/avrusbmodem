@@ -28,11 +28,11 @@
   this software.
 */
 
+#define  INCLUDE_FROM_USBMODEM_C
 #include "USBModem.h"
 
 uint8_t  WatchdogTicks = 0;
 uint16_t SystemTicks   = 0;									// 10 millseconds counter
-
 
 ISR(TIMER1_COMPA_vect)										// Timer 1 interrupt handler
 {
@@ -63,6 +63,7 @@ void WDT_Init(void)
 int main(void)
 {	
 	SetupHardware();
+	ConnectedState = LINKMANAGEMENT_STATE_Idle;
 	
 	puts("\r\nUSB Modem - Copyright (C) 2010 Mike Alexander and Dean Camera"
 	     "\r\n   *** Press '!' to enable debugging, '@' to disable ***\r\n");

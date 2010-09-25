@@ -63,8 +63,11 @@
 		};
 	
 	/* External Variables: */
-		extern uint8_t ConnectedState;
 		extern uint8_t IPAddr1, IPAddr2, IPAddr3, IPAddr4;	// The IP address allocated to us by the remote end
+		extern uint8_t  WatchdogTicks;
+		extern uint16_t SystemTicks;
+		extern RingBuff_t Modem_SendBuffer;
+		extern RingBuff_t Modem_ReceiveBuffer;
 
 		extern const char* ModemDialCommands[];
 		extern const char* NetworkDialCommands[];

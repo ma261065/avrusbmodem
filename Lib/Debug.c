@@ -32,7 +32,6 @@
 
 bool DebugModeEnabled = false;
 
-
 void Debug_PrintChar(const char DebugChar)
 {
 	if (DebugModeEnabled)

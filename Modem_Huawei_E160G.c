@@ -267,10 +267,11 @@ static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor)
 // Each modem will have different initialisation parameters that must be sent to the modem.
 // One way to determine these parameters is to run the modem under Windows and use USBMonitor 
 // (http://www.hhdsoftware.com/Downloads/usb-monitor.html) to determine what commands are sent to the modem.
+// Another method is to look at http://www.draisberghof.de/usb_modeswitch/ to see if the codes for your modem have already been determined.
+// The format of the list is a command, followed by the expected response to that command. The list must be double-NULL terminated.
 // These dial commands are concatenated with the ones in Network_xxx.c, and will be sent before the
 // dial commands defined in Network_xxx.c
-// Do not put ATDT*99# in this list (put it in Network_xxx.c). 
-// The list must be double-NULL terminated.
+// Do not put the actual dial comand (usually ATDT*99#) in this list (put it in Network_xxx.c). 
 
 const char* ModemDialCommands[] = 
 {	

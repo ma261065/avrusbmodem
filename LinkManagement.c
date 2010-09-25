@@ -31,9 +31,8 @@
 #define  INCLUDE_FROM_LINKMANAGEMENT_C
 #include "LinkManagement.h"
 
-uint8_t      IPAddr1, IPAddr2, IPAddr3, IPAddr4;
-uint8_t      ConnectedState = LINKMANAGEMENT_STATE_Idle;
-uint8_t      DialSteps = 0;
+uint8_t			ConnectedState;
+static uint8_t  DialSteps = 0;
 
 void LinkManagement_ManageConnectionState(void)
 {
@@ -81,6 +80,8 @@ void LinkManagement_ManageConnectionState(void)
 	}
 }
 
+// Read the dial commands and send them to the modem. Wait for the expected response then move on to the next command.
+// Returns true if the last dial command has been processed.
 static bool LinkManagement_DialConnection(const char** DialCommands)
 {
 	static char* ResponsePtr = NULL;
@@ -110,8 +111,6 @@ static bool LinkManagement_DialConnection(const char** DialCommands)
 		
 	if (SystemTicks > 100)
 	{
-		SystemTicks = 0;
-
 		CommandPtr = (char*)DialCommands[DialSteps];
 		ResponsePtr = (char*)DialCommands[DialSteps + 1];
 
@@ -120,6 +119,8 @@ static bool LinkManagement_DialConnection(const char** DialCommands)
 			DialSteps = 0;
 			return true;														// Finished dialling
 		}
+
+		SystemTicks = 0;
 
 		Debug_Print("Send: "); Debug_Print(CommandPtr);
 		Debug_Print("(Expect: "); Debug_Print(ResponsePtr); Debug_Print(")\r\n");

@@ -38,9 +38,6 @@
 		
 		#include "../USBModem.h"
 
-	/* External Variables: */
-		extern bool DebugModeEnabled;
-
 	/* Function Prototypes: */
 		void Debug_PrintChar(const char DebugChar);
 		void Debug_Print(const char* DebugText);

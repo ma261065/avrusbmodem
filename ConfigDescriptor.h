@@ -38,7 +38,6 @@
 
 	/* Includes: */
 		#include <LUFA/Drivers/USB/USB.h>
-		
 		#include "USBModem.h"
 		
 	/* Macros: */
@@ -59,13 +58,12 @@
 
 	/* Function Prototypes: */
 		uint8_t ProcessConfigurationDescriptor(void);	
-		
+		void SwitchModemMode(void);
+
 		#if defined(INCLUDE_FROM_CONFIGDESCRIPTOR_C)
 			static uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor);
 			static uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor);
 			static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor);
 		#endif
 
-		void SwitchModemMode(void);
-		
 #endif

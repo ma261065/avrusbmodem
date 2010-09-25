@@ -28,6 +28,7 @@
   this software.
 */
 
+#define INCLUDE_FROM_USBMANAGEMENT_C
 #include "USBManagement.h"
 
 RingBuff_t Modem_SendBuffer;

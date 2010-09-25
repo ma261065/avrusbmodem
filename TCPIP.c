@@ -31,9 +31,10 @@
 #define  INCLUDE_FROM_TCPIP_C
 #include "TCPIP.h"
 
-uip_ipaddr_t     RemoteIPAddress;
-struct uip_conn* TCPConnection;
-struct timer     Periodic_Timer;
+uint8_t						IPAddr1, IPAddr2, IPAddr3, IPAddr4;
+static uip_ipaddr_t			RemoteIPAddress;
+static struct uip_conn*		TCPConnection;
+static struct timer			Periodic_Timer;
 
 bool TCPIP_Connect(void)
 {
