@@ -140,6 +140,9 @@
 
 		#define MAX_RESTARTS										5
 
+	/* External Variables: */
+		extern uint8_t ConnectedState;
+
 	/* Function Prototypes: */
 		void PPP_ManageLink(void);
 		void PPP_InitPPP(void);

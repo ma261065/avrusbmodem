@@ -12,25 +12,28 @@
 
 	#include "USBModem.h"
 	#include "Lib/RingBuff.h"
+	
+	/* External Variables: */
+		extern RingBuff_t Modem_SendBuffer;
+		extern RingBuff_t Modem_ReceiveBuffer;
+		extern bool DebugModeEnabled;
 
 	/* Enums: */
-	enum Packet_States_t
-	{
-		PACKET_STATE_NULL     = 0,
-		PACKET_STATE_INHEADER = 1,
-		PACKET_STATE_INBODY   = 2,
-	};
+		enum Packet_States_t
+		{
+			PACKET_STATE_NULL     = 0,
+			PACKET_STATE_INHEADER = 1,
+			PACKET_STATE_INBODY   = 2,
+		};
 
-	/*Initialize the network*/
-	void network_init(void);
-
-	/*Read from the network, returns protocol*/
-	uint16_t network_read(void);
-
-	/*Send using the network*/
-	void network_send(uint16_t protocol);
-
-	void DumpPacket(void);
+	/* Function Prototypes: */
+		void network_init(void);
+		uint16_t network_read(void);
+		void network_send(uint16_t protocol);
+				
+		#if defined(INCLUDE_FROM_NETWORK_C)
+			static void DumpPacket(void);
+		#endif
 
 	/*Sets the MAC address of the device*/
 	//void network_set_MAC(uint8_t* mac);

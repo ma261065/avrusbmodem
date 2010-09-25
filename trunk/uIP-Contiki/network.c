@@ -1,10 +1,11 @@
+#define  INCLUDE_FROM_NETWORK_C
 #include "network.h"
 
-bool Escape = false;
-uint8_t PacketState = PACKET_STATE_NULL;
-uint16_t PacketProtocol = 0;
-uint16_t PacketLength = 0;
-uint16_t CurrentChecksum, OneBackChecksum, TwoBackChecksum;
+static bool Escape = false;
+static uint8_t PacketState = PACKET_STATE_NULL;
+static uint16_t PacketProtocol = 0;
+static uint16_t PacketLength = 0;
+static uint16_t CurrentChecksum, OneBackChecksum, TwoBackChecksum;
 
 
 // Framed packet looks like:

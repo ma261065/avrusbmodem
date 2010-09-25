@@ -38,11 +38,8 @@
 
 	/* Includes: */
 		#include <avr/io.h>
-
 		#include <LUFA/Drivers/USB/USB.h>
-
 		#include "Lib/RingBuff.h"
-
 		#include "ConfigDescriptor.h"
 
 	/* Macros: */
@@ -56,19 +53,12 @@
 		#define CDC_NOTIFICATIONPIPE      3
 	
 	/* External Variables: */
-		extern RingBuff_t Modem_SendBuffer;
-		extern RingBuff_t Modem_ReceiveBuffer;
+		extern uint8_t ConnectedState;
 		
 	/* Function Prototypes: */
-		void EVENT_USB_Host_HostError(const uint8_t ErrorCode);
-		void EVENT_USB_Host_DeviceAttached(void);
-		void EVENT_USB_Host_DeviceUnattached(void);
-		void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
-		                                            const uint8_t SubErrorCode);
-		void EVENT_USB_Host_DeviceEnumerationComplete(void);
-
 		void USBManagement_ManageUSBState(void);
 		void USBManagement_SendReceivePipes(void);
+
 #endif
 
 

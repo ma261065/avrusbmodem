@@ -63,7 +63,7 @@
 
 	/* Macros: */
 		/** Serial baud rate for debugging */
-		// Note: If this is too low, then the time taken to display all the debug info for a packet
+		// Note: If this is less than 38400, then the time taken to display all the debug info for a packet
 		// can cause the TCP/IP timeout to expire, causing retransmits
 		#define UART_BAUD_RATE            38400
 
@@ -80,11 +80,15 @@
 		#define LEDMASK_USB_ERROR        (LEDS_LED1 | LEDS_LED3)
 	
 	/* External Variables: */
-		extern uint8_t  WatchdogTicks;
-		extern uint16_t SystemTicks;
+		extern uint8_t ConnectedState;
+		extern bool DebugModeEnabled;
+		extern RingBuff_t Modem_SendBuffer;
+		extern RingBuff_t Modem_ReceiveBuffer;
 		
 	/* Function Prototypes: */
-		void SetupHardware(void);
-		void WDT_Init(void) ATTR_NAKED ATTR_INIT_SECTION(3);
+		#if defined(INCLUDE_FROM_USBMODEM_C)
+			static void SetupHardware(void);
+			static void WDT_Init(void) ATTR_NAKED ATTR_INIT_SECTION(3);
+		#endif
 
 #endif
