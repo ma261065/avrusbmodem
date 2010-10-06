@@ -153,7 +153,7 @@ void network_send(uint16_t protocol)
 	checksum = CALC_CRC16(checksum, protocol & 255);
 
 	// Add the information, escaping it as necessary
-	for (uint8_t i = 0; i < uip_len; i++)
+	for (uint16_t i = 0; i < uip_len; i++)
 	{
 		if (*(uip_buf + i) < 0x20 || *(uip_buf + i) == 0x7d || *(uip_buf + i) == 0x7e)
 		{
