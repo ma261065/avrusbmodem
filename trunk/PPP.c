@@ -477,15 +477,31 @@ static void This_Layer_Up(void)
 // Called by the state machine when the current layer goes down. Reset everything
 static void This_Layer_Down(void)
 {
-	Debug_Print("**Layer Down**\r\n");
-
-	PPP_ManageState(PPP_EVENT_Down, &LCP_State);
-	PPP_ManageState(PPP_EVENT_Down, &PAP_State);
-	PPP_ManageState(PPP_EVENT_Down, &IPCP_State);
-	
 	FreePacketMemory();																							// Free the memory from any existing outgoing packet
-	PPP_Phase = PPP_PHASE_Dead;
-	ConnectedState = LINKMANAGEMENT_STATE_Idle;
+
+	switch(PPP_Phase)
+	{
+		case PPP_PHASE_Establish:
+			Debug_Print("**LCP Down**\r\n");
+			PPP_Phase = PPP_PHASE_Dead;
+			ConnectedState = LINKMANAGEMENT_STATE_Idle;
+		break;
+
+		case PPP_PHASE_Authenticate:
+			Debug_Print("**PAP Down**\r\n");
+			PPP_Phase = PPP_PHASE_Establish;
+			PPP_ManageState(PPP_EVENT_Down, &LCP_State);
+		break;
+
+		case PPP_PHASE_Network:
+			Debug_Print("**IPCP Down**\r\n");
+			PPP_Phase = PPP_PHASE_Authenticate;
+			PPP_ManageState(PPP_EVENT_Down, &PAP_State);
+		break;
+
+		default:
+		break;
+	}
 }
 
 // Called by the state machine when the current layer is in negotiation
