@@ -44,8 +44,8 @@ ISR(WDT_vect)												// Watchdog Timer interrupt handler
 {
 	if (++WatchdogTicks >= 23)								// 23 * 8s = 3 minutes. If we've received no data in 3 minutes reboot.
 	{
-		WDTCSR = ((1 << WDCE) | (1 << WDE));				// Set watchdog timer to reboot rather than interrupt next time it fires
 		Debug_Print("Watchdog reboot\r\n");
+		Reboot();
 	}
 }
 
@@ -57,6 +57,11 @@ void WDT_Init(void)
     wdt_disable();
 
     return;
+}
+
+void Reboot(void)
+{
+	WDTCSR = ((1 << WDCE) | (1 << WDE));													// Set watchdog timer to reboot rather than interrupt next time it fires																						// Free the memory from any existing outgoing packet
 }
 
 // Main program entry point. This routine configures the hardware required by the application, then runs the application tasks.
@@ -96,6 +101,7 @@ void SetupHardware(void)
 	// Hardware Initialization
 	LEDs_Init();
 	USB_Init();
+
 	SerialStream_Init(UART_BAUD_RATE, false);
 
 	// General 10ms Timekeeping Timer Initialization

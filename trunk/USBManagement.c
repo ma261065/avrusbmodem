@@ -49,7 +49,7 @@ void EVENT_USB_Host_DeviceUnattached(void)
 {
 	Debug_Print("Device unattached\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_NOTREADY);
-	ConnectedState = 0;
+	ConnectedState = LINKMANAGEMENT_STATE_Idle;
 }
 
 // Event handler for the USB_DeviceEnumerationComplete event. This indicates that a device has been successfully
@@ -86,52 +86,19 @@ void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
 // data received from the attached CDC device and print it to the serial port.
 void USBManagement_ManageUSBState(void)
 {
-	uint8_t ErrorCode;
-
 	switch (USB_HostState)
 	{
-		case HOST_STATE_WaitForDeviceRemoval:
-			Debug_Print("Wait for device removal\r\n");
-
-			// Wait until USB device disconnected
-			while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);
-		break;
-		
 		case HOST_STATE_Addressed:
-			Debug_Print("Send configuration command\r\n");
-			
-			SwitchModemMode();
-					
-			Debug_Print("Looking for modem device...");
-			
-			// Get and process the configuration descriptor data
-			// First time through we expect an error. Once the device has re-attached it should be OK
-			if ((ErrorCode = ProcessConfigurationDescriptor()) != SuccessfulConfigRead)
-			{
-				if (ErrorCode == ControlError)
-				{
-					Debug_Print("Control error (Get Configuration).\r\n");
-					Debug_PrintHex(ErrorCode);
-				}
-				else
-				{
-					Debug_Print("Not a modem device - switching modes\r\n");
-					SwitchModemMode();
-				}
-
-				// Indicate error via status LEDs
-				LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
-
-				// Wait until USB device disconnected
+			if (ProcessModemUSBStates())
+				USB_HostState = HOST_STATE_Configured;
+			else
 				USB_HostState = HOST_STATE_WaitForDeviceRemoval;
-				break;
-			}
-
-			Debug_Print("Modem device enumerated\r\n");
-
-			USB_HostState = HOST_STATE_Configured;
 		break;
 		
+		case HOST_STATE_WaitForDeviceRemoval:
+			while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);			// Wait until USB device disconnected
+		break;
+
 		case HOST_STATE_Configured:
 			USBManagement_SendReceivePipes();
 		break;
@@ -150,7 +117,7 @@ void USBManagement_SendReceivePipes(void)
 	////////////////////////////////
 
 	// Select the OUT data pipe for transmission
-	Pipe_SelectPipe(CDC_DATAPIPE_OUT);
+	Pipe_SelectPipe(CDC_DATA_OUT_PIPE);
 	Pipe_Unfreeze();
 
 	while (Modem_SendBuffer.Elements) 
@@ -183,7 +150,7 @@ void USBManagement_SendReceivePipes(void)
 	////////////////////////////////
 	
 	// Select the data IN pipe
-	Pipe_SelectPipe(CDC_DATAPIPE_IN);
+	Pipe_SelectPipe(CDC_DATA_IN_PIPE);
 	Pipe_Unfreeze();
 
 	// Check if data is in the pipe and space is available in the receive buffer
@@ -211,7 +178,7 @@ void USBManagement_SendReceivePipes(void)
 	Pipe_Freeze();		
 
 	// Select and unfreeze the notification pipe
-	Pipe_SelectPipe(CDC_NOTIFICATIONPIPE);
+	Pipe_SelectPipe(CDC_NOTIFICATION_PIPE);
 	Pipe_Unfreeze();
 	
 	// Check if data is in the pipe

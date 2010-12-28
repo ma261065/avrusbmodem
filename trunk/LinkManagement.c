@@ -32,7 +32,7 @@
 #include "LinkManagement.h"
 
 uint8_t			ConnectedState;
-static uint8_t  DialSteps = 0;
+static uint8_t  DialSteps;
 
 void LinkManagement_ManageConnectionState(void)
 {
@@ -40,6 +40,7 @@ void LinkManagement_ManageConnectionState(void)
 	{
 		case LINKMANAGEMENT_STATE_Idle:
 			SystemTicks = 0;
+			DialSteps = 0;
 			PPP_InitPPP();
 			ConnectedState = LINKMANAGEMENT_STATE_SendModemDialCommands;
 		break;
@@ -53,8 +54,7 @@ void LinkManagement_ManageConnectionState(void)
 			if (LinkManagement_DialConnection(NetworkDialCommands))
 			{
 				Debug_Print("Starting PPP\r\n");
-				PPP_LinkOpen();
-				PPP_LinkUp();
+				PPP_StartLink();
 				ConnectedState = LINKMANAGEMENT_STATE_WaitForLink;
 			}	
 		break;
@@ -109,7 +109,7 @@ static bool LinkManagement_DialConnection(const char** DialCommands)
 		}
 	}	
 		
-	if (SystemTicks > 100)
+	if (SystemTicks > 100)														// Space each command by 1 second
 	{
 		CommandPtr = (char*)DialCommands[DialSteps];
 		ResponsePtr = (char*)DialCommands[DialSteps + 1];

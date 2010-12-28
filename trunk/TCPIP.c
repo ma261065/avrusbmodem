@@ -42,12 +42,9 @@ bool TCPIP_Connect(void)
 	uip_ipaddr(&RemoteIPAddress, 192, 0, 32, 10);	
 	TCPConnection = uip_connect(&RemoteIPAddress, HTONS(80));
 
-	Debug_Print("Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256); Debug_PrintHex(uip_mss() & 255); 
-	Debug_Print("\r\n");	
-
 	if (TCPConnection != NULL)
 	{
-		Debug_Print("Connected to host\r\n");
+		Debug_Print("Connecting to host\r\n");
 		return true;
 	}
 	else
@@ -59,14 +56,23 @@ bool TCPIP_Connect(void)
 
 void TCPIP_TCPCallback(void)
 {
-	if (uip_newdata())
-		Debug_Print("New Data ");
-
 	if (uip_acked())
-		Debug_Print("Acked ");
-	
+		Debug_Print("[ACK] ");
+
+	if (uip_newdata())
+	{
+		Debug_Print("New Data:\r\n");
+		TCPIP_QueueData(uip_appdata, uip_datalen());
+		
+		if (TCPIP_IsDataQueueFull())
+		  uip_stop();
+	}
+
 	if (uip_connected())
-		Debug_Print("Connected ");
+	{
+		Debug_Print("Connected - Maximum Segment Size: 0x"); Debug_PrintHex(uip_mss() / 256); Debug_PrintHex(uip_mss() & 255); 
+		Debug_Print("\r\n");
+	}
 
 	if (uip_closed())
 	{
@@ -104,14 +110,6 @@ void TCPIP_TCPCallback(void)
 		TCPIP_SendGET();
 	}
 
-	if (uip_newdata())
-	{
-		TCPIP_QueueData(uip_appdata, uip_datalen());
-		
-		if (TCPIP_IsDataQueueFull())
-		  uip_stop();
-	}
-
 	if (uip_poll() && uip_stopped(TCPConnection))
 	{
 		if (!(TCPIP_IsDataQueueFull()))
@@ -131,11 +129,11 @@ static void TCPIP_SendGET(void)
 static void TCPIP_QueueData(const char* Data,
                             const uint16_t Length)
 {
-	Debug_Print("\r\nData:\r\n");
-	WatchdogTicks = 0;							// Reset the watchdog count
+	if (Length > 0)
+		WatchdogTicks = 0;							// Reset the watchdog count
 	
 	for (uint16_t i = 0; i < Length; i++)
-	  putchar(Data[i]);
+		putchar(Data[i]);
 	
 	Debug_Print("\r\n");
 }

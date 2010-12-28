@@ -44,13 +44,13 @@
 
 	/* Macros: */
 		/** Pipe number for the CDC data IN pipe */
-		#define CDC_DATAPIPE_IN           1
+		#define CDC_DATA_IN_PIPE           1
 
 		/** Pipe number for the CDC data OUT pipe */
-		#define CDC_DATAPIPE_OUT          2
+		#define CDC_DATA_OUT_PIPE          2
 
 		/** Pipe number for the CDC notification pipe */
-		#define CDC_NOTIFICATIONPIPE      3
+		#define CDC_NOTIFICATION_PIPE      3
 	
 	/* External Variables: */
 		extern uint8_t ConnectedState;
