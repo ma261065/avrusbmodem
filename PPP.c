@@ -31,7 +31,7 @@
 #define  INCLUDE_FROM_PPP_C
 #include "PPP.h"
 
-static uint8_t  			OutgoingPacketID;								// Unique packet ID
+static uint8_t  			OutgoingPacketID = -1;							// Unique packet ID
 
 static PPP_Phases_t			PPP_Phase  = PPP_PHASE_Dead;					// PPP negotiation phases
 
@@ -56,17 +56,11 @@ void PPP_InitPPP(void)
 	PPP_Phase = PPP_PHASE_Dead;
 }
 
-void PPP_LinkUp(void)
+void PPP_StartLink(void)
 {
 	PPP_Phase = PPP_PHASE_Establish;
-	PPP_ManageState(PPP_EVENT_Up, &LCP_State);
-}
-
-void PPP_LinkOpen(void)
-{
-	PPP_ManageState(PPP_EVENT_Open, &LCP_State);
-	PPP_ManageState(PPP_EVENT_Open, &PAP_State);
-	PPP_ManageState(PPP_EVENT_Open, &IPCP_State);
+	PPP_ManageState(PPP_EVENT_Open, &LCP_State, PPP_LAYER_Physical);
+	PPP_ManageState(PPP_EVENT_Up, &LCP_State, PPP_LAYER_Physical);
 }
 
 // Called every 10ms. Send events to the state machine every 3 seconds if the timer is currently running
@@ -82,15 +76,15 @@ void PPP_LinkTimer(void)
 		switch(PPP_Phase)
 		{
 			case PPP_PHASE_Establish:
-				PPP_ManageState(PPP_EVENT_TOPlus, &LCP_State);
+				PPP_ManageState(PPP_EVENT_TOPlus, &LCP_State, PPP_LAYER_Physical);
 			break;
 
 			case PPP_PHASE_Authenticate:
-				PPP_ManageState(PPP_EVENT_TOPlus, &PAP_State);
+				PPP_ManageState(PPP_EVENT_TOPlus, &PAP_State, PPP_LAYER_Authentication);
 			break;
 
 			case PPP_PHASE_Network:
-				PPP_ManageState(PPP_EVENT_TOPlus, &IPCP_State);
+				PPP_ManageState(PPP_EVENT_TOPlus, &IPCP_State, PPP_LAYER_Network);
 			break;
 
 			default:
@@ -104,15 +98,15 @@ void PPP_LinkTimer(void)
 		switch(PPP_Phase)
 		{
 			case PPP_PHASE_Establish:
-				PPP_ManageState(PPP_EVENT_TOMinus, &LCP_State);
+				PPP_ManageState(PPP_EVENT_TOMinus, &LCP_State, PPP_LAYER_Physical);
 			break;
 
 			case PPP_PHASE_Authenticate:
-				PPP_ManageState(PPP_EVENT_TOMinus, &PAP_State);
+				PPP_ManageState(PPP_EVENT_TOMinus, &PAP_State, PPP_LAYER_Authentication);
 			break;
 
 			case PPP_PHASE_Network:
-				PPP_ManageState(PPP_EVENT_TOMinus, &IPCP_State);
+				PPP_ManageState(PPP_EVENT_TOMinus, &IPCP_State, PPP_LAYER_Network);
 			break;
 
 			default:
@@ -128,14 +122,16 @@ void PPP_ManageLink(void)
 	if (PPP_Phase == PPP_PHASE_Dead)
 		return;
 	
-	CurrentProtocol = network_read();
+	uint16_t ReadProtocol = network_read();																				// Don't mess with CurrentProtocol in case we get 0 (No data) back
 
-	if (CurrentProtocol == 0)
+	if (ReadProtocol == 0)
 		return;
 	
-	Debug_Print("Got ");
+	CurrentProtocol = ReadProtocol;
 	IncomingPacket = (PPP_Packet_t*)uip_buf;																			// Map the incoming data to a packet
 	
+	Debug_Print("Got ");
+
 	switch (CurrentProtocol)
 	{
 		case LCP:
@@ -149,14 +145,16 @@ void PPP_ManageLink(void)
 					MarkForNAK = MarkForREJ = false;
 
 					// List of options that we can support. If any other options come in, we have to REJ them
-					const uint8_t SupportedOptions[] = {LCP_OPTION_Async_Control_Character_Map,
+					const uint8_t SupportedOptions[] = {LCP_OPTION_Maximum_Receive_Unit,
+														LCP_OPTION_Magic_Number,
+														LCP_OPTION_Async_Control_Character_Map,
 					                                    LCP_OPTION_Authentication_Protocol,
 					                                    LCP_OPTION_Protocol_Field_Compression,
 					                                    LCP_OPTION_Address_and_Control_Field_Compression};
 
 					if ((MarkForREJ = PPP_TestForREJ(SupportedOptions, sizeof(SupportedOptions))))						// Check that we can support all the options the other end wants to use
 					{
-						PPP_ManageState(PPP_EVENT_RCRMinus, &LCP_State);
+						PPP_ManageState(PPP_EVENT_RCRMinus, &LCP_State, PPP_LAYER_Physical);
 						break;
 					}
 					
@@ -164,51 +162,72 @@ void PPP_ManageLink(void)
 
 					if ((MarkForNAK = PPP_TestForNAK(&Option3)))														// Check that the authentication protocol = PAP (0xc023)
 					{
-						PPP_ManageState(PPP_EVENT_RCRMinus, &LCP_State);
+						PPP_ManageState(PPP_EVENT_RCRMinus, &LCP_State, PPP_LAYER_Physical);
 						break;
 					}
 
-					PPP_ManageState(PPP_EVENT_RCRPlus, &LCP_State);
+					PPP_ManageState(PPP_EVENT_RCRPlus, &LCP_State, PPP_LAYER_Physical);
 				break;
 
 				case ACK:
 					Debug_Print("ACK\r\n");
-					PPP_ManageState(PPP_EVENT_RCA, &LCP_State);
+					
+					if (IncomingPacket->PacketID != OutgoingPacketID)
+					{
+						Debug_Print("Out of sync\r\n");
+						break;
+					}
+
+					PPP_ManageState(PPP_EVENT_RCA, &LCP_State, PPP_LAYER_Physical);
 				break;
 
 				case NAK:
 					Debug_Print("NAK\r\n");
+
+					if (IncomingPacket->PacketID != OutgoingPacketID)
+					{
+						Debug_Print("Out of sync\r\n");
+						break;
+					}
+
 					PPP_ProcessNAK();
-					PPP_ManageState(PPP_EVENT_RCN, &LCP_State);
+					PPP_ManageState(PPP_EVENT_RCN, &LCP_State, PPP_LAYER_Physical);
 				break;
 
 				case REJ:
 					Debug_Print("REJ\r\n");
+
+					if (IncomingPacket->PacketID != OutgoingPacketID)
+					{
+						Debug_Print("Out of sync\r\n");
+						break;
+					}
+
 					PPP_ProcessREJ();
-					PPP_ManageState(PPP_EVENT_RCN, &LCP_State);
+					PPP_ManageState(PPP_EVENT_RCN, &LCP_State, PPP_LAYER_Physical);
 				break;
 
 				case DISC:
 				case ECHOREQ:
 				case ECHOREPLY:
 					Debug_Print("DISC\r\n");
-					PPP_ManageState(PPP_EVENT_RXR, &LCP_State);
+					PPP_ManageState(PPP_EVENT_RXR, &LCP_State, PPP_LAYER_Physical);
 				break;
 
 				case TERMREQ:
 					Debug_Print("TERM\r\n");
-					PPP_ManageState(PPP_EVENT_RTR, &LCP_State);
+					PPP_ManageState(PPP_EVENT_RTR, &LCP_State, PPP_LAYER_Physical);
 				break;
 
 				case CODEREJ:
 				case PROTREJ:
 					Debug_Print("CODE/PROTREJ\r\n");
-					PPP_ManageState(PPP_EVENT_RXJMinus, &LCP_State);
+					PPP_ManageState(PPP_EVENT_RXJMinus, &LCP_State, PPP_LAYER_Physical);
 				break;
 				
 				default:
 					Debug_Print("unknown\r\n");
-					PPP_ManageState(PPP_EVENT_RUC, &LCP_State);
+					PPP_ManageState(PPP_EVENT_RUC, &LCP_State, PPP_LAYER_Physical);
 				break;
 			}
 		break;
@@ -220,13 +239,13 @@ void PPP_ManageLink(void)
 			{
 				case REQ:
 					Debug_Print("REQ\r\n");
-					PPP_ManageState(PPP_EVENT_RCRPlus, &PAP_State);
+					PPP_ManageState(PPP_EVENT_RCRPlus, &PAP_State, PPP_LAYER_Authentication);
 				break;
 
 				case ACK:
 					Debug_Print("ACK\r\n");
-					PPP_ManageState(PPP_EVENT_RCRPlus, &PAP_State);
-					PPP_ManageState(PPP_EVENT_RCA, &PAP_State);
+					PPP_ManageState(PPP_EVENT_RCRPlus, &PAP_State, PPP_LAYER_Authentication);						// The host never sends a Configure request for PAP, but we need it to move the state machine to completion. So, fake it.
+					PPP_ManageState(PPP_EVENT_RCA, &PAP_State, PPP_LAYER_Authentication);
 				break;
 			}
 		break;
@@ -239,41 +258,60 @@ void PPP_ManageLink(void)
 				case REQ:
 					Debug_Print("REQ\r\n");
 	
-					MarkForNAK = false;
-					MarkForREJ = false;
+					MarkForNAK = MarkForREJ = false;
 					
 					// List of options that we can support. If any other options come in, we have to REJ them
 					uint8_t SupportedOptions[] = {IPCP_OPTION_IP_address, IPCP_OPTION_Primary_DNS, IPCP_OPTION_Secondary_DNS};
 					
 					if ((MarkForREJ = PPP_TestForREJ(SupportedOptions, sizeof(SupportedOptions))))
 					{
-						PPP_ManageState(PPP_EVENT_RCRMinus, &IPCP_State);
+						PPP_ManageState(PPP_EVENT_RCRMinus, &IPCP_State, PPP_LAYER_Network);
 						break;
 					}
 
-					PPP_ManageState(PPP_EVENT_RCRPlus, &IPCP_State);
+					PPP_ManageState(PPP_EVENT_RCRPlus, &IPCP_State, PPP_LAYER_Network);
 				break;
 
 				case ACK:
 					Debug_Print("ACK\r\n");
+
+					if (IncomingPacket->PacketID != OutgoingPacketID)
+					{
+						Debug_Print("Out of sync\r\n");
+						break;
+					}
+
 					IPAddr1 = IncomingPacket->Options[0].Data[0]; 						// Store address for use in IP packets.
 					IPAddr2 = IncomingPacket->Options[0].Data[1];    				 	// Assumption is that Option 3 is the first option, which it
 					IPAddr3 = IncomingPacket->Options[0].Data[2];						// should be as the PPP spec states that implementations should
 					IPAddr4 = IncomingPacket->Options[0].Data[3];						// not reorder packets, and we sent out a REQ with option 3 first
 
-					PPP_ManageState(PPP_EVENT_RCA, &IPCP_State);
+					PPP_ManageState(PPP_EVENT_RCA, &IPCP_State, PPP_LAYER_Network);
 				break;
 
 				case NAK:
 					Debug_Print("NAK\r\n");
+					if (IncomingPacket->PacketID != OutgoingPacketID)
+					{
+						Debug_Print("Out of sync\r\n");
+						break;
+					}
+
 					PPP_ProcessNAK();
-					PPP_ManageState(PPP_EVENT_RCN, &IPCP_State);
+					PPP_ManageState(PPP_EVENT_RCN, &IPCP_State, PPP_LAYER_Network);
 				break;
 
 				case REJ:
 					Debug_Print("REJ\r\n");
+
+					if (IncomingPacket->PacketID != OutgoingPacketID)
+					{
+						Debug_Print("Out of sync\r\n");
+						break;
+					}
+
 					PPP_ProcessREJ();
-					PPP_ManageState(PPP_EVENT_RCN, &IPCP_State);
+					PPP_ManageState(PPP_EVENT_RCN, &IPCP_State, PPP_LAYER_Network);
 				break;
 			}
 		break;
@@ -299,57 +337,53 @@ static void Send_Configure_Request(void)
 	switch(PPP_Phase)
 	{
 		case PPP_PHASE_Establish:
-			if (OutgoingPacket == NULL)																						// Create a new packet
+			if (OutgoingPacket == NULL)																			// Create a new packet
 			{
 				// When we send a REQ, we want to make sure that the other end supports these options
-				static PPP_Option_t Option1 = {.Type = LCP_OPTION_Maximum_Receive_Unit,					 .Length = 4,	.Data = {0x5, 0xa0}};
-				static PPP_Option_t Option2 = {.Type = LCP_OPTION_Async_Control_Character_Map,			 .Length = 6,	.Data = {0x0, 0xa, 0x0, 0x0}};
+//				static PPP_Option_t Option1 = {.Type = LCP_OPTION_Maximum_Receive_Unit,					 .Length = 4,	.Data = {0x5, 0xa0}};
+				static PPP_Option_t Option2 = {.Type = LCP_OPTION_Async_Control_Character_Map,			 .Length = 6,	.Data = {0x0, 0x0, 0x0, 0x0}};
+				static PPP_Option_t Option5 = {.Type = LCP_OPTION_Magic_Number,							 .Length = 6,	.Data = {0x27, 0xf5, 0x46, 0xa1}};
 				static PPP_Option_t Option7 = {.Type = LCP_OPTION_Protocol_Field_Compression,			 .Length = 2};
 				static PPP_Option_t Option8 = {.Type = LCP_OPTION_Address_and_Control_Field_Compression, .Length = 2};
+				static PPP_Option_t OptionD = {.Type = LCP_OPTION_Callback,								 .Length = 3,	.Data = {0x6}};
 				
-				OutgoingPacket = malloc(sizeof(PPP_Packet_t) + Option1.Length + Option2.Length + Option7.Length + Option8.Length);			// Reserve memory for outgoing packet. Will persist until we get an ACK so can't build it in uip_buf
-				
-				CurrentProtocol = LCP;
+				//PPP_AddOption(OutgoingPacket, &Option1);
+				PPP_AddOption(&Option2);
+				PPP_AddOption(&Option5);
+				PPP_AddOption(&Option7);
+				PPP_AddOption(&Option8);
+				PPP_AddOption(&OptionD);
 				OutgoingPacket->Code = REQ;
-				OutgoingPacket->Length = htons(sizeof(PPP_Packet_t));
-
-				PPP_AddOption(OutgoingPacket, &Option1);
-				PPP_AddOption(OutgoingPacket, &Option2);
-				PPP_AddOption(OutgoingPacket, &Option7);
-				PPP_AddOption(OutgoingPacket, &Option8);
+				CurrentProtocol = LCP;
 			}
 		break;
 
 		case PPP_PHASE_Authenticate:
-			if (OutgoingPacket == NULL)																						// Create a new packet
+			if (OutgoingPacket == NULL)																			// Create a new packet
 			{
-				OutgoingPacket = malloc(sizeof(PPP_Packet_t) + sizeof(PPP_Option_t));										// Reserve memory for outgoing packet. Will persist until we get an ACK so can't build it in uip_buf
-
-				CurrentProtocol = PAP;
+				static PPP_Option_t Option0 = {.Type = 0x00, .Length = 0x02};
+			
+				PPP_AddOption(&Option0);
+				OutgoingPacket->Options[0].Type = 0x00;															// No User Name 
+                OutgoingPacket->Options[0].Length = 0x00;														// No Password
 				OutgoingPacket->Code = REQ;
-				OutgoingPacket->Options[0].Type = 0x00;																		// No User Name
-				OutgoingPacket->Options[0].Length = 0x00;																	// No Password
-				OutgoingPacket->Length = htons(sizeof(PPP_Packet_t) + sizeof(PPP_Option_t));
+				CurrentProtocol = PAP;
 			}
 		break;
 
 		case PPP_PHASE_Network:
-			if (OutgoingPacket == NULL)																						// Create a new packet
+			if (OutgoingPacket == NULL)																			// Create a new packet
 			{
 				// When we send a REQ, we want to make sure that the other end supports these options
 				static PPP_Option_t Option3  = {.Type = IPCP_OPTION_IP_address,    .Length = 6, .Data = {0, 0, 0, 0}};		
 				static PPP_Option_t Option81 = {.Type = IPCP_OPTION_Primary_DNS,   .Length = 6, .Data = {0, 0, 0, 0}};
 				static PPP_Option_t Option83 = {.Type = IPCP_OPTION_Secondary_DNS, .Length = 6, .Data = {0, 0, 0, 0}};
 				
-				OutgoingPacket = malloc(sizeof(PPP_Packet_t) + Option3.Length + Option81.Length + Option83.Length);			// Reserve memory for outgoing packet. Will persist until we get an ACK so can't build it in uip_buf
-
-				CurrentProtocol = IPCP;
+				PPP_AddOption(&Option3);																		// Make sure Option3 is first
+				PPP_AddOption(&Option81);
+				PPP_AddOption(&Option83);
 				OutgoingPacket->Code = REQ;
-				OutgoingPacket->Length = htons(sizeof(PPP_Packet_t));
-
-				PPP_AddOption(OutgoingPacket, &Option3);																	// Make sure Option3 is first
-				PPP_AddOption(OutgoingPacket, &Option81);
-				PPP_AddOption(OutgoingPacket, &Option83);
+				CurrentProtocol = IPCP;
 			}
 		break;
 
@@ -357,7 +391,7 @@ static void Send_Configure_Request(void)
 		break;
 	}
 
-	OutgoingPacket->PacketID = OutgoingPacketID++;																// Every new REQ Packet going out gets a new ID
+	OutgoingPacket->PacketID = ++OutgoingPacketID;																// Every new REQ Packet going out gets a new ID
 	RestartCount--;																								// Decrement the count before we restart the layer
 
 	uip_len = ntohs(OutgoingPacket->Length);
@@ -409,7 +443,7 @@ static void Send_Terminate_Request(void)
 	CurrentProtocol = LCP;
 	OutgoingPacket->Code = TERMREQ;
 	OutgoingPacket->Length = htons(sizeof(PPP_Packet_t));
-	OutgoingPacket->PacketID = OutgoingPacketID++;																// Every new REQ Packet going out gets a new ID
+	OutgoingPacket->PacketID = ++OutgoingPacketID;																// Every new REQ Packet going out gets a new ID
 
 	RestartCount--;
 
@@ -444,28 +478,32 @@ static void Send_Echo_Reply(void)
 	network_send(CurrentProtocol);
 }
 
-// Called by the state machine when the current layer comes up. Use this to start the next layer.
-static void This_Layer_Up(void)
+// Called by the state machine when the current layer comes up. Use this to start the next layer up.
+static void This_Layer_Up(PPP_Layers_t Layer)
 {
 	CurrentProtocol = NONE;
 	FreePacketMemory();																							// Free the memory from any existing outgoing packet
 
-	switch(PPP_Phase)
+	switch(Layer)
 	{
-		case PPP_PHASE_Establish:
+		case PPP_LAYER_Physical:
 			Debug_Print("**LCP Up**\r\n");
 			PPP_Phase = PPP_PHASE_Authenticate;
-			PPP_ManageState(PPP_EVENT_Up, &PAP_State);
+			OutgoingPacketID = -1;
+			PPP_ManageState(PPP_EVENT_Open, &PAP_State, PPP_LAYER_Authentication);
+			PPP_ManageState(PPP_EVENT_Up, &PAP_State, PPP_LAYER_Authentication);
 		break;
 
-		case PPP_PHASE_Authenticate:
+		case PPP_LAYER_Authentication:
 			Debug_Print("**PAP Up**\r\n");
 			PPP_Phase = PPP_PHASE_Network;
-			PPP_ManageState(PPP_EVENT_Up, &IPCP_State);
+			OutgoingPacketID = -1;
+			PPP_ManageState(PPP_EVENT_Open, &IPCP_State, PPP_LAYER_Network);
+			PPP_ManageState(PPP_EVENT_Up, &IPCP_State, PPP_LAYER_Network);
 		break;
 
-		case PPP_PHASE_Network:
-			Debug_Print("**LINK CONNECTED**\r\n");
+		case PPP_LAYER_Network:
+			Debug_Print("**IPCP Up**\r\n");
 			ConnectedState = LINKMANAGEMENT_STATE_InitializeTCPStack;
 		break;
 
@@ -474,29 +512,26 @@ static void This_Layer_Up(void)
 	}
 }
 
-// Called by the state machine when the current layer goes down. Reset everything
-static void This_Layer_Down(void)
+// Called by the state machine when a layer goes down. Use this to stop the next layer up
+static void This_Layer_Down(PPP_Layers_t Layer)
 {
 	FreePacketMemory();																							// Free the memory from any existing outgoing packet
 
-	switch(PPP_Phase)
+	switch(Layer)
 	{
-		case PPP_PHASE_Establish:
+		case PPP_LAYER_Physical:
 			Debug_Print("**LCP Down**\r\n");
+			PPP_ManageState(PPP_EVENT_Down, &PAP_State, PPP_LAYER_Authentication);
 			PPP_Phase = PPP_PHASE_Dead;
-			ConnectedState = LINKMANAGEMENT_STATE_Idle;
 		break;
 
-		case PPP_PHASE_Authenticate:
+		case PPP_LAYER_Authentication:
 			Debug_Print("**PAP Down**\r\n");
-			PPP_Phase = PPP_PHASE_Establish;
-			PPP_ManageState(PPP_EVENT_Down, &LCP_State);
+			PPP_ManageState(PPP_EVENT_Down, &IPCP_State, PPP_LAYER_Network);
 		break;
 
-		case PPP_PHASE_Network:
+		case PPP_LAYER_Network:
 			Debug_Print("**IPCP Down**\r\n");
-			PPP_Phase = PPP_PHASE_Authenticate;
-			PPP_ManageState(PPP_EVENT_Down, &PAP_State);
 		break;
 
 		default:
@@ -504,17 +539,52 @@ static void This_Layer_Down(void)
 	}
 }
 
-// Called by the state machine when the current layer is in negotiation
-static void This_Layer_Started(void)
+// Called by the state machine when the current layer starts
+static void This_Layer_Started(PPP_Layers_t Layer)
 {
-	Debug_Print("**Layer Started**\r\n");
+	switch(Layer)
+	{
+		case PPP_LAYER_Physical:
+			Debug_Print("**LCP Started**\r\n");
+		break;
+
+		case PPP_LAYER_Authentication:
+			Debug_Print("**PAP Started**\r\n");
+		break;
+
+		case PPP_LAYER_Network:
+			Debug_Print("**IPCP Started**\r\n");
+		break;
+
+		default:
+		break;
+	}
 }
 
-// Called by the state machine when the current layer is closing
-static void This_Layer_Finished(void)
+// Called by the state machine when the current layer finishes
+static void This_Layer_Finished(PPP_Layers_t Layer)
 {
-	Debug_Print("**Layer Finished**\r\n");
-	FreePacketMemory();																							// Free the memory from any existing outgoing packet
+	switch(Layer)
+	{
+		case PPP_LAYER_Physical:
+			Debug_Print("**LCP Finished**\r\n");
+		break;
+
+		case PPP_LAYER_Authentication:
+			Debug_Print("**PAP Finished**\r\n");
+		break;
+
+		case PPP_LAYER_Network:
+			Debug_Print("**IPCP Finished**\r\n");
+		break;
+
+		default:
+		break;
+	}
+
+	Debug_Print("**Rebooting**\r\n");
+	FreePacketMemory();																		// Free the memory from any existing outgoing packet
+	Reboot();
 }
 
 
@@ -524,7 +594,12 @@ static void PPP_ProcessNAK(void)
 	PPP_Option_t* CurrentOption = NULL;
 
 	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in NAK packet
-	  PPP_ChangeOption(OutgoingPacket, CurrentOption);
+	{
+		if (PPP_CheckForOption(CurrentOption))
+			PPP_ChangeOption(OutgoingPacket, CurrentOption);								// If the NAK'd option is not already in the outgoing packet add it
+		else
+			PPP_AddOption(CurrentOption);													// Otherwise chenge the existing one
+	}
 }
 
 // We get a REJ if our outbound Configure Request contains any options not acceptable to the remote end. So we remove those options.
@@ -635,6 +710,41 @@ static void FreePacketMemory(void)
 	}
 }
 
+// Check if the given option is in the outgoing packet
+static bool PPP_CheckForOption(const PPP_Option_t* const Option)
+{
+	PPP_Option_t* CurrentOption = NULL;
+
+	while ((CurrentOption = PPP_GetNextOption(OutgoingPacket, CurrentOption)) != NULL)						// Scan options in the packet
+	{
+		if (CurrentOption->Type == Option->Type)
+		  return true;
+	}
+
+	return false;
+}
+
+// Add the given option to the end of the outgoing packet and adjust the size of the packet
+static void PPP_AddOption(const PPP_Option_t* const Option)
+{
+	uint8_t OldPacketLength;
+	
+	if (OutgoingPacket != NULL)
+		OldPacketLength = ntohs(OutgoingPacket->Length);													// If the packet already exists
+	else
+		OldPacketLength = sizeof(PPP_Packet_t);																// If we're creating a new empty packet
+	
+	uint8_t NewPacketLength = OldPacketLength + Option->Length;											
+	PPP_Packet_t* NewPacket = malloc(NewPacketLength);														// Allocate memory for the new larger packet
+	
+	memcpy((void*)NewPacket, OutgoingPacket, ntohs(OutgoingPacket->Length));								// Copy the old packet to the new packet
+	memcpy((void*)NewPacket + OldPacketLength, Option, Option->Length);										// Add the new option
+	
+	FreePacketMemory();																						// Free the old packet's memory
+	OutgoingPacket = NewPacket;
+	OutgoingPacket->Length = htons(NewPacketLength);
+}
+
 // Try and find the option in the packet, and if it exists, change its value to that in the passed-in option
 static void PPP_ChangeOption(PPP_Packet_t* const ThisPacket,
                              const PPP_Option_t* const Option)
@@ -646,14 +756,6 @@ static void PPP_ChangeOption(PPP_Packet_t* const ThisPacket,
 		if (CurrentOption->Type == Option->Type)
 		  memcpy(CurrentOption->Data, Option->Data, Option->Length - 2);
 	}
-}
-
-// Add the given option to the end of the packet and adjust the size of the packet
-static void PPP_AddOption(PPP_Packet_t* const ThisPacket,
-                          const PPP_Option_t* const Option)
-{
-	memcpy((void*)ThisPacket + ntohs(ThisPacket->Length), Option, Option->Length);
-	ThisPacket->Length = htons(ntohs(ThisPacket->Length) + Option->Length);
 }
 
 // Try and find the option in the packet, and if it exists remove it and adjust the size of the packet
@@ -703,7 +805,8 @@ static PPP_Option_t* PPP_GetNextOption(const PPP_Packet_t* const ThisPacket,
 /////////////////////////////////////////////////////////////////////////////////////////
 
 static void PPP_ManageState(const PPP_Events_t Event,
-                     PPP_States_t* const State)
+                     PPP_States_t* const State,
+					 PPP_Layers_t const Layer)
 {
 	switch (*State)
 	{
@@ -717,7 +820,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 
 				case PPP_EVENT_Open:
 					*State = PPP_STATE_Starting;
-					This_Layer_Started();
+					This_Layer_Started(Layer);
 				break;
 
 				case PPP_EVENT_Close:
@@ -752,7 +855,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 
 				case PPP_EVENT_Close:
 					*State = PPP_STATE_Initial;
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 				break;
 
 				case PPP_EVENT_TOPlus:
@@ -812,7 +915,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 			{
 				case PPP_EVENT_Down:
 					*State = PPP_STATE_Starting;
-					This_Layer_Started();
+					This_Layer_Started(Layer);
 				break;
 
 				case PPP_EVENT_Open:
@@ -861,7 +964,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				
 				case PPP_EVENT_RXJMinus:
 					*State = PPP_STATE_Stopped;
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 				break;
 
 				case PPP_EVENT_TOPlus:
@@ -899,7 +1002,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				case PPP_EVENT_TOMinus:
 					*State = PPP_STATE_Closed;
 					TimerOn = false;
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 				break;
 
 				case PPP_EVENT_RCRPlus:
@@ -920,7 +1023,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				case PPP_EVENT_RXJMinus:
 					*State = PPP_STATE_Closed;
 					TimerOn = false;
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 				break;
 
 				case PPP_EVENT_RUC:
@@ -957,7 +1060,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 				
 				case PPP_EVENT_TOMinus:
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Stopped;
 				break;
@@ -978,7 +1081,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 
 				case PPP_EVENT_RTA:
 				case PPP_EVENT_RXJMinus:
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Stopped;
 				break;
@@ -1023,13 +1126,15 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_TOMinus:
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Stopped;
 				break;
 
 				case PPP_EVENT_RCRPlus:
-					Send_Configure_Ack();
+					if (Layer != PPP_LAYER_Authentication)											// We faked a Configure request for PAP. So no need to answer it if we're in the authentication phase
+						Send_Configure_Ack();															
+
 					*State = PPP_STATE_Ack_Sent;
 				break;
 
@@ -1062,7 +1167,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_RXJMinus:
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Stopped;
 				break;
@@ -1102,14 +1207,14 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_TOMinus:
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Stopped;
 				break;
 
 				case PPP_EVENT_RCRPlus:
 					Send_Configure_Ack();
-					This_Layer_Up();
+					This_Layer_Up(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Opened;
 				break;
@@ -1136,7 +1241,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_RXJMinus:
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Stopped;
 				break;
@@ -1176,7 +1281,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_TOMinus:
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Stopped;
 				break;
@@ -1195,7 +1300,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 					RestartCount = MAX_RESTARTS;
 					LinkTimer = 0;
 					TimerOn = false;
-					This_Layer_Up();
+					This_Layer_Up(Layer);
 					*State = PPP_STATE_Opened;
 				break;
 
@@ -1217,7 +1322,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_RXJMinus:
-					This_Layer_Finished();
+					This_Layer_Finished(Layer);
 					TimerOn = false;
 					*State = PPP_STATE_Stopped;
 				break;
@@ -1233,7 +1338,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 			switch (Event)
 			{
 				case PPP_EVENT_Down:
-					This_Layer_Down();
+					This_Layer_Down(Layer);
 					*State = PPP_STATE_Starting;
 				break;
 
@@ -1243,7 +1348,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_Close:
-					This_Layer_Down();
+					This_Layer_Down(Layer);
 					RestartCount = MAX_RESTARTS;
 					LinkTimer = 0;
 					TimerOn = true;
@@ -1252,7 +1357,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_RCRPlus:
-					This_Layer_Down();
+					This_Layer_Down(Layer);
 					TimerOn = true;
 					Send_Configure_Request();
 					Send_Configure_Ack();
@@ -1260,7 +1365,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_RCRMinus:
-					This_Layer_Down();
+					This_Layer_Down(Layer);
 					TimerOn = true;
 					Send_Configure_Request();
 					Send_Configure_Nak_Rej();
@@ -1270,14 +1375,14 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				case PPP_EVENT_RCA:
 				case PPP_EVENT_RCN:
 				case PPP_EVENT_RTA:
-					This_Layer_Down();
+					This_Layer_Down(Layer);
 					TimerOn = true;
 					Send_Configure_Request();
 					*State = PPP_STATE_Req_Sent;
 				break;
 
 				case PPP_EVENT_RTR:
-					This_Layer_Down();
+					This_Layer_Down(Layer);
 					RestartCount = 0;
 					LinkTimer = 0;
 					TimerOn = true;
@@ -1291,7 +1396,7 @@ static void PPP_ManageState(const PPP_Events_t Event,
 				break;
 
 				case PPP_EVENT_RXJMinus:
-					This_Layer_Down();
+					This_Layer_Down(Layer);
 					RestartCount = MAX_RESTARTS;
 					LinkTimer = 0;
 					TimerOn = true;

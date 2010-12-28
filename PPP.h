@@ -41,6 +41,14 @@
 		#include "Lib/Debug.h"
 	
 	/* Enums: */
+
+		typedef enum
+		{
+			PPP_LAYER_Physical,
+			PPP_LAYER_Authentication,
+			PPP_LAYER_Network,
+		} PPP_Layers_t;
+
 		typedef enum
 		{
 			PPP_PHASE_Dead,
@@ -132,6 +140,7 @@
 		#define LCP_OPTION_Reserved			 						0x6		// LCP Option 6
 		#define LCP_OPTION_Protocol_Field_Compression 				0x7		// LCP Option 7
 		#define LCP_OPTION_Address_and_Control_Field_Compression 	0x8		// LCP Option 8
+		#define LCP_OPTION_Callback								 	0xd		// LCP Option D
 
 		#define IPCP_OPTION_IP_Compression_Protocol					0x2		// IPCP Option 2
 		#define IPCP_OPTION_IP_address								0x3		// IPCP Option 3
@@ -149,14 +158,15 @@
 		void PPP_LinkTimer(void);
 		void PPP_LinkUp(void);
 		void PPP_LinkOpen(void);
+		void PPP_StartLink(void);
 
 		#if defined(INCLUDE_FROM_PPP_C)
 			static PPP_Option_t* PPP_GetNextOption(const PPP_Packet_t* const ThisPacket,
 			                                       const PPP_Option_t* const CurrentOption);
 			static void PPP_RemoveOption(PPP_Packet_t* const ThisPacket,
 			                             const uint8_t Type);
-			static void PPP_AddOption(PPP_Packet_t* const ThisPacket,
-			                          const PPP_Option_t* const Option);
+			static void PPP_AddOption(const PPP_Option_t*);
+			static bool PPP_CheckForOption(const PPP_Option_t*);
 			static void PPP_ChangeOption(PPP_Packet_t* const ThisPacket,
 			                             const PPP_Option_t* const Option);
 			static void PPP_ProcessNAK(void);
@@ -165,7 +175,8 @@
 			static bool PPP_TestForREJ(const uint8_t Options[],
 			                           const uint8_t NumOptions);
 			static void PPP_ManageState(const PPP_Events_t Event,
-										PPP_States_t* const State);
+										PPP_States_t* const State,
+										PPP_Layers_t const Layer);
 			static void Send_Configure_Request(void);
 			static void Send_Configure_Ack(void);
 			static void Send_Configure_Nak_Rej(void);
@@ -173,10 +184,10 @@
 			static void Send_Terminate_Ack(void);
 			static void Send_Code_Reject(void);
 			static void Send_Echo_Reply(void);
-			static void This_Layer_Up(void);
-			static void This_Layer_Down(void);
-			static void This_Layer_Started(void);
-			static void This_Layer_Finished(void);
+			static void This_Layer_Up(PPP_Layers_t Layer);
+			static void This_Layer_Down(PPP_Layers_t Layer);
+			static void This_Layer_Started(PPP_Layers_t Layer);
+			static void This_Layer_Finished(PPP_Layers_t Layer);
 			static void FreePacketMemory(void);
 		#endif
 		

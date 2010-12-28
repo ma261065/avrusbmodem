@@ -87,6 +87,7 @@
 		
 	/* Function Prototypes: */
 		void WDT_Init(void) ATTR_NAKED ATTR_INIT_SECTION(3);
+		void Reboot(void);
 
 		#if defined(INCLUDE_FROM_USBMODEM_C)
 			static void SetupHardware(void);

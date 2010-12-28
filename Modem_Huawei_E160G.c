@@ -38,23 +38,13 @@
 #define  INCLUDE_FROM_CONFIGDESCRIPTOR_C
 #include "ConfigDescriptor.h"
 
-// Interface Class value for the CDC class
-#define CDC_CONTROL_CLASS              0xff
-
-// Interface Class value for the CDC subclass
-#define CDC_CONTROL_SUBCLASS           0xff
-
-// Interface Class value for the CDC protocol
-#define CDC_CONTROL_PROTOCOL           0xff
-
-// Interface Class value for the CDC data class
-#define CDC_DATA_CLASS                 0xff
-
-// Interface Class value for the CDC data subclass
-#define CDC_DATA_SUBCLASS              0xff
-
-// Interface Class value for the CDC data protocol
-#define CDC_DATA_PROTOCOL              0xff
+// Interface Class values for the CDC data protocol
+#define CDC_CSCP_CDCClass 0xff
+#define CDC_CSCP_ACMSubclass 0xff
+#define CDC_CSCP_ATCommandProtocol 0xff
+#define CDC_CSCP_CDCDataClass 0xff
+#define CDC_CSCP_NoDataSubclass 0xff
+#define CDC_CSCP_NoDataProtocol 0xff
 
 /** Reads and processes an attached device's descriptors, to determine compatibility and pipe configurations. This
  *  routine will read in the entire configuration descriptor, and configure the hosts pipes to correctly communicate
@@ -69,7 +59,11 @@ uint8_t ProcessConfigurationDescriptor(void)
 	uint8_t  ConfigDescriptorData[512];
 	void*    CurrConfigLocation = ConfigDescriptorData;
 	uint16_t CurrConfigBytesRem;
-	uint8_t  FoundEndpoints = 0;
+
+	USB_Descriptor_Interface_t* CDCControlInterface  = NULL;
+	USB_Descriptor_Endpoint_t*  DataINEndpoint       = NULL;
+	USB_Descriptor_Endpoint_t*  DataOUTEndpoint      = NULL;
+	USB_Descriptor_Endpoint_t*  NotificationEndpoint = NULL;
 
 	/* Retrieve the entire configuration descriptor into the allocated buffer */
 	switch (USB_Host_GetDeviceConfigDescriptor(1, &CurrConfigBytesRem, ConfigDescriptorData, sizeof(ConfigDescriptorData)))
@@ -83,105 +77,80 @@ uint8_t ProcessConfigurationDescriptor(void)
 		default:
 			return ControlError;
 	}
-	
-	/* Get the CDC control interface from the configuration descriptor */
-	if (USB_GetNextDescriptorComp(&CurrConfigBytesRem, &CurrConfigLocation,
-	                              DComp_NextCDCControlInterface) != DESCRIPTOR_SEARCH_COMP_Found)
-	{
-		/* Descriptor not found, error out */
-		return NoCDCInterfaceFound;
-	}
 
-	/* Get the IN and OUT data and IN notification endpoints for the CDC interface */
-	while (FoundEndpoints != ((1 << CDC_NOTIFICATIONPIPE) | (1 << CDC_DATAPIPE_IN) | (1 << CDC_DATAPIPE_OUT)))
+	while (!(DataINEndpoint) || !(DataOUTEndpoint) || !(NotificationEndpoint))
 	{
-		/* Fetch the next bulk or interrupt endpoint from the current CDC interface */
-		if (USB_GetNextDescriptorComp(&CurrConfigBytesRem, &CurrConfigLocation,
+		/* See if we've found a likely compatible interface, and if there is an endpoint within that interface */
+		if (!(CDCControlInterface) ||
+		    USB_GetNextDescriptorComp(&CurrConfigBytesRem, &CurrConfigLocation,
 		                              DComp_NextCDCDataInterfaceEndpoint) != DESCRIPTOR_SEARCH_COMP_Found)
 		{
-			/* Check to see if the control interface's notification pipe has been found, if so search for the data interface */
-			if (FoundEndpoints & (1 << CDC_NOTIFICATIONPIPE))
+			/* Check if we have already found the control interface's notification endpoint or not */
+			if (NotificationEndpoint)
 			{
-				/* Get the next CDC data interface from the configuration descriptor (CDC class has two CDC interfaces) */
-				if (USB_GetNextDescriptorComp(&CurrConfigBytesRem, &CurrConfigLocation, 
-				                              DComp_NextCDCDataInterface) != DESCRIPTOR_SEARCH_COMP_Found)
+				/* Get the next CDC data interface from the configuration descriptor */
+				if (USB_GetNextDescriptorComp(&CurrConfigBytesRem, &CurrConfigLocation,
+											  DComp_NextCDCDataInterface) != DESCRIPTOR_SEARCH_COMP_Found)
 				{
 					/* Descriptor not found, error out */
-					return NoCDCInterfaceFound;
+					return NoCompatibleInterfaceFound;
 				}
+
+				/* Clear any found endpoints */
+				DataINEndpoint       = NULL;
+				DataOUTEndpoint      = NULL;
 			}
 			else
 			{
-				/* Clear the found endpoints mask, since any already processed endpoints aren't in the CDC interface we need */
-				FoundEndpoints = 0;
-
-				/* Disable any already configured pipes from the invalid CDC interfaces */
-				Pipe_SelectPipe(CDC_NOTIFICATIONPIPE);
-				Pipe_DisablePipe();
-				Pipe_SelectPipe(CDC_DATAPIPE_IN);
-				Pipe_DisablePipe();
-				Pipe_SelectPipe(CDC_DATAPIPE_OUT);
-				Pipe_DisablePipe();
-			
-				/* Get the next CDC control interface from the configuration descriptor (CDC class has two CDC interfaces) */
+				/* Get the next CDC control interface from the configuration descriptor */
 				if (USB_GetNextDescriptorComp(&CurrConfigBytesRem, &CurrConfigLocation,
-				                              DComp_NextCDCControlInterface) != DESCRIPTOR_SEARCH_COMP_Found)
+											  DComp_NextCDCControlInterface) != DESCRIPTOR_SEARCH_COMP_Found)
 				{
 					/* Descriptor not found, error out */
-					return NoCDCInterfaceFound;
+					return NoCompatibleInterfaceFound;
 				}
+
+				/* Save the interface in case we need to refer back to it later */
+				CDCControlInterface = DESCRIPTOR_PCAST(CurrConfigLocation, USB_Descriptor_Interface_t);
+
+				/* Clear any found endpoints */
+				NotificationEndpoint = NULL;
 			}
 
-			/* Fetch the next bulk or interrupt endpoint from the current CDC interface */
-			if (USB_GetNextDescriptorComp(&CurrConfigBytesRem, &CurrConfigLocation,
-			                              DComp_NextCDCDataInterfaceEndpoint) != DESCRIPTOR_SEARCH_COMP_Found)
-			{
-				/* Descriptor not found, error out */
-				return NoEndpointFound;
-			}
+			/* Skip the remainder of the loop as we have not found an endpoint yet */
+			continue;
 		}
-		
+
+		/* Retrieve the endpoint address from the endpoint descriptor */
 		USB_Descriptor_Endpoint_t* EndpointData = DESCRIPTOR_PCAST(CurrConfigLocation, USB_Descriptor_Endpoint_t);
 
-		/* Check if the found endpoint is a interrupt or bulk type descriptor */
-		if ((EndpointData->Attributes & EP_TYPE_MASK) == EP_TYPE_INTERRUPT)
+		/* If the endpoint is a IN type endpoint */
+		if (EndpointData->EndpointAddress & ENDPOINT_DESCRIPTOR_DIR_IN)
 		{
-			/* If the endpoint is a IN type interrupt endpoint */
-			if (EndpointData->EndpointAddress & ENDPOINT_DESCRIPTOR_DIR_IN)
-			{							   
-				/* Configure the notification pipe */
-				Pipe_ConfigurePipe(CDC_NOTIFICATIONPIPE, EP_TYPE_INTERRUPT, PIPE_TOKEN_IN,
-								   EndpointData->EndpointAddress, EndpointData->EndpointSize, PIPE_BANK_SINGLE);
-
-				Pipe_SetInterruptPeriod(EndpointData->PollingIntervalMS);
-				
-				/* Set the flag indicating that the notification pipe has been found */
-				FoundEndpoints |= (1 << CDC_NOTIFICATIONPIPE);
-			}
+			/* Check if the found endpoint is a interrupt or bulk type descriptor */
+			if ((EndpointData->Attributes & EP_TYPE_MASK) == EP_TYPE_INTERRUPT)
+			  NotificationEndpoint = EndpointData;
+			else
+			  DataINEndpoint = EndpointData;
 		}
 		else
 		{
-			/* Check if the endpoint is a bulk IN or bulk OUT endpoint */
-			if (EndpointData->EndpointAddress & ENDPOINT_DESCRIPTOR_DIR_IN)
-			{
-				/* Configure the data IN pipe */
-				Pipe_ConfigurePipe(CDC_DATAPIPE_IN, EP_TYPE_BULK, PIPE_TOKEN_IN,
-								   EndpointData->EndpointAddress, EndpointData->EndpointSize, PIPE_BANK_SINGLE);
-				
-				/* Set the flag indicating that the data IN pipe has been found */
-				FoundEndpoints |= (1 << CDC_DATAPIPE_IN);
-			}
-			else
-			{
-				/* Configure the data OUT pipe */
-				Pipe_ConfigurePipe(CDC_DATAPIPE_OUT, EP_TYPE_BULK, PIPE_TOKEN_OUT,
-								   EndpointData->EndpointAddress, EndpointData->EndpointSize, PIPE_BANK_SINGLE);
-				
-				/* Set the flag indicating that the data OUT pipe has been found */
-				FoundEndpoints |= (1 << CDC_DATAPIPE_OUT);
-			}
+			DataOUTEndpoint = EndpointData;
 		}
 	}
+
+	/* Configure the CDC data IN pipe */
+	Pipe_ConfigurePipe(CDC_DATA_IN_PIPE, EP_TYPE_BULK, PIPE_TOKEN_IN,
+	                   DataINEndpoint->EndpointAddress, DataINEndpoint->EndpointSize, PIPE_BANK_SINGLE);
+
+	/* Configure the CDC data OUT pipe */
+	Pipe_ConfigurePipe(CDC_DATA_OUT_PIPE, EP_TYPE_BULK, PIPE_TOKEN_OUT,
+					   DataOUTEndpoint->EndpointAddress, DataOUTEndpoint->EndpointSize, PIPE_BANK_SINGLE);
+
+	/* Configure the CDC notification pipe */
+	Pipe_ConfigurePipe(CDC_NOTIFICATION_PIPE, EP_TYPE_INTERRUPT, PIPE_TOKEN_IN,
+					   NotificationEndpoint->EndpointAddress, NotificationEndpoint->EndpointSize, PIPE_BANK_SINGLE);
+	Pipe_SetInterruptPeriod(NotificationEndpoint->PollingIntervalMS);
 
 	/* Valid data found, return success */
 	return SuccessfulConfigRead;
@@ -195,19 +164,23 @@ uint8_t ProcessConfigurationDescriptor(void)
  *
  *  \return A value from the DSEARCH_Return_ErrorCodes_t enum
  */
-static uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor)
+uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor)
 {
-	if (DESCRIPTOR_TYPE(CurrentDescriptor) == DTYPE_Interface)
+	USB_Descriptor_Header_t* Header = DESCRIPTOR_PCAST(CurrentDescriptor, USB_Descriptor_Header_t);
+
+	if (Header->Type == DTYPE_Interface)
 	{
+		USB_Descriptor_Interface_t* Interface = DESCRIPTOR_PCAST(CurrentDescriptor, USB_Descriptor_Interface_t);
+
 		/* Check the CDC descriptor class, subclass and protocol, break out if correct control interface found */
-		if ((DESCRIPTOR_CAST(CurrentDescriptor, USB_Descriptor_Interface_t).Class    == CDC_CONTROL_CLASS)    &&
-		    (DESCRIPTOR_CAST(CurrentDescriptor, USB_Descriptor_Interface_t).SubClass == CDC_CONTROL_SUBCLASS) &&
-		    (DESCRIPTOR_CAST(CurrentDescriptor, USB_Descriptor_Interface_t).Protocol == CDC_CONTROL_PROTOCOL))
+		if ((Interface->Class    == CDC_CSCP_CDCClass)    &&
+		    (Interface->SubClass == CDC_CSCP_ACMSubclass) &&
+		    (Interface->Protocol == CDC_CSCP_ATCommandProtocol))
 		{
 			return DESCRIPTOR_SEARCH_Found;
 		}
 	}
-	
+
 	return DESCRIPTOR_SEARCH_NotFound;
 }
 
@@ -219,19 +192,23 @@ static uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor)
  *
  *  \return A value from the DSEARCH_Return_ErrorCodes_t enum
  */
-static uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor)
+uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor)
 {
-	if (DESCRIPTOR_TYPE(CurrentDescriptor) == DTYPE_Interface)
+	USB_Descriptor_Header_t* Header = DESCRIPTOR_PCAST(CurrentDescriptor, USB_Descriptor_Header_t);
+
+	if (Header->Type == DTYPE_Interface)
 	{
+		USB_Descriptor_Interface_t* Interface = DESCRIPTOR_PCAST(CurrentDescriptor, USB_Descriptor_Interface_t);
+
 		/* Check the CDC descriptor class, subclass and protocol, break out if correct data interface found */
-		if ((DESCRIPTOR_CAST(CurrentDescriptor, USB_Descriptor_Interface_t).Class    == CDC_DATA_CLASS)    &&
-		    (DESCRIPTOR_CAST(CurrentDescriptor, USB_Descriptor_Interface_t).SubClass == CDC_DATA_SUBCLASS) &&
-		    (DESCRIPTOR_CAST(CurrentDescriptor, USB_Descriptor_Interface_t).Protocol == CDC_DATA_PROTOCOL))
+		if ((Interface->Class    == CDC_CSCP_CDCDataClass)   &&
+		    (Interface->SubClass == CDC_CSCP_NoDataSubclass) &&
+		    (Interface->Protocol == CDC_CSCP_NoDataProtocol))
 		{
 			return DESCRIPTOR_SEARCH_Found;
 		}
 	}
-	
+
 	return DESCRIPTOR_SEARCH_NotFound;
 }
 
@@ -245,17 +222,21 @@ static uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor)
  *
  *  \return A value from the DSEARCH_Return_ErrorCodes_t enum
  */
-static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor)
+uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor)
 {
-	if (DESCRIPTOR_TYPE(CurrentDescriptor) == DTYPE_Endpoint)
+	USB_Descriptor_Header_t* Header = DESCRIPTOR_PCAST(CurrentDescriptor, USB_Descriptor_Header_t);
+
+	if (Header->Type == DTYPE_Endpoint)
 	{
-		uint8_t EndpointType = (DESCRIPTOR_CAST(CurrentDescriptor,
-		                                        USB_Descriptor_Endpoint_t).Attributes & EP_TYPE_MASK);
-	
-		if ((EndpointType == EP_TYPE_BULK) || (EndpointType == EP_TYPE_INTERRUPT))
-		  return DESCRIPTOR_SEARCH_Found;
+		USB_Descriptor_Endpoint_t* Endpoint = DESCRIPTOR_PCAST(CurrentDescriptor, USB_Descriptor_Endpoint_t);
+
+		if (((Endpoint->Attributes & EP_TYPE_MASK) == EP_TYPE_BULK) || 
+		    ((Endpoint->Attributes & EP_TYPE_MASK) == EP_TYPE_INTERRUPT))
+		{
+			return DESCRIPTOR_SEARCH_Found;
+		}
 	}
-	else if (DESCRIPTOR_TYPE(CurrentDescriptor) == DTYPE_Interface)
+	else if (Header->Type == DTYPE_Interface)
 	{
 		return DESCRIPTOR_SEARCH_Fail;
 	}
@@ -265,14 +246,10 @@ static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor)
 
 
 // Each modem will have different initialisation parameters that must be sent to the modem.
-// One way to determine these parameters is to run the modem under Windows and use USBMonitor 
-// (http://www.hhdsoftware.com/Downloads/usb-monitor.html) to determine what commands are sent to the modem.
-// Another method is to look at http://www.draisberghof.de/usb_modeswitch/ to see if the codes for your modem have already been determined.
 // The format of the list is a command, followed by the expected response to that command. The list must be double-NULL terminated.
 // These dial commands are concatenated with the ones in Network_xxx.c, and will be sent before the
 // dial commands defined in Network_xxx.c
 // Do not put the actual dial comand (usually ATDT*99#) in this list (put it in Network_xxx.c). 
-
 const char* ModemDialCommands[] = 
 {	
 	"AT\r\n","OK",
@@ -282,18 +259,22 @@ const char* ModemDialCommands[] =
 	NULL, NULL
 };
 
-
 // USB Modems make use of a feature called USB mode switching. You can read about it at http://www.draisberghof.de/usb_modeswitch/ 
 // Depending on the modem you will have to define different commands to switch the modem from storage mode to modem mode.
 // One way to determine the correct command is to run the modem under Windows and use USBMonitor 
 // (http://www.hhdsoftware.com/Downloads/usb-monitor.html) to determine what commands are sent to the modem.
-
-void SwitchModemMode(void)
+// Another method is to look at the code at http://www.draisberghof.de/usb_modeswitch/ to see if the codes for your modem have already been determined.
+//
+// This function returns:
+// true if the modem has been enumerated correctly
+// false if there is an error, or if we must wait for the modem to disconnect
+bool ProcessModemUSBStates(void)
 {
 	uint8_t ErrorCode;
 
+	Debug_Print("Send configuration command\r\n");
+			
 	// Standard request to set the device configuration to configuration 1
-	// For the Huawei E160G modem, this will cause the device to disconnect and change modes
 	USB_ControlRequest = (USB_Request_Header_t)
 	{
 		.bmRequestType = (REQDIR_HOSTTODEVICE | REQTYPE_STANDARD | REQREC_DEVICE),
@@ -306,12 +287,36 @@ void SwitchModemMode(void)
 	// Select the control pipe for the request transfer
 	Pipe_SelectPipe(PIPE_CONTROLPIPE);
 
-	Debug_Print("Switching...\r\n");
-	
 	// Send the request and display any error
 	if ((ErrorCode = USB_Host_SendControlRequest(NULL)) != HOST_SENDCONTROL_Successful)
 	{
-		Debug_Print("Control error (Switch mode).\r\n");
+		Debug_Print("Control error (Set Config)\r\n");
 		Debug_PrintHex(ErrorCode);
+		LEDs_SetAllLEDs(LEDMASK_USB_ERROR);					// Indicate error via status LEDs
+		return false;
 	}
+					
+	Debug_Print("Looking for modem device...");
+			
+	// Get and process the configuration descriptor data
+	// First time through we expect a non-modem device. Once the device has disconnected and re-attached it should be OK
+	if ((ErrorCode = ProcessConfigurationDescriptor()) != SuccessfulConfigRead)
+	{
+		if (ErrorCode == ControlError)
+		{
+			Debug_Print("Control error (Get Configuration)\r\n");
+			Debug_PrintHex(ErrorCode);
+			LEDs_SetAllLEDs(LEDMASK_USB_ERROR);				// Indicate error via status LEDs
+			return false;
+		}
+		else
+		{
+			Debug_Print("Not a modem device - switching modes\r\n");
+			USB_Host_SuspendBus();							// This will cause the device to disconnect and reconnect in modem mode
+			return false;									// Wait until USB device disconnects
+		}
+	}
+
+	Debug_Print("Modem device enumerated\r\n");
+	return true;
 }

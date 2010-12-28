@@ -37,9 +37,8 @@
 #define _CONFIGDESCRIPTOR_H_
 
 	/* Includes: */
-		#include <LUFA/Drivers/USB/USB.h>
 		#include "USBModem.h"
-		
+
 	/* Macros: */
 		/** Maximum size of a device configuration descriptor which can be processed by the host, in bytes */
 		#define MAX_CONFIG_DESCRIPTOR_SIZE     512
@@ -52,18 +51,18 @@
 			ControlError                    = 1, /**< A control request to the device failed to complete successfully */
 			DescriptorTooLarge              = 2, /**< The device's Configuration Descriptor is too large to process */
 			InvalidConfigDataReturned       = 3, /**< The device returned an invalid Configuration Descriptor */
-			NoCDCInterfaceFound             = 4, /**< A compatible CDC interface was not found in the device's Configuration Descriptor */
-			NoEndpointFound                 = 5, /**< Compatible CDC endpoints were not found in the device's CDC interface */
+			NoCompatibleInterfaceFound      = 4, /**< A compatible interface with the required endpoints was not found */
 		};
 
 	/* Function Prototypes: */
 		uint8_t ProcessConfigurationDescriptor(void);	
-		void SwitchModemMode(void);
+		bool ProcessModemUSBStates(void);
 
 		#if defined(INCLUDE_FROM_CONFIGDESCRIPTOR_C)
 			static uint8_t DComp_NextCDCControlInterface(void* CurrentDescriptor);
 			static uint8_t DComp_NextCDCDataInterface(void* CurrentDescriptor);
 			static uint8_t DComp_NextCDCDataInterfaceEndpoint(void* CurrentDescriptor);
+
 		#endif
 
 #endif
