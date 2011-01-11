@@ -146,14 +146,14 @@ static bool TCPIP_IsDataQueueFull(void)
 void TCPIP_InitializeTCPStack(void)
 {
 	Debug_Print("Init TCP Stack\r\n");
-
+	
+	// Periodic Connection Timer Initialization
+	timer_set(&Periodic_Timer, CLOCK_SECOND / 2);
+	
 	// uIP Initialization
 	network_init();
 	clock_init();
 	uip_init();
-
-	// Periodic Connection Timer Initialization
-	timer_set(&Periodic_Timer, CLOCK_SECOND / 2);
 
 	// Set this machine's IP address
 	uip_ipaddr_t LocalIPAddress;
