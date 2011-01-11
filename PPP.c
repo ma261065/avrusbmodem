@@ -31,24 +31,22 @@
 #define  INCLUDE_FROM_PPP_C
 #include "PPP.h"
 
-static uint8_t  			OutgoingPacketID = -1;							// Unique packet ID
-
-static PPP_Phases_t			PPP_Phase  = PPP_PHASE_Dead;					// PPP negotiation phases
-
-static PPP_States_t			LCP_State  = PPP_STATE_Initial;					// Each phase has a number of states
-static PPP_States_t			PAP_State  = PPP_STATE_Initial;					
-static PPP_States_t			IPCP_State = PPP_STATE_Initial;					
-
-static PPP_Packet_t*  		OutgoingPacket = NULL;							// The outgoing packet
-static PPP_Packet_t*  		IncomingPacket = NULL;							// The incoming packet
-static uint16_t     		CurrentProtocol = NONE;							// Type of the last received packet
-
-static uint8_t 				RestartCount = MAX_RESTARTS;
-static uint16_t				LinkTimer    = 0;
-static bool					TimerOn      = false;
-
+static uint8_t  			OutgoingPacketID;								// Unique packet ID
+static PPP_Phases_t			PPP_Phase;										// PPP negotiation phases
+static PPP_States_t			LCP_State;										// Each phase has a number of states
+static PPP_States_t			PAP_State;
+static PPP_States_t			IPCP_State;
+static PPP_Packet_t*  		OutgoingPacket;									// Pointer to the outgoing packet
+static PPP_Packet_t*  		IncomingPacket;									// Pointer to the incoming packet
+static uint16_t     		CurrentProtocol;								// Type of the last received packet
+static uint8_t 				RestartCount;
+static uint16_t				LinkTimer;
+static bool					TimerOn;
 static bool 				MarkForNAK;
 static bool					MarkForREJ;
+static uint8_t				OutgoingPacketBuffer[OUTGOING_PACKET_BUFFER_SIZE];	// Buffer to store the outgoing packet in
+
+PPP_Packet_t* dummy;	
 
 
 void PPP_InitPPP(void)
@@ -58,6 +56,18 @@ void PPP_InitPPP(void)
 
 void PPP_StartLink(void)
 {
+	OutgoingPacket = NULL;
+	CurrentProtocol = NONE;
+	TimerOn = false;
+	LinkTimer = 0;
+	uip_len = 0;
+	RestartCount = MAX_RESTARTS;
+	MarkForNAK = MarkForREJ = false;
+	OutgoingPacketID = -1;
+	OutgoingPacket = IncomingPacket = NULL;	
+	LCP_State  = PPP_STATE_Initial;
+	PAP_State  = PPP_STATE_Initial;
+	IPCP_State = PPP_STATE_Initial;
 	PPP_Phase = PPP_PHASE_Establish;
 	PPP_ManageState(PPP_EVENT_Open, &LCP_State, PPP_LAYER_Physical);
 	PPP_ManageState(PPP_EVENT_Up, &LCP_State, PPP_LAYER_Physical);
@@ -361,7 +371,7 @@ static void Send_Configure_Request(void)
 		case PPP_PHASE_Authenticate:
 			if (OutgoingPacket == NULL)																			// Create a new packet
 			{
-				static PPP_Option_t Option0 = {.Type = 0x00, .Length = 0x02};
+				static PPP_Option_t Option0 = {.Type = 0x00, .Length = 2};
 			
 				PPP_AddOption(&Option0);
 				OutgoingPacket->Options[0].Type = 0x00;															// No User Name 
@@ -393,10 +403,9 @@ static void Send_Configure_Request(void)
 
 	OutgoingPacket->PacketID = ++OutgoingPacketID;																// Every new REQ Packet going out gets a new ID
 	RestartCount--;																								// Decrement the count before we restart the layer
-
 	uip_len = ntohs(OutgoingPacket->Length);
 	memcpy(uip_buf, OutgoingPacket, uip_len);																	// Copy the outgoing packet to the buffer for sending
-	
+
 	network_send(CurrentProtocol);																				// Send either the new packet or the modified packet
 }
 
@@ -437,8 +446,6 @@ static void Send_Terminate_Request(void)
 {
 	Debug_Print("Send Terminate Request\r\n");
 	
-	FreePacketMemory();																							// Free the memory from any existing outgoing packet
-
 	OutgoingPacket = (PPP_Packet_t*)uip_buf;																	// Build the outgoing packet in uip_buf
 	CurrentProtocol = LCP;
 	OutgoingPacket->Code = TERMREQ;
@@ -482,7 +489,7 @@ static void Send_Echo_Reply(void)
 static void This_Layer_Up(PPP_Layers_t Layer)
 {
 	CurrentProtocol = NONE;
-	FreePacketMemory();																							// Free the memory from any existing outgoing packet
+	OutgoingPacket = NULL;																						// Clear the outgoing packet
 
 	switch(Layer)
 	{
@@ -515,14 +522,14 @@ static void This_Layer_Up(PPP_Layers_t Layer)
 // Called by the state machine when a layer goes down. Use this to stop the next layer up
 static void This_Layer_Down(PPP_Layers_t Layer)
 {
-	FreePacketMemory();																							// Free the memory from any existing outgoing packet
+	OutgoingPacket = NULL;																						// Clear the outgoing packet
 
 	switch(Layer)
 	{
 		case PPP_LAYER_Physical:
 			Debug_Print("**LCP Down**\r\n");
 			PPP_ManageState(PPP_EVENT_Down, &PAP_State, PPP_LAYER_Authentication);
-			PPP_Phase = PPP_PHASE_Dead;
+			PPP_Phase = PPP_PHASE_Establish;
 		break;
 
 		case PPP_LAYER_Authentication:
@@ -583,7 +590,6 @@ static void This_Layer_Finished(PPP_Layers_t Layer)
 	}
 
 	Debug_Print("**Rebooting**\r\n");
-	FreePacketMemory();																		// Free the memory from any existing outgoing packet
 	Reboot();
 }
 
@@ -596,9 +602,9 @@ static void PPP_ProcessNAK(void)
 	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in NAK packet
 	{
 		if (PPP_CheckForOption(CurrentOption))
-			PPP_ChangeOption(OutgoingPacket, CurrentOption);								// If the NAK'd option is not already in the outgoing packet add it
+			PPP_ChangeOption(OutgoingPacket, CurrentOption);								// If the NAK'd option is already in the outgoing packet then change the existing option
 		else
-			PPP_AddOption(CurrentOption);													// Otherwise chenge the existing one
+			PPP_AddOption(CurrentOption);													// Otherwise add it
 	}
 }
 
@@ -608,7 +614,7 @@ static void PPP_ProcessREJ(void)
 	PPP_Option_t* CurrentOption = NULL;
 
 	while ((CurrentOption = PPP_GetNextOption(IncomingPacket, CurrentOption)) != NULL)		// Scan options in REJ packet
-	  PPP_RemoveOption(OutgoingPacket, CurrentOption->Type);
+	  PPP_RemoveOption(OutgoingPacket, CurrentOption->Type);								// Remove the options(s) we don't want
 }
 
 // Test to see if the incoming packet contains any options we can't support If so, take out all good options and leave the bad ones to be sent out in the REJ
@@ -636,7 +642,7 @@ static bool PPP_TestForREJ(const uint8_t Options[],
 		  FoundBadOption = true;
 	}
 	
-	if (!FoundBadOption)																// No bad options. Return, leaving the packet untouched
+	if (!FoundBadOption)																	// No bad options. Return, leaving the packet untouched
 	  return false;
 
 	// We found some bad options, so now we need to go through the packet and remove all others, leaving the bad options to be sent out in the REJ
@@ -647,7 +653,7 @@ static bool PPP_TestForREJ(const uint8_t Options[],
 			if (CurrentOption->Type == Options[i])
 			{
 				PPP_RemoveOption(IncomingPacket, CurrentOption->Type);
-				CurrentOption = NULL;													// Start again. Easier than moving back (as next option has now moved into place of current option)
+				CurrentOption = NULL;														// Start again. Easier than moving back (as next option has now moved into place of current option)
 				break;
 			}
 		}
@@ -674,7 +680,7 @@ static bool PPP_TestForNAK(const PPP_Option_t* const Option)
 		}
 	}
 	
-	if (!FoundBadOption)																// No bad option. Return, leaving the packet untouched
+	if (!FoundBadOption)																	// No bad option. Return, leaving the packet untouched
 	  return false;
 
 	// We found a bad option, so now we need to go through the packet and remove all others, leaving the bad option to be sent out in the NAK
@@ -688,7 +694,7 @@ static bool PPP_TestForNAK(const PPP_Option_t* const Option)
 		else
 		{
 			PPP_RemoveOption(IncomingPacket, CurrentOption->Type);
-			CurrentOption = NULL;														// Start again. Easier than moving back (as next option has now moved into place of current option)
+			CurrentOption = NULL;															// Start again. Easier than moving back (as next option has now moved into place of current option)
 		}
 	}
 
@@ -700,22 +706,12 @@ static bool PPP_TestForNAK(const PPP_Option_t* const Option)
 // Packet Helper functions //
 /////////////////////////////
 
-// Frees any memory allocated to the outgoing packet
-static void FreePacketMemory(void)
-{
-	if (OutgoingPacket != NULL)
-	{
-		free(OutgoingPacket);																					// Free the memory of any Outgoing packet we've previously allocated
-		OutgoingPacket = NULL;
-	}
-}
-
 // Check if the given option is in the outgoing packet
 static bool PPP_CheckForOption(const PPP_Option_t* const Option)
 {
 	PPP_Option_t* CurrentOption = NULL;
 
-	while ((CurrentOption = PPP_GetNextOption(OutgoingPacket, CurrentOption)) != NULL)						// Scan options in the packet
+	while ((CurrentOption = PPP_GetNextOption(OutgoingPacket, CurrentOption)) != NULL)		// Scan options in the packet
 	{
 		if (CurrentOption->Type == Option->Type)
 		  return true;
@@ -727,34 +723,39 @@ static bool PPP_CheckForOption(const PPP_Option_t* const Option)
 // Add the given option to the end of the outgoing packet and adjust the size of the packet
 static void PPP_AddOption(const PPP_Option_t* const Option)
 {
-	uint8_t OldPacketLength;
+	uint16_t OldPacketLength, NewPacketLength;
 	
-	if (OutgoingPacket != NULL)
-		OldPacketLength = ntohs(OutgoingPacket->Length);													// If the packet already exists
+	if (OutgoingPacket == NULL)
+	{
+		OutgoingPacket = (PPP_Packet_t*)&OutgoingPacketBuffer;
+		OldPacketLength = sizeof(PPP_Packet_t);												// If we're creating a new empty packet
+	}
 	else
-		OldPacketLength = sizeof(PPP_Packet_t);																// If we're creating a new empty packet
+		OldPacketLength = ntohs(OutgoingPacket->Length);									// If the packet already exists
 	
-	uint8_t NewPacketLength = OldPacketLength + Option->Length;											
-	PPP_Packet_t* NewPacket = malloc(NewPacketLength);														// Allocate memory for the new larger packet
+	NewPacketLength = OldPacketLength + Option->Length;
 	
-	memcpy((void*)NewPacket, OutgoingPacket, ntohs(OutgoingPacket->Length));								// Copy the old packet to the new packet
-	memcpy((void*)NewPacket + OldPacketLength, Option, Option->Length);										// Add the new option
+	if (NewPacketLength > OUTGOING_PACKET_BUFFER_SIZE)
+	{
+		Debug_Print("*** Packet overflow ***\r\n");
+		return;
+	}
 	
-	FreePacketMemory();																						// Free the old packet's memory
-	OutgoingPacket = NewPacket;
+	memcpy((void*)OutgoingPacket + OldPacketLength, Option, Option->Length);				// Add the new option
+	
 	OutgoingPacket->Length = htons(NewPacketLength);
 }
 
-// Try and find the option in the packet, and if it exists, change its value to that in the passed-in option
+// Try and find the option in the packet, and if it exists, change its value to that in the passed-in option (assumes the option lengths are the same)
 static void PPP_ChangeOption(PPP_Packet_t* const ThisPacket,
                              const PPP_Option_t* const Option)
 {
 	PPP_Option_t* CurrentOption = NULL;
 
-	while ((CurrentOption = PPP_GetNextOption(ThisPacket, CurrentOption)) != NULL)						// Scan options in the packet
+	while ((CurrentOption = PPP_GetNextOption(ThisPacket, CurrentOption)) != NULL)			// Scan options in the packet
 	{
 		if (CurrentOption->Type == Option->Type)
-		  memcpy(CurrentOption->Data, Option->Data, Option->Length - 2);
+		  memcpy(CurrentOption->Data, Option->Data, Option->Length - 2);					// Copy the data portion of the option (not Type or Length)
 	}
 }
 
@@ -773,7 +774,10 @@ static void PPP_RemoveOption(PPP_Packet_t* const ThisPacket,
 			uint8_t OptionLength = CurrentOption->Length;											// Save the Option Length as the memcpy will change CurrentOption->Length
 
 			if (NextOption != NULL)																	// If it's not the last option in the packet ...
-			  memcpy(CurrentOption, NextOption, ntohs(ThisPacket->Length) - OptionLength - 4);		// ... move all further options forward
+			{
+				uint16_t LenToCopy = ntohs(ThisPacket->Length) - ((void*)CurrentOption - (void*)ThisPacket) - OptionLength;
+			    memcpy(CurrentOption, NextOption, LenToCopy);										// ... move all further options forward
+			}
 
 			ThisPacket->Length = htons(ntohs(ThisPacket->Length) - OptionLength);					// Adjust the length
 		}
@@ -787,15 +791,15 @@ static PPP_Option_t* PPP_GetNextOption(const PPP_Packet_t* const ThisPacket,
 	PPP_Option_t* NextOption;
 	
 	if (CurrentOption == NULL)
-	  NextOption = (PPP_Option_t*)ThisPacket->Options;
+		NextOption = (PPP_Option_t*)ThisPacket->Options;											// First option
 	else
-	  NextOption = (PPP_Option_t*)((uint8_t*)CurrentOption + CurrentOption->Length);
+		NextOption = (PPP_Option_t*)((uint8_t*)CurrentOption + CurrentOption->Length);
 
 	// Check that we haven't overrun the end of the packet
 	if (((void*)NextOption - (void*)ThisPacket->Options) < (ntohs(ThisPacket->Length) - 4))
-	  return NextOption;
+		return NextOption;
 	else 
-	  return NULL;
+		return NULL;
 }
 
 

@@ -40,11 +40,11 @@ ISR(TIMER1_COMPA_vect)										// Timer 1 interrupt handler
 	PPP_LinkTimer();
 }
 
-ISR(WDT_vect)												// Watchdog Timer interrupt handler
+ISR(TIMER3_COMPA_vect)										// Timeout Timer interrupt handler
 {
 	if (++WatchdogTicks >= 23)								// 23 * 8s = 3 minutes. If we've received no data in 3 minutes reboot.
 	{
-		Debug_Print("Watchdog reboot\r\n");
+		Debug_Print("Timeout. Rebooting...\r\n");
 		Reboot();
 	}
 }
@@ -53,15 +53,19 @@ ISR(WDT_vect)												// Watchdog Timer interrupt handler
 // A function needs to be added to the .init3 section (i.e. during the startup code, before main()) to disable the watchdog early enough so it does not continually reset the AVR.
 void WDT_Init(void)
 {
-    MCUSR = 0;
+    MCUSR = 0;												// Clear the source of the reset
     wdt_disable();
 
-    return;
+	wdt_reset();
+	WDTCSR = ((1 << WDCE) | (1 << WDE));		
+	WDTCSR = ((1 << WDE) | (1 << WDP3));					// Watchdog Initialization (4 Second Period)
 }
 
 void Reboot(void)
 {
-	WDTCSR = ((1 << WDCE) | (1 << WDE));													// Set watchdog timer to reboot rather than interrupt next time it fires																						// Free the memory from any existing outgoing packet
+	WDTCSR = ((1 << WDCE) | (1 << WDE));
+	WDTCSR = ((1 << WDE));									// Set watchdog timer to 16ms
+	_delay_ms(30);											// Wait longer than 16ms
 }
 
 // Main program entry point. This routine configures the hardware required by the application, then runs the application tasks.
@@ -70,11 +74,10 @@ int main(void)
 	SetupHardware();
 	ConnectedState = LINKMANAGEMENT_STATE_Idle;
 	
-	puts("\r\nUSB Modem - Copyright (C) 2010 Mike Alexander and Dean Camera"
-	     "\r\n   *** Press '!' to enable debugging, '@' to disable ***\r\n");
-	
-	for(;;)
+	while(true)
 	{
+		wdt_reset();
+
 		LinkManagement_ManageConnectionState();
 		USBManagement_ManageUSBState();
 		USB_USBTask();
@@ -98,26 +101,31 @@ void SetupHardware(void)
 	// Disable clock division
 	clock_prescale_set(clock_div_1);
 
+	// Enable interrups
+	sei();
+	
+	SerialStream_Init(UART_BAUD_RATE, false);
+	puts("\r\nUSB Modem - Copyright (C) 2011 Mike Alexander and Dean Camera"
+	     "\r\n   *** Press '!' to enable debugging, '@' to disable ***\r\n");
+	
+	USB_Host_SuspendBus();									// If the WDT has reset the AVR, need to give the modem time to reinitialise
+	_delay_ms(HOST_DEVICE_SETTLE_DELAY_MS);
+	
 	// Hardware Initialization
 	LEDs_Init();
 	USB_Init();
-
-	SerialStream_Init(UART_BAUD_RATE, false);
-
-	// General 10ms Timekeeping Timer Initialization
+	
+	// Timer 1 is used as a general 10ms timekeeping timer (Timer 0 is used by TCP/IP stack)
 	TCCR1B = ((1 << WGM12) | (1 << CS10) | (1 << CS12));	// CK/1024 prescale, CTC mode
 	OCR1A  = ((F_CPU / 1024) / 100);						// 10ms timer period
 	TIMSK1 = (1 << OCIE1A);									// Enable interrupt on Timer compare
+
+	// Timer 3 is used as a timeout timer
+	TCCR3B = ((1 << WGM32) | (1 << CS30) | (1 << CS32));	// CK/1024 prescale, CTC mode
+	OCR3A  = ((F_CPU / 1024) * 8);							// 8s timer period
+	TIMSK3 = (1 << OCIE3A);									// Enable interrupt on Timer compare
 	
 	// Modem Packet Ring Buffer Initialization
 	Buffer_Initialize(&Modem_SendBuffer);
 	Buffer_Initialize(&Modem_ReceiveBuffer);
-	
-	// Watchdog ISR Initialization (8 Second Period)
-	wdt_reset();
-	WDTCSR = ((1 << WDCE) | (1 << WDE));		
-	WDTCSR = ((1 << WDIE) | (1 << WDP0) | (1 << WDP3));
-	
-	// Enable interrups
-	sei();
 }

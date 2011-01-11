@@ -130,7 +130,7 @@ static void TCPIP_QueueData(const char* Data,
                             const uint16_t Length)
 {
 	if (Length > 0)
-		WatchdogTicks = 0;							// Reset the watchdog count
+		WatchdogTicks = 0;							// Reset the timeout counter
 	
 	for (uint16_t i = 0; i < Length; i++)
 		putchar(Data[i]);

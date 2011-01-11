@@ -9,7 +9,6 @@
 		
 const char* NetworkDialCommands[] = 
 {	
-	"AT+CGDCONT=1,\"IP\",\"3services\",,0,0\r\n", "OK",
 	"ATDT*99#\r\n", "CONNECT",
 	NULL, NULL
 };
