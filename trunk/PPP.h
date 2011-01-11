@@ -148,6 +148,7 @@
 		#define IPCP_OPTION_Secondary_DNS							0x83	// IPCP Option 83
 
 		#define MAX_RESTARTS										5
+		#define OUTGOING_PACKET_BUFFER_SIZE							48
 
 	/* External Variables: */
 		extern uint8_t ConnectedState;
@@ -188,7 +189,6 @@
 			static void This_Layer_Down(PPP_Layers_t Layer);
 			static void This_Layer_Started(PPP_Layers_t Layer);
 			static void This_Layer_Finished(PPP_Layers_t Layer);
-			static void FreePacketMemory(void);
 		#endif
 		
 #endif
