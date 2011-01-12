@@ -40,7 +40,7 @@ bool TCPIP_Connect(void)
 {
 	// Connect to the remote machine (www.example.com)
 	uip_ipaddr(&RemoteIPAddress, 192, 0, 32, 10);	
-	TCPConnection = uip_connect(&RemoteIPAddress, HTONS(80));
+	TCPConnection = uip_connect(&RemoteIPAddress, UIP_HTONS(80));
 
 	if (TCPConnection != NULL)
 	{

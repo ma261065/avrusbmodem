@@ -52,6 +52,7 @@ PPP_Packet_t* dummy;
 void PPP_InitPPP(void)
 {
 	PPP_Phase = PPP_PHASE_Dead;
+	TimerOn = false;
 }
 
 void PPP_StartLink(void)
@@ -403,7 +404,7 @@ static void Send_Configure_Request(void)
 
 	OutgoingPacket->PacketID = ++OutgoingPacketID;																// Every new REQ Packet going out gets a new ID
 	RestartCount--;																								// Decrement the count before we restart the layer
-	uip_len = ntohs(OutgoingPacket->Length);
+	uip_len = uip_ntohs(OutgoingPacket->Length);
 	memcpy(uip_buf, OutgoingPacket, uip_len);																	// Copy the outgoing packet to the buffer for sending
 
 	network_send(CurrentProtocol);																				// Send either the new packet or the modified packet
@@ -437,7 +438,7 @@ static void Send_Configure_Nak_Rej(void)
 		return;
 	}
 
-	uip_len = ntohs(IncomingPacket->Length);
+	uip_len = uip_ntohs(IncomingPacket->Length);
 	network_send(CurrentProtocol);
 }
 
@@ -449,12 +450,12 @@ static void Send_Terminate_Request(void)
 	OutgoingPacket = (PPP_Packet_t*)uip_buf;																	// Build the outgoing packet in uip_buf
 	CurrentProtocol = LCP;
 	OutgoingPacket->Code = TERMREQ;
-	OutgoingPacket->Length = htons(sizeof(PPP_Packet_t));
+	OutgoingPacket->Length = UIP_HTONS(sizeof(PPP_Packet_t));
 	OutgoingPacket->PacketID = ++OutgoingPacketID;																// Every new REQ Packet going out gets a new ID
 
 	RestartCount--;
 
-	uip_len = ntohs(OutgoingPacket->Length);
+	uip_len = uip_ntohs(OutgoingPacket->Length);
 	network_send(CurrentProtocol);																				// Send the packet
 }
 
@@ -731,7 +732,7 @@ static void PPP_AddOption(const PPP_Option_t* const Option)
 		OldPacketLength = sizeof(PPP_Packet_t);												// If we're creating a new empty packet
 	}
 	else
-		OldPacketLength = ntohs(OutgoingPacket->Length);									// If the packet already exists
+		OldPacketLength = uip_ntohs(OutgoingPacket->Length);									// If the packet already exists
 	
 	NewPacketLength = OldPacketLength + Option->Length;
 	
@@ -743,7 +744,7 @@ static void PPP_AddOption(const PPP_Option_t* const Option)
 	
 	memcpy((void*)OutgoingPacket + OldPacketLength, Option, Option->Length);				// Add the new option
 	
-	OutgoingPacket->Length = htons(NewPacketLength);
+	OutgoingPacket->Length = uip_htons(NewPacketLength);
 }
 
 // Try and find the option in the packet, and if it exists, change its value to that in the passed-in option (assumes the option lengths are the same)
@@ -775,11 +776,11 @@ static void PPP_RemoveOption(PPP_Packet_t* const ThisPacket,
 
 			if (NextOption != NULL)																	// If it's not the last option in the packet ...
 			{
-				uint16_t LenToCopy = ntohs(ThisPacket->Length) - ((void*)CurrentOption - (void*)ThisPacket) - OptionLength;
+				uint16_t LenToCopy = uip_ntohs(ThisPacket->Length) - ((void*)CurrentOption - (void*)ThisPacket) - OptionLength;
 			    memcpy(CurrentOption, NextOption, LenToCopy);										// ... move all further options forward
 			}
 
-			ThisPacket->Length = htons(ntohs(ThisPacket->Length) - OptionLength);					// Adjust the length
+			ThisPacket->Length = uip_htons(uip_ntohs(ThisPacket->Length) - OptionLength);					// Adjust the length
 		}
 	}
 }
@@ -796,7 +797,7 @@ static PPP_Option_t* PPP_GetNextOption(const PPP_Packet_t* const ThisPacket,
 		NextOption = (PPP_Option_t*)((uint8_t*)CurrentOption + CurrentOption->Length);
 
 	// Check that we haven't overrun the end of the packet
-	if (((void*)NextOption - (void*)ThisPacket->Options) < (ntohs(ThisPacket->Length) - 4))
+	if (((void*)NextOption - (void*)ThisPacket->Options) < (uip_ntohs(ThisPacket->Length) - 4))
 		return NextOption;
 	else 
 		return NULL;
