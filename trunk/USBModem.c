@@ -101,10 +101,12 @@ void SetupHardware(void)
 	// Disable clock division
 	clock_prescale_set(clock_div_1);
 
-	// Enable interrups
+	// Enable interrupts
 	sei();
 	
-	SerialStream_Init(UART_BAUD_RATE, false);
+	Serial_Init(UART_BAUD_RATE, false);
+	Serial_CreateStream(NULL);
+	
 	puts("\r\nUSB Modem - Copyright (C) 2011 Mike Alexander and Dean Camera"
 	     "\r\n   *** Press '!' to enable debugging, '@' to disable ***\r\n");
 	
