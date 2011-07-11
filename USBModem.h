@@ -46,7 +46,7 @@
 		#include <LUFA/Version.h>
 		#include <LUFA/Common/Common.h>
 		#include <LUFA/Drivers/USB/USB.h>
-		#include <LUFA/Drivers/Peripheral/SerialStream.h>
+		#include <LUFA/Drivers/Peripheral/Serial.h>
 		#include <LUFA/Drivers/Board/LEDs.h>
 		
 		#include <uIP-Contiki/network.h>

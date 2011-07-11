@@ -56,6 +56,8 @@ void EVENT_USB_Host_DeviceUnattached(void)
 //  enumerated by the host and is now ready to be used by the application.
 void EVENT_USB_Host_DeviceEnumerationComplete(void)
 {
+	ProcessModemUSBStates();
+
 	Debug_Print("Enumeration complete\r\n");
 	LEDs_SetAllLEDs(LEDMASK_USB_READY);
 }
@@ -63,7 +65,7 @@ void EVENT_USB_Host_DeviceEnumerationComplete(void)
 // Event handler for the USB_HostError event. This indicates that a hardware error occurred while in host mode.
 void EVENT_USB_Host_HostError(const uint8_t ErrorCode)
 {
-	USB_ShutDown();
+	USB_Disable();
 
 	Debug_Print("Host Mode error\r\n");
     Debug_PrintHex(ErrorCode);
@@ -82,27 +84,13 @@ void EVENT_USB_Host_DeviceEnumerationFailed(const uint8_t ErrorCode,
 	LEDs_SetAllLEDs(LEDMASK_USB_ERROR);
 }
 
-// Task to set the configuration of the attached device after it has been enumerated, and to read in
-// data received from the attached CDC device and print it to the serial port.
+// Task to manage the USB modem once it has been enumerated.
 void USBManagement_ManageUSBState(void)
 {
-	switch (USB_HostState)
-	{
-		case HOST_STATE_Addressed:
-			if (ProcessModemUSBStates())
-				USB_HostState = HOST_STATE_Configured;
-			else
-				USB_HostState = HOST_STATE_WaitForDeviceRemoval;
-		break;
-		
-		case HOST_STATE_WaitForDeviceRemoval:
-			while (USB_HostState == HOST_STATE_WaitForDeviceRemoval);			// Wait until USB device disconnected
-		break;
+	if (USB_HostState != HOST_STATE_Configured)
+	  return;
 
-		case HOST_STATE_Configured:
-			USBManagement_SendReceivePipes();
-		break;
-	}
+	USBManagement_SendReceivePipes();
 }
 
 void USBManagement_SendReceivePipes(void)
@@ -134,7 +122,7 @@ void USBManagement_SendReceivePipes(void)
 			} 
 		} 
 
-		Pipe_Write_Byte(Buffer_GetElement(&Modem_SendBuffer)); 
+		Pipe_Write_8(Buffer_GetElement(&Modem_SendBuffer)); 
 	} 
 	  
 	// Send remaining data in pipe bank 
@@ -162,7 +150,7 @@ void USBManagement_SendReceivePipes(void)
 			if (Pipe_IsReadWriteAllowed())
 			{
 				while (Pipe_BytesInPipe())
-				  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_Byte());
+				  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_8());
 			}
 
 			// Clear the pipe after it is read, ready for the next packet

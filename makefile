@@ -84,7 +84,7 @@ F_CPU = 8000000
 
 
 # Input clock frequency.
-#     This will define a symbol, F_CLOCK, in all source code files equal to the 
+#     This will define a symbol, F_USB, in all source code files equal to the 
 #     input clock frequency (before any prescaling is performed) in Hz. This value may
 #     differ from F_CPU if prescaling is used on the latter, and is required as the
 #     raw input clock is fed directly to the PLL sections of the AVR for high speed
@@ -94,7 +94,7 @@ F_CPU = 8000000
 #
 #     If no clock division is performed on the input clock inside the AVR (via the
 #     CPU clock adjust registers or the clock division fuses), this will be equal to F_CPU.
-F_CLOCK = $(F_CPU)
+F_USB = $(F_CPU)
 
 
 # Output format. (can be srec, ihex, binary)
@@ -202,7 +202,7 @@ CSTANDARD = -std=c99
 
 # Place -D or -U options here for C sources
 CDEFS  = -DF_CPU=$(F_CPU)UL
-CDEFS += -DF_CLOCK=$(F_CLOCK)UL
+CDEFS += -DF_USB=$(F_USB)UL
 CDEFS += -DBOARD=BOARD_$(BOARD)
 CDEFS += $(LUFA_OPTS)
 CDEFS += $(UIP_OPTS)
@@ -210,14 +210,14 @@ CDEFS += $(UIP_OPTS)
 
 # Place -D or -U options here for ASM sources
 ADEFS  = -DF_CPU=$(F_CPU)
-ADEFS += -DF_CLOCK=$(F_CLOCK)UL
+ADEFS += -DF_USB=$(F_USB)UL
 ADEFS += -DBOARD=BOARD_$(BOARD)
 ADEFS += $(LUFA_OPTS)
 ADEFS += $(UIP_OPTS)
 
 # Place -D or -U options here for C++ sources
 CPPDEFS  = -DF_CPU=$(F_CPU)UL
-CPPDEFS += -DF_CLOCK=$(F_CLOCK)UL
+CPPDEFS += -DF_USB=$(F_USB)UL
 CPPDEFS += -DBOARD=BOARD_$(BOARD)
 CPPDEFS += $(LUFA_OPTS)
 CPPDEFS += $(UIP_OPTS)
