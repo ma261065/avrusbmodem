@@ -7,15 +7,16 @@
 
 	#include <avr/io.h>
 	#include <util/delay.h>
+	
+	#include <LUFA/Drivers/Misc/RingBuffer.h>
 
 	#include <uIP-Contiki/uip.h>
 
 	#include "USBModem.h"
-	#include "Lib/RingBuff.h"
 	
 	/* External Variables: */
-		extern RingBuff_t Modem_SendBuffer;
-		extern RingBuff_t Modem_ReceiveBuffer;
+		extern RingBuffer_t Modem_SendBuffer;
+		extern RingBuffer_t Modem_ReceiveBuffer;
 		extern bool DebugModeEnabled;
 
 	/* Enums: */

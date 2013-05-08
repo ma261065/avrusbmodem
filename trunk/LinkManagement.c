@@ -92,9 +92,9 @@ static bool LinkManagement_DialConnection(const char** DialCommands)
 	if (USB_HostState != HOST_STATE_Configured)	
 		return false;
 
-	while (Modem_ReceiveBuffer.Elements)										// Read back the response
+	while (!RingBuffer_IsEmpty(&Modem_ReceiveBuffer))						    // Read back the response
 	{	
-		c = Buffer_GetElement(&Modem_ReceiveBuffer);
+		c = RingBuffer_Remove(&Modem_ReceiveBuffer);
 		Debug_PrintChar(c);
 		
 		if (c == *(ResponsePtr + CharsMatched))									// Match the response character by character with the expected response						
@@ -126,7 +126,7 @@ static bool LinkManagement_DialConnection(const char** DialCommands)
 		Debug_Print("(Expect: "); Debug_Print(ResponsePtr); Debug_Print(")\r\n");
 				
 		while (*CommandPtr)														
-			Buffer_StoreElement(&Modem_SendBuffer, *(CommandPtr++));			// Send the command	to the modem
+			RingBuffer_Insert(&Modem_SendBuffer, *(CommandPtr++));			// Send the command	to the modem
 	}
 
 	return false;																// Haven't finished dialling

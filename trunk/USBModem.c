@@ -31,6 +31,11 @@
 #define  INCLUDE_FROM_USBMODEM_C
 #include "USBModem.h"
 
+RingBuffer_t Modem_SendBuffer;
+uint8_t      Modem_SendBuffer_Data[128];
+RingBuffer_t Modem_ReceiveBuffer;
+uint8_t      Modem_ReceiveBuffer_Data[128];
+
 uint8_t  WatchdogTicks = 0;
 uint16_t SystemTicks   = 0;									// 10 millseconds counter
 
@@ -128,6 +133,6 @@ void SetupHardware(void)
 	TIMSK3 = (1 << OCIE3A);									// Enable interrupt on Timer compare
 	
 	// Modem Packet Ring Buffer Initialization
-	Buffer_Initialize(&Modem_SendBuffer);
-	Buffer_Initialize(&Modem_ReceiveBuffer);
+	RingBuffer_InitBuffer(&Modem_SendBuffer, Modem_SendBuffer_Data, sizeof(Modem_SendBuffer_Data));
+	RingBuffer_InitBuffer(&Modem_ReceiveBuffer, Modem_ReceiveBuffer_Data, sizeof(Modem_ReceiveBuffer_Data));
 }

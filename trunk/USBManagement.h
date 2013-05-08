@@ -39,7 +39,7 @@
 	/* Includes: */
 		#include <avr/io.h>
 		#include <LUFA/Drivers/USB/USB.h>
-		#include "Lib/RingBuff.h"
+		#include <LUFA/Drivers/Misc/RingBuffer.h>
 		#include "ConfigDescriptor.h"
 
 	/* Macros: */
