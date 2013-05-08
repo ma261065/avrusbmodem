@@ -45,7 +45,8 @@
 		#include <uIP-Contiki/timer.h>
 		#include <uIP-Contiki/uip.h>
 
-		#include "Lib/RingBuff.h"
+		#include <LUFA/Drivers/Misc/RingBuffer.h>
+	
 		#include "Lib/Debug.h"
 		#include "PPP.h"
 		#include "TCPIP.h"
@@ -66,8 +67,8 @@
 		extern uint8_t IPAddr1, IPAddr2, IPAddr3, IPAddr4;	// The IP address allocated to us by the remote end
 		extern uint8_t  WatchdogTicks;
 		extern uint16_t SystemTicks;
-		extern RingBuff_t Modem_SendBuffer;
-		extern RingBuff_t Modem_ReceiveBuffer;
+		extern RingBuffer_t Modem_SendBuffer;
+		extern RingBuffer_t Modem_ReceiveBuffer;
 
 		extern const char* ModemDialCommands[];
 		extern const char* NetworkDialCommands[];

@@ -48,12 +48,12 @@
 		#include <LUFA/Drivers/USB/USB.h>
 		#include <LUFA/Drivers/Peripheral/Serial.h>
 		#include <LUFA/Drivers/Board/LEDs.h>
+		#include <LUFA/Drivers/Misc/RingBuffer.h>
 		
 		#include <uIP-Contiki/network.h>
 		#include <uIP-Contiki/timer.h>
 		#include <uIP-Contiki/uip.h>
 
-		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
 
 		#include "PPP.h"
@@ -82,8 +82,8 @@
 	/* External Variables: */
 		extern uint8_t ConnectedState;
 		extern bool DebugModeEnabled;
-		extern RingBuff_t Modem_SendBuffer;
-		extern RingBuff_t Modem_ReceiveBuffer;
+		extern RingBuffer_t Modem_SendBuffer;
+		extern RingBuffer_t Modem_ReceiveBuffer;
 		
 	/* Function Prototypes: */
 		void WDT_Init(void) ATTR_NAKED ATTR_INIT_SECTION(3);

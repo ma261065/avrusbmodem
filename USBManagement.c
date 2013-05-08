@@ -31,10 +31,6 @@
 #define INCLUDE_FROM_USBMANAGEMENT_C
 #include "USBManagement.h"
 
-RingBuff_t Modem_SendBuffer;
-RingBuff_t Modem_ReceiveBuffer;
-
-
 // Event handler for the USB_DeviceAttached event. This indicates that a device has been attached to the host, and
 // starts the library USB task to begin the enumeration and USB management process.
 void EVENT_USB_Host_DeviceAttached(void)
@@ -108,7 +104,7 @@ void USBManagement_SendReceivePipes(void)
 	Pipe_SelectPipe(CDC_DATA_OUT_PIPE);
 	Pipe_Unfreeze();
 
-	while (Modem_SendBuffer.Elements) 
+	while (!RingBuffer_IsEmpty(&Modem_SendBuffer)) 
 	{ 
 		if (!(Pipe_IsReadWriteAllowed())) 
 		{ 
@@ -122,7 +118,7 @@ void USBManagement_SendReceivePipes(void)
 			} 
 		} 
 
-		Pipe_Write_8(Buffer_GetElement(&Modem_SendBuffer)); 
+		Pipe_Write_8(RingBuffer_Remove(&Modem_SendBuffer)); 
 	} 
 	  
 	// Send remaining data in pipe bank 
@@ -144,13 +140,13 @@ void USBManagement_SendReceivePipes(void)
 	// Check if data is in the pipe and space is available in the receive buffer
 	if (Pipe_IsINReceived())
 	{
-		if ((Modem_ReceiveBuffer.Elements < (BUFF_STATICSIZE - 64)))
+		if (RingBuffer_GetFreeCount(&Modem_ReceiveBuffer) >= 64)
 		{
 			// Check if data is in the pipe
 			if (Pipe_IsReadWriteAllowed())
 			{
 				while (Pipe_BytesInPipe())
-				  Buffer_StoreElement(&Modem_ReceiveBuffer, Pipe_Read_8());
+				  RingBuffer_Insert(&Modem_ReceiveBuffer, Pipe_Read_8());
 			}
 
 			// Clear the pipe after it is read, ready for the next packet

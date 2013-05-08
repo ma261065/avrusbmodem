@@ -23,11 +23,11 @@ static uint16_t CurrentChecksum, OneBackChecksum, TwoBackChecksum;
 
 uint16_t network_read(void)
 {
-	RingBuff_Elements_t c;
+	uint8_t c;
 	
-	while (Modem_ReceiveBuffer.Elements)
+	while (!RingBuffer_IsEmpty(&Modem_ReceiveBuffer))
 	{
-		c = Buffer_GetElement(&Modem_ReceiveBuffer);
+		c = RingBuffer_Remove(&Modem_ReceiveBuffer);
 
 		switch (PacketState)
 		{
@@ -135,21 +135,21 @@ void network_send(uint16_t protocol)
 	// Send out the packet with HDLC-like framing  - see http://tools.ietf.org/html/rfc1662
 	
 	// Start with the framing flag
-	Buffer_StoreElement(&Modem_SendBuffer, 0x7e);
+	RingBuffer_Insert(&Modem_SendBuffer, 0x7e);
 
 	// Address	
-	Buffer_StoreElement(&Modem_SendBuffer, 0xff);
+	RingBuffer_Insert(&Modem_SendBuffer, 0xff);
 	checksum = CALC_CRC16(checksum, 0xff);
 
 	// Control
-	Buffer_StoreElement(&Modem_SendBuffer, 0x03);
+	RingBuffer_Insert(&Modem_SendBuffer, 0x03);
 	checksum = CALC_CRC16(checksum, 0x03);
 
 	// Protocol
-	Buffer_StoreElement(&Modem_SendBuffer, protocol / 256);
+	RingBuffer_Insert(&Modem_SendBuffer, protocol / 256);
 	checksum = CALC_CRC16(checksum, protocol / 256);
 
-	Buffer_StoreElement(&Modem_SendBuffer, protocol & 255);
+	RingBuffer_Insert(&Modem_SendBuffer, protocol & 255);
 	checksum = CALC_CRC16(checksum, protocol & 255);
 
 	// Add the information, escaping it as necessary
@@ -157,17 +157,17 @@ void network_send(uint16_t protocol)
 	{
 		if (*(uip_buf + i) < 0x20 || *(uip_buf + i) == 0x7d || *(uip_buf + i) == 0x7e)
 		{
-			Buffer_StoreElement(&Modem_SendBuffer, 0x7d);
-			Buffer_StoreElement(&Modem_SendBuffer, *(uip_buf + i) ^ 0x20);
+			RingBuffer_Insert(&Modem_SendBuffer, 0x7d);
+			RingBuffer_Insert(&Modem_SendBuffer, *(uip_buf + i) ^ 0x20);
 		}
 		else
 		{
-			Buffer_StoreElement(&Modem_SendBuffer, *(uip_buf + i));
+			RingBuffer_Insert(&Modem_SendBuffer, *(uip_buf + i));
 		}
 
 		checksum = CALC_CRC16(checksum, *(uip_buf + i));
 	
-		if (Modem_SendBuffer.Elements == BUFF_STATICSIZE)    			// Periodically flush the buffer to the modem
+		if (RingBuffer_GetCount(&Modem_SendBuffer) >= 64)    			// Periodically flush the buffer to the modem
 			USBManagement_SendReceivePipes();
 	}
 
@@ -176,25 +176,25 @@ void network_send(uint16_t protocol)
 
 	if ((checksum & 255) < 0x20 || (checksum & 255) == 0x7d || (checksum & 255) == 0x7e)
 	{
-		Buffer_StoreElement(&Modem_SendBuffer, 0x7d);
-		Buffer_StoreElement(&Modem_SendBuffer, (checksum & 255) ^ 0x20);
+		RingBuffer_Insert(&Modem_SendBuffer, 0x7d);
+		RingBuffer_Insert(&Modem_SendBuffer, (checksum & 255) ^ 0x20);
 	}
    	else
 	{
-		Buffer_StoreElement(&Modem_SendBuffer, checksum & 255);			// Insert checksum MSB
+		RingBuffer_Insert(&Modem_SendBuffer, checksum & 255);			// Insert checksum MSB
 	}
 	
 	if ((checksum / 256) < 0x20 || (checksum / 256) == 0x7d || (checksum / 256) == 0x7e)
 	{
-		Buffer_StoreElement(&Modem_SendBuffer, 0x7d);
-		Buffer_StoreElement(&Modem_SendBuffer, (checksum / 256) ^ 0x20);
+		RingBuffer_Insert(&Modem_SendBuffer, 0x7d);
+		RingBuffer_Insert(&Modem_SendBuffer, (checksum / 256) ^ 0x20);
 	}
 	else
 	{
-		Buffer_StoreElement(&Modem_SendBuffer, checksum / 256);			// Insert checksum LSB
+		RingBuffer_Insert(&Modem_SendBuffer, checksum / 256);			// Insert checksum LSB
 	}
    
-	Buffer_StoreElement(&Modem_SendBuffer, 0x7e);						// Framing
+	RingBuffer_Insert(&Modem_SendBuffer, 0x7e);						// Framing
 
 	uip_len = 0;
 

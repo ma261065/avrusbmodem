@@ -36,8 +36,9 @@
 		#include <stdbool.h>
 		#include <stdint.h>
 
+		#include <LUFA/Drivers/Misc/RingBuffer.h>
+
 		#include "LinkManagement.h"
-		#include "Lib/RingBuff.h"
 		#include "Lib/Debug.h"
 	
 	/* Enums: */
